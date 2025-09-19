@@ -34,7 +34,7 @@ export default function Book() {
                   <div className="flex-shrink-0">
                     <div className="relative w-48 h-64 bg-gray-700 rounded-lg overflow-hidden">
                       <Image
-                        src={`/book/${book.cover}`}
+                        src={book.cover}
                         alt={book.title}
                         fill
                         className="object-cover"

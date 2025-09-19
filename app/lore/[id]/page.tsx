@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "../../../components/Header";
 import loreData from "../../constants/lore/data.json";
+import LoreContent from "../../../components/LoreContent";
+import ShareButton from "../../../components/ShareButton";
 
 interface LoreDetailProps {
   params: {
@@ -89,9 +91,7 @@ export default function LoreDetail({ params }: LoreDetailProps) {
 
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-8">
               <div className="prose prose-invert max-w-none">
-                <div className="text-gray-300 leading-relaxed whitespace-pre-line font-text text-lg">
-                  {lore.content}
-                </div>
+                <LoreContent content={lore.content as any} />
               </div>
             </div>
           </div>
@@ -118,9 +118,7 @@ export default function LoreDetail({ params }: LoreDetailProps) {
           >
             All Lore
           </Link>
-          <button className="px-6 py-3 bg-transparent border border-white/50 rounded-lg text-white font-semibold hover:bg-white/10 transition-all duration-300">
-            Share
-          </button>
+          <ShareButton />
         </div>
       </div>
     </div>

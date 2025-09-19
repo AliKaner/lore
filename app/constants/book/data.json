@@ -1,0 +1,40 @@
+{
+  "id": "bultac",
+  "title": "The Chronicles of Blutac Kingdom",
+  "cover": "bultac-cover.jpg",
+  "description": "An epic tale of adventure, magic, and ancient kingdoms.",
+  "chapters": [
+    {
+      "id": "ch-1",
+      "title": "The Beginning",
+      "content": {
+        "tr": "Uzun zaman önce, Blutac Krallığı'nın kuruluşu ile başlayan efsanevi hikaye...",
+        "en": "Long ago, the legendary story began with the founding of the Blutac Kingdom..."
+      }
+    },
+    {
+      "id": "ch-2",
+      "title": "The Old Tavern",
+      "content": {
+        "tr": "Yaşlı Bron'un tavernasında geçen gizemli olaylar ve karşılaşmalar...",
+        "en": "Mysterious events and encounters at Old Bron's tavern..."
+      }
+    },
+    {
+      "id": "ch-3",
+      "title": "The Shadow Mage",
+      "content": {
+        "tr": "Gölge büyücüsünün ortaya çıkışı ve krallığa getirdiği tehdit...",
+        "en": "The emergence of the Shadow Mage and the threat he brings to the kingdom..."
+      }
+    },
+    {
+      "id": "ch-4",
+      "title": "The Final Battle",
+      "content": {
+        "tr": "Krallığın kaderini belirleyecek son savaş ve kahramanların mücadelesi...",
+        "en": "The final battle that will determine the fate of the kingdom and the heroes' struggle..."
+      }
+    }
+  ]
+}

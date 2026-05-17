@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -136,7 +136,7 @@ export default function AdminEntries() {
             {mode === "create" ? "New Lore Entry" : "Edit Lore Entry"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-300 mb-1 font-text">Universe *</label>
                 <select
@@ -166,7 +166,7 @@ export default function AdminEntries() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-300 mb-1 font-text">Name *</label>
                 <input
@@ -290,7 +290,7 @@ export default function AdminEntries() {
                   <span className="text-xs bg-white/20 text-gray-300 px-2 py-0.5 rounded capitalize">{e.type}</span>
                 </div>
                 <p className="text-gray-400 text-xs font-text">
-                  {getName(categories ?? [], e.categoryId)} · {getName(universes ?? [], e.universeId)}
+                  {getName(categories ?? [], e.categoryId)} Â· {getName(universes ?? [], e.universeId)}
                 </p>
               </div>
               <div className="flex gap-2 flex-shrink-0">

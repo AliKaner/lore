@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -122,7 +122,7 @@ export default function AdminChapters() {
             {mode === "create" ? "New Chapter" : "Edit Chapter"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-300 mb-1 font-text">Universe (filter)</label>
                 <select
@@ -147,7 +147,7 @@ export default function AdminChapters() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-300 mb-1 font-text">Title *</label>
                 <input

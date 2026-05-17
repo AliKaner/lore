@@ -35,17 +35,7 @@ export default function Home() {
             </p>
           </div>
 
-          {universes === undefined && (
-            <div className="flex justify-center">
-              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            </div>
-          )}
-
-          {universes !== undefined && universes.length === 0 && (
-            <div className="text-center text-gray-400 font-text text-xl">
-              No universes created yet.
-            </div>
-          )}
+          {universes !== undefined && universes.length === 0 && null}
 
           {universes && universes.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

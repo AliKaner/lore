@@ -18,11 +18,17 @@ export default function AdminLogin() {
     setError("");
     setLoading(true);
     try {
-      const { token } = await loginAction({ password });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Connection timeout. Check NEXT_PUBLIC_CONVEX_URL in Vercel.")), 10000)
+      );
+      const { token } = await Promise.race([
+        loginAction({ password }),
+        timeoutPromise,
+      ]);
       login(token);
       router.push("/admin");
     } catch (err: any) {
-      setError(err?.message ?? "Login failed. Check Convex logs.");
+      setError(err?.message ?? "Login failed.");
     } finally {
       setLoading(false);
     }

@@ -47,13 +47,13 @@ export default function Home() {
                     href={`/universe/${universe._id}`}
                     className="group block"
                   >
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden hover:bg-white/15 hover:border-white/40 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden hover:bg-white/15 hover:border-white/40 transition-all duration-300 hover:shadow-2xl hover:shadow-black/50">
                       <div className="relative h-56 bg-gray-800">
                         {universe.imageUrl ? (
                           <img
                             src={universe.imageUrl}
                             alt={universe.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            className="w-full h-full object-cover transition-transform duration-300"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-600">

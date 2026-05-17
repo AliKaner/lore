@@ -161,14 +161,14 @@ export default function UniversePage({
                     <Link
                       key={entry._id}
                       href={`/lore/${entry._id}`}
-                      className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-lg overflow-hidden hover:bg-white/15 hover:border-white/30 transition-all duration-300 transform hover:scale-105"
+                      className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-lg overflow-hidden hover:bg-white/15 hover:border-white/30 transition-all duration-300 hover:shadow-xl hover:shadow-black/40"
                     >
                       <div className="relative h-44 bg-gray-700">
                         {entry.imageUrl ? (
                           <img
                             src={entry.imageUrl}
                             alt={entry.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            className="w-full h-full object-cover transition-transform duration-300"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-600 text-4xl">
@@ -226,7 +226,7 @@ export default function UniversePage({
                             <img
                               src={book.coverUrl}
                               alt={book.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-cover transition-transform duration-300"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-600 text-3xl">📚</div>

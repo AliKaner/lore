@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, use } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { useQuery } from "convex/react";
@@ -21,9 +21,11 @@ const TYPE_LABELS: Record<string, string> = {
 export default function UniversePage({
   params,
 }: {
-  params: { universeId: string };
+  params: Promise<{ universeId: string }>;
 }) {
-  const universeId = params.universeId as Id<"universes">;
+  const { universeId: universeIdRaw } = use(params);
+  const universeId = universeIdRaw as Id<"universes">;
+
   const [activeTab, setActiveTab] = useState<"lore" | "books">("lore");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -47,9 +49,7 @@ export default function UniversePage({
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="text-center text-white">
             <h1 className="text-4xl font-bold mb-4 font-title">Universe Not Found</h1>
-            <Link href="/" className="text-blue-400 hover:text-blue-300">
-              Back to Home
-            </Link>
+            <Link href="/" className="text-blue-400 hover:text-blue-300">Back to Home</Link>
           </div>
         </div>
       </div>
@@ -63,11 +63,7 @@ export default function UniversePage({
       {/* Universe Hero */}
       <div className="relative h-64 md:h-80">
         {universe?.imageUrl ? (
-          <img
-            src={universe.imageUrl}
-            alt={universe?.name ?? ""}
-            className="w-full h-full object-cover"
-          />
+          <img src={universe.imageUrl} alt={universe.name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gray-800" />
         )}
@@ -87,26 +83,19 @@ export default function UniversePage({
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs */}
         <div className="flex gap-4 mb-8 border-b border-white/20">
-          <button
-            onClick={() => setActiveTab("lore")}
-            className={`pb-3 px-4 font-title font-semibold transition-colors ${
-              activeTab === "lore"
-                ? "text-white border-b-2 border-white"
-                : "text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            Lore
-          </button>
-          <button
-            onClick={() => setActiveTab("books")}
-            className={`pb-3 px-4 font-title font-semibold transition-colors ${
-              activeTab === "books"
-                ? "text-white border-b-2 border-white"
-                : "text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            Books
-          </button>
+          {(["lore", "books"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-3 px-4 font-title font-semibold capitalize transition-colors ${
+                activeTab === tab
+                  ? "text-white border-b-2 border-white"
+                  : "text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              {tab === "lore" ? "Lore" : "Books"}
+            </button>
+          ))}
         </div>
 
         {/* Lore Tab */}
@@ -114,7 +103,6 @@ export default function UniversePage({
           <div>
             {/* Filters */}
             <div className="flex flex-wrap gap-3 mb-8">
-              {/* Category filter */}
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedCategory("all")}
@@ -140,7 +128,6 @@ export default function UniversePage({
                   </button>
                 ))}
               </div>
-              {/* Type filter */}
               <div className="flex flex-wrap gap-2">
                 {TYPES.map((type) => (
                   <button
@@ -158,16 +145,13 @@ export default function UniversePage({
               </div>
             </div>
 
-            {/* Entries Grid */}
             {filteredEntries === undefined && (
               <div className="flex justify-center py-16">
                 <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               </div>
             )}
             {filteredEntries !== undefined && filteredEntries.length === 0 && (
-              <p className="text-center text-gray-500 font-text py-16">
-                No entries found.
-              </p>
+              <p className="text-center text-gray-500 font-text py-16">No entries found.</p>
             )}
             {filteredEntries && filteredEntries.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -205,8 +189,7 @@ export default function UniversePage({
                           {entry.name}
                         </h3>
                         <p className="text-xs text-gray-400 mt-1 font-text">
-                          {categories?.find((c) => c._id === entry.categoryId)
-                            ?.name ?? ""}
+                          {categories?.find((c) => c._id === entry.categoryId)?.name ?? ""}
                         </p>
                       </div>
                     </Link>
@@ -225,9 +208,7 @@ export default function UniversePage({
               </div>
             )}
             {books !== undefined && books.length === 0 && (
-              <p className="text-center text-gray-500 font-text py-16">
-                No books in this universe yet.
-              </p>
+              <p className="text-center text-gray-500 font-text py-16">No books in this universe yet.</p>
             )}
             {books && books.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -248,9 +229,7 @@ export default function UniversePage({
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-600 text-3xl">
-                              📚
-                            </div>
+                            <div className="w-full h-full flex items-center justify-center text-gray-600 text-3xl">📚</div>
                           )}
                         </div>
                         <div className="flex-1">
@@ -258,9 +237,7 @@ export default function UniversePage({
                             {book.title}
                           </h3>
                           {book.description && (
-                            <p className="text-sm text-gray-400 font-text line-clamp-3">
-                              {book.description}
-                            </p>
+                            <p className="text-sm text-gray-400 font-text line-clamp-3">{book.description}</p>
                           )}
                         </div>
                       </div>

@@ -35,7 +35,7 @@ export default function LoreContent({
           </option>
         </select>
       </div>
-      <div className="text-gray-300 leading-relaxed whitespace-pre-line font-text text-lg">
+      <div className="text-gray-300 leading-relaxed whitespace-pre-wrap font-text text-lg">
         {text}
       </div>
     </div>

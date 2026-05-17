@@ -26,7 +26,7 @@ export default function AdminLogin() {
         timeoutPromise,
       ]);
       login(token);
-      router.push("/admin");
+      window.location.href = "/admin";
     } catch (err: any) {
       setError(err?.message ?? "Login failed.");
     } finally {

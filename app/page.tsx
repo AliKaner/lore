@@ -1,12 +1,16 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Header from "../components/Header";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function Home() {
+  const universes = useQuery(api.universes.list);
+
   return (
     <div className="min-h-screen relative">
-      {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
           src="/landing-bg.png"
@@ -15,38 +19,88 @@ export default function Home() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-black/50"></div>
       </div>
 
-      {/* Content */}
       <div className="relative z-10">
-        {/* Header with Logo and Navigation */}
         <Header />
 
-        {/* Main Content */}
-        <main className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-4">
-          <div className="text-center text-white max-w-4xl mx-auto">
+        <main className="max-w-7xl mx-auto px-4 py-16">
+          <div className="text-center mb-16">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent font-title">
-              Welcome to Our World
+              Choose Your Universe
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-200 font-text">
-              Discover the rich lore and stories that shape our universe
+            <p className="text-xl md:text-2xl text-gray-200 font-text">
+              Discover the rich lore and stories that shape our universes
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/lore"
-                className="px-8 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-lg text-white font-semibold hover:bg-white/30 transition-all duration-300 text-center"
-              >
-                Explore Lore
-              </Link>
-              <Link
-                href="/lore"
-                className="px-8 py-3 bg-transparent border border-white/50 rounded-lg text-white font-semibold hover:bg-white/10 transition-all duration-300 text-center"
-              >
-                Learn More
-              </Link>
-            </div>
           </div>
+
+          {universes === undefined && (
+            <div className="flex justify-center">
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            </div>
+          )}
+
+          {universes !== undefined && universes.length === 0 && (
+            <div className="text-center text-gray-400 font-text text-xl">
+              No universes created yet.
+            </div>
+          )}
+
+          {universes && universes.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {universes
+                .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                .map((universe) => (
+                  <Link
+                    key={universe._id}
+                    href={`/universe/${universe._id}`}
+                    className="group block"
+                  >
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden hover:bg-white/15 hover:border-white/40 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+                      <div className="relative h-56 bg-gray-800">
+                        {universe.imageUrl ? (
+                          <img
+                            src={universe.imageUrl}
+                            alt={universe.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-600">
+                            <svg
+                              className="w-16 h-16"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1}
+                                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <h2 className="text-2xl font-bold text-white font-title">
+                            {universe.name}
+                          </h2>
+                        </div>
+                      </div>
+                      {universe.description && (
+                        <div className="p-4">
+                          <p className="text-gray-300 font-text text-sm line-clamp-2">
+                            {universe.description}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+            </div>
+          )}
         </main>
       </div>
     </div>

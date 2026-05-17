@@ -1,17 +1,15 @@
 "use client";
-
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function Header() {
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
     { name: "Home", href: "/" },
-    { name: "Lore", href: "/lore" },
-    { name: "Book", href: "/book" },
     { name: "FAQs", href: "/faq" },
   ];
 
@@ -19,7 +17,6 @@ export default function Header() {
     <header className="bg-black/20 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
               <Image
@@ -33,8 +30,7 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex items-center space-x-8">
+          <nav className="flex items-center space-x-4">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -48,6 +44,12 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
+            <Link
+              href="/admin"
+              className="px-4 py-2 rounded-md text-sm font-medium text-white/50 hover:text-white/80 hover:bg-white/10 transition-colors duration-200 font-title"
+            >
+              Admin
+            </Link>
           </nav>
         </div>
       </div>

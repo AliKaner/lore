@@ -100,122 +100,126 @@ export default function UniversePage({
 
         {/* Lore Tab */}
         {activeTab === "lore" && (
-          <div className="relative">
-            {/* Category background image */}
-            {(() => {
-              const activeCat = categories?.find((c) => c._id === selectedCategory);
-              return activeCat?.imageUrl ? (
-                <div
-                  key={activeCat._id}
-                  className="absolute inset-0 -mx-4 -mt-2 rounded-xl overflow-hidden pointer-events-none"
-                  style={{ zIndex: 0 }}
-                >
-                  <img
-                    src={activeCat.imageUrl}
-                    alt=""
-                    className="w-full h-full object-cover opacity-20 blur-sm scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-gray-900/80 to-gray-900" />
-                </div>
-              ) : null;
-            })()}
-
-            {/* Filters */}
-            <div className="relative flex flex-wrap gap-3 mb-8" style={{ zIndex: 1 }}>
-              <div className="flex flex-wrap gap-2">
+          <div className="flex gap-6">
+            {/* Left: Categories */}
+            <div className="w-44 flex-shrink-0 space-y-2">
+              <button
+                onClick={() => setSelectedCategory("all")}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-text transition-colors ${
+                  selectedCategory === "all"
+                    ? "bg-white/30 text-white border border-white/50"
+                    : "bg-white/10 text-gray-300 border border-white/20 hover:bg-white/20"
+                }`}
+              >
+                All Categories
+              </button>
+              {categories?.map((cat) => (
                 <button
-                  onClick={() => setSelectedCategory("all")}
-                  className={`px-4 py-2 rounded-lg text-sm font-text transition-colors ${
-                    selectedCategory === "all"
-                      ? "bg-white/30 text-white border border-white/50"
-                      : "bg-white/10 text-gray-300 border border-white/20 hover:bg-white/20"
+                  key={cat._id}
+                  onClick={() => setSelectedCategory(cat._id)}
+                  className={`relative w-full overflow-hidden rounded-lg text-sm font-text transition-all duration-300 text-left ${
+                    selectedCategory === cat._id
+                      ? "border-2 border-white/70 shadow-lg shadow-black/50"
+                      : "border border-white/20 hover:border-white/40"
                   }`}
                 >
-                  All Categories
-                </button>
-                {categories?.map((cat) => (
-                  <button
-                    key={cat._id}
-                    onClick={() => setSelectedCategory(cat._id)}
-                    className={`px-4 py-2 rounded-lg text-sm font-text transition-colors ${
-                      selectedCategory === cat._id
-                        ? "bg-white/30 text-white border border-white/50"
-                        : "bg-white/10 text-gray-300 border border-white/20 hover:bg-white/20"
+                  {cat.imageUrl && (
+                    <img
+                      src={cat.imageUrl}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
+                  <div
+                    className={`absolute inset-0 transition-colors duration-300 ${
+                      cat.imageUrl
+                        ? selectedCategory === cat._id
+                          ? "bg-black/40"
+                          : "bg-black/65 hover:bg-black/50"
+                        : selectedCategory === cat._id
+                        ? "bg-white/30"
+                        : "bg-white/10 hover:bg-white/20"
                     }`}
-                  >
+                  />
+                  <span className="relative px-3 py-2 block text-white drop-shadow font-semibold">
                     {cat.name}
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {TYPES.map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setTypeFilter(type)}
-                    className={`px-3 py-1.5 rounded text-xs font-text transition-colors ${
-                      typeFilter === type
-                        ? "bg-blue-600 text-white"
-                        : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
-                    }`}
-                  >
-                    {TYPE_LABELS[type]}
-                  </button>
-                ))}
-              </div>
+                  </span>
+                </button>
+              ))}
+
+              {/* Type filters */}
+              {(categories?.length ?? 0) > 0 && (
+                <div className="pt-3 border-t border-white/10 space-y-1">
+                  {TYPES.map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setTypeFilter(type)}
+                      className={`w-full text-left px-3 py-1.5 rounded text-xs font-text transition-colors ${
+                        typeFilter === type
+                          ? "bg-blue-600 text-white"
+                          : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
+                      }`}
+                    >
+                      {TYPE_LABELS[type]}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div className="relative" style={{ zIndex: 1 }}>
-            {filteredEntries === undefined && (
-              <div className="flex justify-center py-16">
-                <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              </div>
-            )}
-            {filteredEntries !== undefined && filteredEntries.length === 0 && (
-              <p className="text-center text-gray-500 font-text py-16">No entries found.</p>
-            )}
-            {filteredEntries && filteredEntries.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredEntries
-                  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-                  .map((entry) => (
-                    <Link
-                      key={entry._id}
-                      href={`/lore/${entry._id}`}
-                      className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-lg overflow-hidden hover:bg-white/15 hover:border-white/30 transition-all duration-300 hover:shadow-xl hover:shadow-black/40"
-                    >
-                      <div className="relative h-44 bg-gray-700">
-                        {entry.imageUrl ? (
-                          <img
-                            src={entry.imageUrl}
-                            alt={entry.name}
-                            className="w-full h-full object-cover transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-600 text-4xl">
-                            {entry.type === "character" && "👤"}
-                            {entry.type === "city" && "🏰"}
-                            {entry.type === "item" && "⚔️"}
-                            {entry.type === "story" && "📖"}
-                            {entry.type === "other" && "✨"}
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        <span className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded capitalize font-text">
-                          {entry.type}
-                        </span>
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-base font-semibold text-white group-hover:text-blue-300 transition-colors font-title">
-                          {entry.name}
-                        </h3>
-                        <p className="text-xs text-gray-400 mt-1 font-text">
-                          {categories?.find((c) => c._id === entry.categoryId)?.name ?? ""}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-              </div>
-            )}
+            {/* Right: Entries */}
+            <div className="flex-1 min-w-0">
+              {filteredEntries === undefined && (
+                <div className="flex justify-center py-16">
+                  <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </div>
+              )}
+              {filteredEntries !== undefined && filteredEntries.length === 0 && (
+                <p className="text-center text-gray-500 font-text py-16">No entries found.</p>
+              )}
+              {filteredEntries && filteredEntries.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredEntries
+                    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                    .map((entry) => (
+                      <Link
+                        key={entry._id}
+                        href={`/lore/${entry._id}`}
+                        className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-lg overflow-hidden hover:bg-white/15 hover:border-white/30 transition-all duration-300 hover:shadow-xl hover:shadow-black/40"
+                      >
+                        <div className="relative h-40 bg-gray-700">
+                          {entry.imageUrl ? (
+                            <img
+                              src={entry.imageUrl}
+                              alt={entry.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-600 text-4xl">
+                              {entry.type === "character" && "👤"}
+                              {entry.type === "city" && "🏰"}
+                              {entry.type === "item" && "⚔️"}
+                              {entry.type === "story" && "📖"}
+                              {entry.type === "other" && "✨"}
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                          <span className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded capitalize font-text">
+                            {entry.type}
+                          </span>
+                        </div>
+                        <div className="p-3">
+                          <h3 className="text-sm font-semibold text-white group-hover:text-blue-300 transition-colors font-title">
+                            {entry.name}
+                          </h3>
+                          <p className="text-xs text-gray-400 mt-1 font-text">
+                            {categories?.find((c) => c._id === entry.categoryId)?.name ?? ""}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                </div>
+              )}
             </div>
           </div>
         )}

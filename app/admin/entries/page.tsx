@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { ImageUpload } from "@/components/ImageUpload";
+import { CleanTextarea } from "@/components/CleanTextarea";
 
 const TYPES = ["character", "city", "item", "story", "other"] as const;
 type LoreType = (typeof TYPES)[number];
@@ -218,20 +219,18 @@ export default function AdminEntries() {
                 </button>
               </div>
               {contentLang === "tr" ? (
-                <textarea
+                <CleanTextarea
                   value={form.contentTr}
-                  onChange={(e) => setForm({ ...form, contentTr: e.target.value })}
+                  onChange={(v) => setForm({ ...form, contentTr: v })}
                   rows={10}
                   placeholder="Türkçe içerik..."
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none resize-y font-text"
                 />
               ) : (
-                <textarea
+                <CleanTextarea
                   value={form.contentEn}
-                  onChange={(e) => setForm({ ...form, contentEn: e.target.value })}
+                  onChange={(v) => setForm({ ...form, contentEn: v })}
                   rows={10}
                   placeholder="English content..."
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none resize-y font-text"
                 />
               )}
             </div>

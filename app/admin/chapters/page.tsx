@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { CleanTextarea } from "@/components/CleanTextarea";
 
 type Mode = "list" | "create" | "edit";
 
@@ -177,20 +178,18 @@ export default function AdminChapters() {
                 <button type="button" onClick={() => setContentLang("en")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "en" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>English</button>
               </div>
               {contentLang === "tr" ? (
-                <textarea
+                <CleanTextarea
                   value={form.contentTr}
-                  onChange={(e) => setForm({ ...form, contentTr: e.target.value })}
+                  onChange={(v) => setForm({ ...form, contentTr: v })}
                   rows={12}
                   placeholder="Türkçe içerik..."
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none resize-y font-text"
                 />
               ) : (
-                <textarea
+                <CleanTextarea
                   value={form.contentEn}
-                  onChange={(e) => setForm({ ...form, contentEn: e.target.value })}
+                  onChange={(v) => setForm({ ...form, contentEn: v })}
                   rows={12}
                   placeholder="English content..."
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none resize-y font-text"
                 />
               )}
             </div>

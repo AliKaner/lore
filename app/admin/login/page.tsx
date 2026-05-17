@@ -21,8 +21,8 @@ export default function AdminLogin() {
       const { token } = await loginAction({ password });
       login(token);
       router.push("/admin");
-    } catch {
-      setError("Invalid password.");
+    } catch (err: any) {
+      setError(err?.message ?? "Login failed. Check Convex logs.");
     } finally {
       setLoading(false);
     }

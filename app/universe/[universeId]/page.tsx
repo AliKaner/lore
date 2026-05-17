@@ -100,9 +100,28 @@ export default function UniversePage({
 
         {/* Lore Tab */}
         {activeTab === "lore" && (
-          <div>
+          <div className="relative">
+            {/* Category background image */}
+            {(() => {
+              const activeCat = categories?.find((c) => c._id === selectedCategory);
+              return activeCat?.imageUrl ? (
+                <div
+                  key={activeCat._id}
+                  className="absolute inset-0 -mx-4 -mt-2 rounded-xl overflow-hidden pointer-events-none"
+                  style={{ zIndex: 0 }}
+                >
+                  <img
+                    src={activeCat.imageUrl}
+                    alt=""
+                    className="w-full h-full object-cover opacity-20 blur-sm scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-gray-900/80 to-gray-900" />
+                </div>
+              ) : null;
+            })()}
+
             {/* Filters */}
-            <div className="flex flex-wrap gap-3 mb-8">
+            <div className="relative flex flex-wrap gap-3 mb-8" style={{ zIndex: 1 }}>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedCategory("all")}
@@ -145,6 +164,7 @@ export default function UniversePage({
               </div>
             </div>
 
+            <div className="relative" style={{ zIndex: 1 }}>
             {filteredEntries === undefined && (
               <div className="flex justify-center py-16">
                 <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -196,6 +216,7 @@ export default function UniversePage({
                   ))}
               </div>
             )}
+            </div>
           </div>
         )}
 

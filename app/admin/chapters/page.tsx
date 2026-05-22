@@ -41,6 +41,12 @@ export default function AdminChapters() {
   const [error, setError] = useState("");
   const [contentLang, setContentLang] = useState<"tr" | "en">("tr");
 
+  const categories = useQuery(api.categories.list);
+  const createEntryMutation = useMutation(api.loreEntries.create);
+  const [showCharModal, setShowCharModal] = useState(false);
+  const [charForm, setCharForm] = useState({ name: "", categoryId: "" });
+  const [charLoading, setCharLoading] = useState(false);
+
   const filteredBooks = books?.filter(
     (b) => filterUniverse === "all" || b.universeId === filterUniverse
   );
@@ -96,6 +102,32 @@ export default function AdminChapters() {
       await removeMutation({ id, sessionToken: token });
     } catch (err: any) {
       alert(err.message);
+    }
+  };
+
+  const handleAddCharacter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+    const book = books?.find((b) => b._id === form.bookId);
+    if (!book || !charForm.name || !charForm.categoryId) return;
+    setCharLoading(true);
+    try {
+      await createEntryMutation({
+        universeId: book.universeId,
+        categoryId: charForm.categoryId as Id<"categories">,
+        name: charForm.name,
+        type: "character",
+        contentTr: "",
+        contentEn: "",
+        sessionToken: token,
+      });
+      setShowCharModal(false);
+      setCharForm({ name: "", categoryId: "" });
+      alert("Karakter başarıyla eklendi!");
+    } catch (err: any) {
+      alert(err.message || "Bir hata oluştu");
+    } finally {
+      setCharLoading(false);
     }
   };
 
@@ -183,22 +215,29 @@ export default function AdminChapters() {
                   <button type="button" onClick={() => setContentLang("tr")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "tr" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>Türkçe</button>
                   <button type="button" onClick={() => setContentLang("en")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "en" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>English</button>
                 </div>
-                <div className="text-sm text-gray-400 font-text">
-                  {contentLang === "tr" ? `${getWordCount(form.contentTr)} kelime` : `${getWordCount(form.contentEn)} words`}
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-gray-400 font-text">
+                    {contentLang === "tr" ? `${getWordCount(form.contentTr)} kelime` : `${getWordCount(form.contentEn)} words`}
+                  </div>
+                  {form.bookId && (
+                    <button type="button" onClick={() => setShowCharModal(true)} className="px-3 py-1 bg-green-600/30 border border-green-500/30 rounded text-green-300 hover:bg-green-600/50 transition-colors text-sm font-text">
+                      + Hızlı Karakter
+                    </button>
+                  )}
                 </div>
               </div>
               {contentLang === "tr" ? (
                 <CleanTextarea
                   value={form.contentTr}
                   onChange={(v) => setForm({ ...form, contentTr: v })}
-                  rows={12}
+                  rows={24}
                   placeholder="Türkçe içerik..."
                 />
               ) : (
                 <CleanTextarea
                   value={form.contentEn}
                   onChange={(v) => setForm({ ...form, contentEn: v })}
-                  rows={12}
+                  rows={24}
                   placeholder="English content..."
                 />
               )}
@@ -231,27 +270,72 @@ export default function AdminChapters() {
       )}
 
       {/* List */}
-      {chapters === undefined ? (
-        <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" /></div>
-      ) : (filtered?.length ?? 0) === 0 ? (
-        <p className="text-gray-500 font-text text-center py-16">No chapters yet.</p>
-      ) : (
-        <div className="space-y-3">
-          {filtered?.sort((a, b) => a.order - b.order).map((c) => (
-            <div key={c._id} className="bg-white/10 border border-white/20 rounded-xl p-4 flex items-center gap-4">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white font-bold font-title flex-shrink-0">
-                {c.order}
+      {mode === "list" && (
+        chapters === undefined ? (
+          <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" /></div>
+        ) : (filtered?.length ?? 0) === 0 ? (
+          <p className="text-gray-500 font-text text-center py-16">No chapters yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {filtered?.sort((a, b) => a.order - b.order).map((c) => (
+              <div key={c._id} className="bg-white/10 border border-white/20 rounded-xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white font-bold font-title flex-shrink-0">
+                  {c.order}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-white font-semibold font-title truncate">{c.title}</h3>
+                  <p className="text-gray-400 text-xs font-text">{getBookName(c.bookId)}</p>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button onClick={() => openEdit(c)} className="px-3 py-1.5 bg-blue-600/30 border border-blue-500/30 rounded text-blue-300 hover:bg-blue-600/50 transition-colors text-sm font-text">Edit</button>
+                  <button onClick={() => handleDelete(c._id)} className="px-3 py-1.5 bg-red-600/30 border border-red-500/30 rounded text-red-300 hover:bg-red-600/50 transition-colors text-sm font-text">Delete</button>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-semibold font-title truncate">{c.title}</h3>
-                <p className="text-gray-400 text-xs font-text">{getBookName(c.bookId)}</p>
+            ))}
+          </div>
+        )
+      )}
+
+      {/* Quick Character Modal */}
+      {showCharModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-white/20 rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-white mb-4 font-title">Hızlı Karakter Ekle</h3>
+            <form onSubmit={handleAddCharacter} className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1 font-text">Kategori *</label>
+                <select
+                  value={charForm.categoryId}
+                  onChange={(e) => setCharForm({ ...charForm, categoryId: e.target.value })}
+                  required
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                >
+                  <option value="">Kategori seçin</option>
+                  {categories?.filter(c => c.universeId === books?.find(b => b._id === form.bookId)?.universeId).map((c) => (
+                    <option key={c._id} value={c._id} className="bg-gray-900">{c.name}</option>
+                  ))}
+                </select>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <button onClick={() => openEdit(c)} className="px-3 py-1.5 bg-blue-600/30 border border-blue-500/30 rounded text-blue-300 hover:bg-blue-600/50 transition-colors text-sm font-text">Edit</button>
-                <button onClick={() => handleDelete(c._id)} className="px-3 py-1.5 bg-red-600/30 border border-red-500/30 rounded text-red-300 hover:bg-red-600/50 transition-colors text-sm font-text">Delete</button>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1 font-text">Karakter Adı *</label>
+                <input
+                  type="text"
+                  value={charForm.name}
+                  onChange={(e) => setCharForm({ ...charForm, name: e.target.value })}
+                  required
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                />
               </div>
-            </div>
-          ))}
+              <div className="flex gap-3 pt-4">
+                <button type="submit" disabled={charLoading} className="px-6 py-2 bg-green-600/30 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-600/50 transition-colors disabled:opacity-50 font-text flex-1">
+                  {charLoading ? "Ekleniyor..." : "Ekle"}
+                </button>
+                <button type="button" onClick={() => setShowCharModal(false)} className="px-6 py-2 bg-transparent border border-white/20 rounded-lg text-gray-400 hover:text-white transition-colors font-text flex-1">
+                  İptal
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

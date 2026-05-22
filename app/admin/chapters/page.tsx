@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -17,6 +17,11 @@ interface FormData {
 }
 
 const EMPTY: FormData = { bookId: "", title: "", contentTr: "", contentEn: "", order: "1" };
+
+const getWordCount = (text: string) => {
+  if (!text) return 0;
+  return text.trim().split(/\s+/).filter((word) => word.length > 0).length;
+};
 
 export default function AdminChapters() {
   const { token } = useAdminAuth();
@@ -173,9 +178,14 @@ export default function AdminChapters() {
             </div>
             {/* Content with language tabs */}
             <div>
-              <div className="flex gap-2 mb-2">
-                <button type="button" onClick={() => setContentLang("tr")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "tr" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>Türkçe</button>
-                <button type="button" onClick={() => setContentLang("en")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "en" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>English</button>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setContentLang("tr")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "tr" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>Türkçe</button>
+                  <button type="button" onClick={() => setContentLang("en")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "en" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>English</button>
+                </div>
+                <div className="text-sm text-gray-400 font-text">
+                  {contentLang === "tr" ? `${getWordCount(form.contentTr)} kelime` : `${getWordCount(form.contentEn)} words`}
+                </div>
               </div>
               {contentLang === "tr" ? (
                 <CleanTextarea

@@ -217,7 +217,9 @@ export default function AdminChapters() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-sm text-gray-400 font-text">
-                    {contentLang === "tr" ? `${getWordCount(form.contentTr)} kelime` : `${getWordCount(form.contentEn)} words`}
+                    {contentLang === "tr" 
+                      ? `${getWordCount(form.contentTr)} kelime (~${Math.ceil(getWordCount(form.contentTr) / 250)} sayfa)` 
+                      : `${getWordCount(form.contentEn)} words (~${Math.ceil(getWordCount(form.contentEn) / 250)} pages)`}
                   </div>
                   {form.bookId && (
                     <button type="button" onClick={() => setShowCharModal(true)} className="px-3 py-1 bg-green-600/30 border border-green-500/30 rounded text-green-300 hover:bg-green-600/50 transition-colors text-sm font-text">

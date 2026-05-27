@@ -17,7 +17,9 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-black/20 backdrop-blur-md border-b border-white/10 relative z-10">
+    <>
+      <header className="bg-black/20 backdrop-blur-md border-b border-white/10 relative z-10">
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
@@ -107,15 +109,17 @@ export default function Header() {
               <svg className="w-4 h-4 mr-2 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
                 <line x1="16" y1="8" x2="2" y2="22" />
-                <line x1="17.5" y1="15" x2="9" y2="15" />
+                <line x1="17.5" y1="15" />
               </svg>
               Lore Yazarı Ol
             </button>
           </div>
         </div>
       )}
-
-      <WriterRequestModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
     </header>
-  );
+
+    <WriterRequestModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+  </>
+);
 }
+

@@ -80,15 +80,15 @@ export default function ChapterDetailPage({ params }: { params: Promise<{ bookId
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 font-title">{chapter.title}</h1>
           <p className="text-xl text-gray-400 font-text mb-2">{book.title}</p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-450 font-text mt-3 bg-white/5 border border-white/5 py-1.5 px-4 rounded-full max-w-fit mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-300 font-text mt-3 bg-white/5 border border-white/10 py-2 px-5 rounded-full max-w-fit mx-auto shadow-inner">
             <span>👁️ {chapter.views ?? 0} Görüntülenme</span>
-            <span className="text-gray-655">•</span>
+            <span className="text-amber-500/40">•</span>
             <span>📖 {wordCount.toLocaleString("tr-TR")} Kelime</span>
-            <span className="text-gray-655">•</span>
-            <span>⏱️ {readingTime} dk okuma (80 kelime/dk)</span>
+            <span className="text-amber-500/40">•</span>
+            <span>⏱️ {readingTime} dk okuma</span>
             {currentIndex >= 0 && (
               <>
-                <span className="text-gray-655">•</span>
+                <span className="text-amber-500/40">•</span>
                 <span>Bölüm {currentIndex + 1} / {allChapters.length}</span>
               </>
             )}

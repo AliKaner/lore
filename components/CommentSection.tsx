@@ -113,28 +113,28 @@ export default function CommentSection({
         <div className="flex items-center gap-6">
           <button
             onClick={handleLike}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-300 ${
+            className={`px-5 py-2.5 rounded-lg font-semibold tracking-wider font-title cursor-pointer flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 border-4 border-double ${
               isLiked
-                ? "bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30"
-                : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
+                ? "bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-red-600/70 text-red-200 hover:text-red-100 hover:border-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.45)]"
+                : "bg-gradient-to-r from-blue-950 via-blue-900 to-blue-950 border-amber-600/70 text-amber-200 hover:text-amber-100 hover:border-amber-500 hover:shadow-[0_0_15px_rgba(245,158,11,0.35)]"
             }`}
           >
             <svg
-              className={`w-6 h-6 transition-transform duration-300 ${
-                isLiked ? "scale-110 fill-current text-red-500" : ""
+              className={`w-4 h-4 mr-2 transition-transform duration-300 ${
+                isLiked ? "scale-110 fill-current text-red-500" : "text-amber-400"
               }`}
-              fill="none"
+              fill={isLiked ? "currentColor" : "none"}
               stroke="currentColor"
+              strokeWidth={2}
               viewBox="0 0 24 24"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
               />
             </svg>
-            <span className="font-semibold font-title">
+            <span className="text-xs">
               {initialLikeCount} Beğeni
             </span>
           </button>
@@ -205,15 +205,22 @@ export default function CommentSection({
           <button
             type="submit"
             disabled={submitting}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold font-title rounded-lg transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 bg-gradient-to-r from-blue-950 via-blue-900 to-blue-950 border-4 border-double border-amber-600/70 hover:border-amber-500 hover:shadow-[0_0_15px_rgba(245,158,11,0.35)] text-amber-200 hover:text-amber-100 text-xs font-semibold tracking-wider font-title cursor-pointer flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? (
               <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin mr-2" />
                 Gönderiliyor...
               </>
             ) : (
-              "Yorum Gönder"
+              <>
+                <svg className="w-4 h-4 mr-2 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
+                  <line x1="16" y1="8" x2="2" y2="22" />
+                  <line x1="17.5" y1="15" x2="9" y2="15" />
+                </svg>
+                Yorum Gönder
+              </>
             )}
           </button>
         </form>

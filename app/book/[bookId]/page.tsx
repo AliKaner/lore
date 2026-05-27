@@ -64,9 +64,18 @@ export default function BookDetailPage({ params }: { params: Promise<{ bookId: s
             <div className="flex-1 space-y-4">
               <div>
                 <h1 className="text-4xl font-bold text-white font-title mb-2">{book.title}</h1>
-                {book.universe && <p className="text-gray-400 font-text mb-3">{book.universe.name}</p>}
+                {book.universe && <p className="text-gray-400 font-text mb-2">{book.universe.name}</p>}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-md text-sm text-amber-200/90 flex items-center gap-1.5 font-text">
+                    #️⃣ {(book as any).chapterCount ?? 0} Sayfa
+                  </span>
+                  <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-md text-sm text-amber-200/90 flex items-center gap-1.5 font-text">
+                    ⏱️ {(book as any).totalReadingTime ?? 0} dk okuma
+                  </span>
+                </div>
                 {book.description && <p className="text-gray-300 font-text text-lg">{book.description}</p>}
               </div>
+
               {chapters.length > 0 && (
                 <div className="flex flex-wrap gap-4">
                   <Link href={`/book/${bookId}/${chapters[0]._id}`} className="px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all">

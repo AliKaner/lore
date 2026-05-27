@@ -11,16 +11,40 @@ async function verifySession(ctx: { db: any }, token: string) {
   }
 }
 
+async function getBookStats(ctx: { db: any }, bookId: any) {
+  const chapters = await ctx.db
+    .query("chapters")
+    .withIndex("by_book", (q: any) => q.eq("bookId", bookId))
+    .collect();
+  
+  let totalWords = 0;
+  for (const ch of chapters) {
+    const text = ch.contentTr || ch.contentEn || "";
+    if (text) {
+      totalWords += text.trim().split(/\s+/).filter(Boolean).length;
+    }
+  }
+  
+  const totalReadingTime = Math.ceil(totalWords / 80);
+  const chapterCount = chapters.length;
+  
+  return { chapterCount, totalReadingTime };
+}
+
 export const list = query({
   handler: async (ctx) => {
     const books = await ctx.db.query("books").collect();
     return Promise.all(
-      books.map(async (b) => ({
-        ...b,
-        coverUrl: b.coverStorageId
-          ? await ctx.storage.getUrl(b.coverStorageId)
-          : null,
-      }))
+      books.map(async (b) => {
+        const stats = await getBookStats(ctx, b._id);
+        return {
+          ...b,
+          ...stats,
+          coverUrl: b.coverStorageId
+            ? await ctx.storage.getUrl(b.coverStorageId)
+            : null,
+        };
+      })
     );
   },
 });
@@ -33,12 +57,16 @@ export const listByUniverse = query({
       .withIndex("by_universe", (q) => q.eq("universeId", args.universeId))
       .collect();
     return Promise.all(
-      books.map(async (b) => ({
-        ...b,
-        coverUrl: b.coverStorageId
-          ? await ctx.storage.getUrl(b.coverStorageId)
-          : null,
-      }))
+      books.map(async (b) => {
+        const stats = await getBookStats(ctx, b._id);
+        return {
+          ...b,
+          ...stats,
+          coverUrl: b.coverStorageId
+            ? await ctx.storage.getUrl(b.coverStorageId)
+            : null,
+        };
+      })
     );
   },
 });
@@ -49,8 +77,10 @@ export const getById = query({
     const book = await ctx.db.get(args.id);
     if (!book) return null;
     const universe = await ctx.db.get(book.universeId);
+    const stats = await getBookStats(ctx, book._id);
     return {
       ...book,
+      ...stats,
       coverUrl: book.coverStorageId
         ? await ctx.storage.getUrl(book.coverStorageId)
         : null,
@@ -58,6 +88,7 @@ export const getById = query({
     };
   },
 });
+
 
 export const create = mutation({
   args: {

@@ -258,13 +258,22 @@ export default function UniversePage({
                           )}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-lg font-bold text-white group-hover:text-blue-300 transition-colors font-title mb-2">
+                          <h3 className="text-lg font-bold text-white group-hover:text-blue-300 transition-colors font-title mb-1.5">
                             {book.title}
                           </h3>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            <span className="bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-md text-xs text-amber-200/90 flex items-center gap-1 font-text">
+                              #️⃣ {(book as any).chapterCount ?? 0} Sayfa
+                            </span>
+                            <span className="bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-md text-xs text-amber-200/90 flex items-center gap-1 font-text">
+                              ⏱️ {(book as any).totalReadingTime ?? 0} dk okuma
+                            </span>
+                          </div>
                           {book.description && (
-                            <p className="text-sm text-gray-400 font-text line-clamp-3">{book.description}</p>
+                            <p className="text-sm text-gray-400 font-text line-clamp-2">{book.description}</p>
                           )}
                         </div>
+
                       </div>
                     </Link>
                   ))}

@@ -12,9 +12,12 @@ import type * as admin from "../admin.js";
 import type * as books from "../books.js";
 import type * as categories from "../categories.js";
 import type * as chapters from "../chapters.js";
+import type * as comments from "../comments.js";
 import type * as fileStorage from "../fileStorage.js";
+import type * as likes from "../likes.js";
 import type * as loreEntries from "../loreEntries.js";
 import type * as universes from "../universes.js";
+import type * as writerRequests from "../writerRequests.js";
 
 import type {
   ApiFromModules,
@@ -27,9 +30,12 @@ declare const fullApi: ApiFromModules<{
   books: typeof books;
   categories: typeof categories;
   chapters: typeof chapters;
+  comments: typeof comments;
   fileStorage: typeof fileStorage;
+  likes: typeof likes;
   loreEntries: typeof loreEntries;
   universes: typeof universes;
+  writerRequests: typeof writerRequests;
 }>;
 
 /**

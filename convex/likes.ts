@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { Doc } from "./_generated/dataModel";
 
 export const checkLiked = query({
   args: {
@@ -37,7 +38,7 @@ export const toggle = mutation({
     const isLore = args.targetId.split(":")[0] === "loreEntries";
     const targetTable = isLore ? "loreEntries" : "chapters";
 
-    const target = await ctx.db.get(args.targetId as any);
+    const target = (await ctx.db.get(args.targetId as any)) as Doc<"loreEntries"> | Doc<"chapters"> | null;
     if (!target) {
       throw new Error("Target not found");
     }

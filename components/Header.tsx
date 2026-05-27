@@ -3,10 +3,12 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import WriterRequestModal from "./WriterRequestModal";
 
 export default function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const navItems = [
     { name: "Home", href: "/" },
@@ -45,6 +47,12 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
+            <button
+              onClick={() => setModalOpen(true)}
+              className="ml-2 px-4 py-2 bg-blue-600 hover:bg-blue-505 text-white text-sm font-medium rounded-md transition-colors duration-200 font-title cursor-pointer"
+            >
+              Lore Yazarı Ol
+            </button>
           </nav>
 
           {/* Mobile hamburger */}
@@ -84,9 +92,20 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                setModalOpen(true);
+              }}
+              className="w-full text-left block px-4 py-3 bg-blue-600 text-white font-medium text-sm rounded-md transition-colors font-title mt-2 cursor-pointer"
+            >
+              ✍️ Lore Yazarı Ol
+            </button>
           </div>
         </div>
       )}
+
+      <WriterRequestModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
     </header>
   );
 }

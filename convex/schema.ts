@@ -33,6 +33,8 @@ export default defineSchema({
     contentEn: v.string(),
     relatedEntryIds: v.optional(v.array(v.id("loreEntries"))),
     order: v.optional(v.number()),
+    views: v.optional(v.number()),
+    likeCount: v.optional(v.number()),
   })
     .index("by_universe", ["universeId"])
     .index("by_category", ["categoryId"]),
@@ -51,10 +53,33 @@ export default defineSchema({
     contentTr: v.string(),
     contentEn: v.string(),
     order: v.number(),
+    views: v.optional(v.number()),
+    likeCount: v.optional(v.number()),
   }).index("by_book", ["bookId"]),
 
   sessions: defineTable({
     token: v.string(),
     expiresAt: v.number(),
   }).index("by_token", ["token"]),
+
+  likes: defineTable({
+    targetId: v.union(v.id("loreEntries"), v.id("chapters")),
+    clientId: v.string(),
+  }).index("by_target_and_client", ["targetId", "clientId"]),
+
+  comments: defineTable({
+    targetId: v.union(v.id("loreEntries"), v.id("chapters")),
+    name: v.string(),
+    email: v.string(),
+    content: v.string(),
+    createdAt: v.number(),
+    clientId: v.optional(v.string()),
+  }).index("by_target", ["targetId"]),
+
+  writerRequests: defineTable({
+    name: v.string(),
+    email: v.string(),
+    message: v.optional(v.string()),
+    createdAt: v.number(),
+  }),
 });

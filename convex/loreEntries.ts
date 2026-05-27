@@ -91,7 +91,20 @@ export const getById = query({
       category,
       universe,
       relatedEntries: relatedEntries.filter(Boolean),
+      views: entry.views ?? 0,
+      likeCount: entry.likeCount ?? 0,
     };
+  },
+});
+
+export const incrementViews = mutation({
+  args: { id: v.id("loreEntries") },
+  handler: async (ctx, args) => {
+    const entry = await ctx.db.get(args.id);
+    if (!entry) throw new Error("Lore entry not found");
+    const currentViews = entry.views ?? 0;
+    await ctx.db.patch(args.id, { views: currentViews + 1 });
+    return currentViews + 1;
   },
 });
 

@@ -40,7 +40,24 @@ export const getById = query({
       .withIndex("by_book", (q) => q.eq("bookId", chapter.bookId))
       .collect();
     const sorted = allChapters.sort((a, b) => a.order - b.order);
-    return { ...chapter, book, allChapters: sorted };
+    return {
+      ...chapter,
+      book,
+      allChapters: sorted,
+      views: chapter.views ?? 0,
+      likeCount: chapter.likeCount ?? 0,
+    };
+  },
+});
+
+export const incrementViews = mutation({
+  args: { id: v.id("chapters") },
+  handler: async (ctx, args) => {
+    const chapter = await ctx.db.get(args.id);
+    if (!chapter) throw new Error("Chapter not found");
+    const currentViews = chapter.views ?? 0;
+    await ctx.db.patch(args.id, { views: currentViews + 1 });
+    return currentViews + 1;
   },
 });
 

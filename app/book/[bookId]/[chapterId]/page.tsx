@@ -1,19 +1,36 @@
 "use client";
-import React, { use } from "react";
+import React, { use, useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import LoreContent from "@/components/LoreContent";
-import { useQuery } from "convex/react";
+import CommentSection from "@/components/CommentSection";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+
+const countWords = (text: string) => {
+  if (!text) return 0;
+  return text.trim().split(/\s+/).filter(Boolean).length;
+};
 
 export default function ChapterDetailPage({ params }: { params: Promise<{ bookId: string; chapterId: string }> }) {
   const { bookId: bookIdRaw, chapterId: chapterIdRaw } = use(params);
   const bookId = bookIdRaw as Id<"books">;
   const chapterId = chapterIdRaw as Id<"chapters">;
 
+  const [lang, setLang] = useState<"tr" | "en">("tr");
+
   const chapter = useQuery(api.chapters.getById, { id: chapterId });
   const book = useQuery(api.books.getById, { id: bookId });
+  const incrementViews = useMutation(api.chapters.incrementViews);
+
+  useEffect(() => {
+    if (chapterId) {
+      incrementViews({ id: chapterId }).catch((err) => {
+        console.error("Failed to increment views:", err);
+      });
+    }
+  }, [chapterId, incrementViews]);
 
   if (chapter === undefined || book === undefined) {
     return (
@@ -45,6 +62,10 @@ export default function ChapterDetailPage({ params }: { params: Promise<{ bookId
   const prevChapter = currentIndex > 0 ? allChapters[currentIndex - 1] : null;
   const nextChapter = currentIndex < allChapters.length - 1 ? allChapters[currentIndex + 1] : null;
 
+  const activeContent = lang === "tr" ? chapter.contentTr : chapter.contentEn;
+  const wordCount = countWords(activeContent);
+  const readingTime = Math.ceil(wordCount / 80);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <Header />
@@ -59,13 +80,23 @@ export default function ChapterDetailPage({ params }: { params: Promise<{ bookId
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 font-title">{chapter.title}</h1>
           <p className="text-xl text-gray-400 font-text mb-2">{book.title}</p>
-          {currentIndex >= 0 && (
-            <p className="text-lg text-gray-500 font-text">Chapter {currentIndex + 1} of {allChapters.length}</p>
-          )}
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-450 font-text mt-3 bg-white/5 border border-white/5 py-1.5 px-4 rounded-full max-w-fit mx-auto">
+            <span>👁️ {chapter.views ?? 0} Görüntülenme</span>
+            <span className="text-gray-655">•</span>
+            <span>📖 {wordCount.toLocaleString("tr-TR")} Kelime</span>
+            <span className="text-gray-655">•</span>
+            <span>⏱️ {readingTime} dk okuma (80 kelime/dk)</span>
+            {currentIndex >= 0 && (
+              <>
+                <span className="text-gray-655">•</span>
+                <span>Bölüm {currentIndex + 1} / {allChapters.length}</span>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-8 mb-8">
-          <LoreContent content={{ tr: chapter.contentTr, en: chapter.contentEn }} />
+          <LoreContent content={{ tr: chapter.contentTr, en: chapter.contentEn }} lang={lang} onLangChange={setLang} />
         </div>
 
         <div className="flex justify-between items-center mb-12">
@@ -84,6 +115,12 @@ export default function ChapterDetailPage({ params }: { params: Promise<{ bookId
             ) : <div />}
           </div>
         </div>
+
+        <CommentSection
+          targetId={chapterId}
+          initialLikeCount={chapter.likeCount ?? 0}
+          viewsCount={chapter.views ?? 0}
+        />
 
         {allChapters.length > 0 && (
           <div className="mt-8 pt-8 border-t border-white/20">

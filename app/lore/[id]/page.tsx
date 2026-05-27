@@ -1,10 +1,11 @@
 "use client";
-import React, { use } from "react";
+import React, { use, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import LoreContent from "@/components/LoreContent";
 import ShareButton from "@/components/ShareButton";
-import { useQuery } from "convex/react";
+import CommentSection from "@/components/CommentSection";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 
@@ -12,6 +13,15 @@ export default function LoreDetail({ params }: { params: Promise<{ id: string }>
   const { id } = use(params);
   const entryId = id as Id<"loreEntries">;
   const entry = useQuery(api.loreEntries.getById, { id: entryId });
+  const incrementViews = useMutation(api.loreEntries.incrementViews);
+
+  useEffect(() => {
+    if (entryId) {
+      incrementViews({ id: entryId }).catch((err) => {
+        console.error("Failed to increment views:", err);
+      });
+    }
+  }, [entryId, incrementViews]);
 
   if (entry === undefined) {
     return (
@@ -103,6 +113,12 @@ export default function LoreDetail({ params }: { params: Promise<{ id: string }>
             </div>
           </div>
         </div>
+
+        <CommentSection
+          targetId={entryId}
+          initialLikeCount={entry.likeCount ?? 0}
+          viewsCount={entry.views ?? 0}
+        />
 
         <div className="flex justify-between mt-12">
           <Link href={backHref} className="px-6 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all">

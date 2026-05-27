@@ -80,12 +80,23 @@ export default function Home() {
                         </div>
                       </div>
                       {universe.description && (
-                        <div className="p-4">
+                        <div className="p-4 pb-2">
                           <p className="text-gray-300 font-text text-sm line-clamp-2">
                             {universe.description}
                           </p>
                         </div>
                       )}
+                      <div className="px-4 pb-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-gray-400 font-text">
+                        <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+                          📚 {(universe as any).counts?.books ?? 0} Kitap
+                        </span>
+                        <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+                          🗂️ {(universe as any).counts?.categories ?? 0} Kategori
+                        </span>
+                        <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+                          ✨ {(universe as any).counts?.entries ?? 0} Lore Girdisi
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 ))}

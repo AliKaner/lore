@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const SECTIONS = [
   { label: "Universes", href: "/admin/universes", icon: "🌌", query: "universes" },
@@ -10,14 +11,21 @@ const SECTIONS = [
   { label: "Lore Entries", href: "/admin/entries", icon: "📜", query: "entries" },
   { label: "Books", href: "/admin/books", icon: "📚", query: "books" },
   { label: "Chapters", href: "/admin/chapters", icon: "📖", query: "chapters" },
+  { label: "Writer Requests", href: "/admin/requests", icon: "✍️", query: "requests" },
 ];
 
 export default function AdminDashboard() {
+  const { token } = useAdminAuth();
+
   const universes = useQuery(api.universes.list);
   const categories = useQuery(api.categories.list);
   const entries = useQuery(api.loreEntries.list);
   const books = useQuery(api.books.list);
   const chapters = useQuery(api.chapters.list);
+  const requests = useQuery(
+    api.writerRequests.list,
+    token ? { sessionToken: token } : "skip"
+  );
 
   const counts: Record<string, number | undefined> = {
     universes: universes?.length,
@@ -25,6 +33,7 @@ export default function AdminDashboard() {
     entries: entries?.length,
     books: books?.length,
     chapters: chapters?.length,
+    requests: requests?.length,
   };
 
   return (
@@ -33,7 +42,7 @@ export default function AdminDashboard() {
         Admin Dashboard
       </h1>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
         {SECTIONS.map((s) => (
           <Link key={s.href} href={s.href}>
             <div className="bg-white/10 border border-white/20 rounded-xl p-6 hover:bg-white/15 hover:border-white/30 transition-all text-center">

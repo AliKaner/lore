@@ -15,12 +15,33 @@ export const list = query({
   handler: async (ctx) => {
     const universes = await ctx.db.query("universes").collect();
     return Promise.all(
-      universes.map(async (u) => ({
-        ...u,
-        imageUrl: u.imageStorageId
+      universes.map(async (u) => {
+        const imageUrl = u.imageStorageId
           ? await ctx.storage.getUrl(u.imageStorageId)
-          : null,
-      }))
+          : null;
+        const categories = await ctx.db
+          .query("categories")
+          .withIndex("by_universe", (q) => q.eq("universeId", u._id))
+          .collect();
+        const books = await ctx.db
+          .query("books")
+          .withIndex("by_universe", (q) => q.eq("universeId", u._id))
+          .collect();
+        const entries = await ctx.db
+          .query("loreEntries")
+          .withIndex("by_universe", (q) => q.eq("universeId", u._id))
+          .collect();
+
+        return {
+          ...u,
+          imageUrl,
+          counts: {
+            categories: categories.length,
+            books: books.length,
+            entries: entries.length,
+          },
+        };
+      })
     );
   },
 });

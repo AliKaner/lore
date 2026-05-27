@@ -68,7 +68,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ bookId: s
                 {book.description && <p className="text-gray-300 font-text text-lg">{book.description}</p>}
               </div>
               {chapters.length > 0 && (
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4">
                   <Link href={`/book/${bookId}/${chapters[0]._id}`} className="px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all">
                     Read First Chapter
                   </Link>
@@ -77,6 +77,12 @@ export default function BookDetailPage({ params }: { params: Promise<{ bookId: s
                       Read Last Chapter
                     </Link>
                   )}
+                  <Link href={`/book/${bookId}/pdf`} className="px-6 py-3 bg-red-600/20 border border-red-500/30 text-red-300 rounded-lg hover:bg-red-600/30 hover:border-red-500/50 hover:text-white transition-all flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    PDF / Kitap Olarak Kaydet
+                  </Link>
                 </div>
               )}
             </div>

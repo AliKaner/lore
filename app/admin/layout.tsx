@@ -13,6 +13,7 @@ const NAV = [
   { label: "Lore Entries", href: "/admin/entries" },
   { label: "Books", href: "/admin/books" },
   { label: "Chapters", href: "/admin/chapters" },
+  { label: "Writer Requests", href: "/admin/requests" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

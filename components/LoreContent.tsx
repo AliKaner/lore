@@ -8,13 +8,20 @@ type LoreContentProps = {
     en?: string;
   };
   defaultLang?: "tr" | "en";
+  lang?: "tr" | "en";
+  onLangChange?: (lang: "tr" | "en") => void;
 };
 
 export default function LoreContent({
   content,
   defaultLang = "tr",
+  lang: externalLang,
+  onLangChange,
 }: LoreContentProps) {
-  const [lang, setLang] = React.useState<"tr" | "en">(defaultLang);
+  const [internalLang, setInternalLang] = React.useState<"tr" | "en">(defaultLang);
+
+  const lang = externalLang !== undefined ? externalLang : internalLang;
+  const setLang = onLangChange !== undefined ? onLangChange : setInternalLang;
 
   const text = (content as any)?.[lang] || "";
 
@@ -25,7 +32,7 @@ export default function LoreContent({
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value as "tr" | "en")}
-          className="bg-transparent border border-white/30 text-white rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-white/50"
+          className="bg-transparent border border-white/30 text-white rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-white/50 cursor-pointer"
         >
           <option value="tr" className="bg-gray-900">
             Türkçe

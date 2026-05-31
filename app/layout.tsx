@@ -16,7 +16,7 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Lore Universe",
+  title: "Booktions",
   description: "Discover the rich lore and stories that shape our universe",
   icons: {
     icon: [
@@ -28,16 +28,16 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   openGraph: {
-    title: "Lore Universe",
+    title: "Booktions",
     description: "Discover the rich lore and stories that shape our universe",
     url: "https://your-domain.com",
-    siteName: "Lore Universe",
+    siteName: "Booktions",
     images: [
       {
         url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "Lore Universe Logo",
+        alt: "Booktions Logo",
       },
     ],
     locale: "en_US",
@@ -45,11 +45,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lore Universe",
+    title: "Booktions",
     description: "Discover the rich lore and stories that shape our universe",
     images: ["/logo.png"],
   },
 };
+
 
 export default function RootLayout({
   children,

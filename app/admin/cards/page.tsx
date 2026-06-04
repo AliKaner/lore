@@ -13,6 +13,7 @@ interface FormData {
   cardTypeId: string;
   name: string;
   level: string;
+  orientation: "vertical" | "horizontal";
   descriptionTr: string;
   descriptionEn: string;
   order: string;
@@ -24,6 +25,7 @@ const EMPTY: FormData = {
   cardTypeId: "",
   name: "",
   level: "1",
+  orientation: "vertical",
   descriptionTr: "",
   descriptionEn: "",
   order: "",
@@ -84,6 +86,7 @@ export default function AdminCards() {
       cardTypeId: c.cardTypeId,
       name: c.name,
       level: String(c.level),
+      orientation: c.orientation ?? "vertical",
       descriptionTr: c.descriptionTr ?? "",
       descriptionEn: c.descriptionEn ?? "",
       order: c.order?.toString() ?? "",
@@ -106,6 +109,7 @@ export default function AdminCards() {
         cardTypeId: form.cardTypeId as Id<"cardTypes">,
         name: form.name,
         level: parseInt(form.level),
+        orientation: form.orientation,
         descriptionTr: form.descriptionTr || undefined,
         descriptionEn: form.descriptionEn || undefined,
         order: form.order ? parseInt(form.order) : undefined,
@@ -218,6 +222,25 @@ export default function AdminCards() {
               </div>
             </div>
             <div>
+              <label className="block text-sm text-gray-300 mb-1 font-text">Orientation *</label>
+              <div className="flex gap-3">
+                {(["vertical", "horizontal"] as const).map((o) => (
+                  <button
+                    key={o}
+                    type="button"
+                    onClick={() => setForm({ ...form, orientation: o })}
+                    className={`flex-1 py-2 rounded-lg border text-sm font-text transition-colors ${
+                      form.orientation === o
+                        ? "bg-white/30 border-white/50 text-white"
+                        : "bg-white/5 border-white/20 text-gray-400 hover:bg-white/10"
+                    }`}
+                  >
+                    {o === "vertical" ? "▮ Dikey" : "▬ Yatay"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
               <label className="block text-sm text-gray-300 mb-1 font-text">Description (TR)</label>
               <textarea
                 value={form.descriptionTr}
@@ -298,7 +321,7 @@ export default function AdminCards() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {filteredCards?.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((c) => (
             <div key={c._id} className="bg-white/10 border border-white/20 rounded-xl overflow-hidden">
-              <div className="relative aspect-[2/3] bg-gray-800">
+              <div className={`relative bg-gray-800 ${c.orientation === "horizontal" ? "aspect-[3/2]" : "aspect-[2/3]"}`}>
                 {c.imageUrl ? (
                   <img src={c.imageUrl} alt={c.name} className="w-full h-full object-cover" />
                 ) : (
@@ -306,6 +329,9 @@ export default function AdminCards() {
                 )}
                 <span className="absolute top-1.5 right-1.5 bg-black/60 text-yellow-300 text-xs px-1.5 py-0.5 rounded font-text">
                   Sv.{c.level}
+                </span>
+                <span className="absolute bottom-1.5 right-1.5 bg-black/60 text-white/50 text-xs px-1.5 py-0.5 rounded font-text">
+                  {c.orientation === "horizontal" ? "▬" : "▮"}
                 </span>
               </div>
               <div className="p-2">

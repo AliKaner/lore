@@ -178,17 +178,18 @@ export default function BoardGamePage({
                 <p className="text-center text-gray-500 font-text py-16">Kart bulunamadı.</p>
               )}
               {filteredCards && filteredCards.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4">
                   {filteredCards
                     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                     .map((card) => {
                       const type = cardTypes?.find((t) => t._id === card.cardTypeId);
+                      const isHorizontal = card.orientation === "horizontal";
                       return (
                         <div
                           key={card._id}
-                          className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden hover:bg-white/15 hover:border-white/30 transition-all duration-300 hover:shadow-xl hover:shadow-black/40"
+                          className="break-inside-avoid mb-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden hover:bg-white/15 hover:border-white/30 transition-all duration-300 hover:shadow-xl hover:shadow-black/40"
                         >
-                          <div className="relative aspect-[2/3] bg-gray-800">
+                          <div className={`relative bg-gray-800 ${isHorizontal ? "aspect-[3/2]" : "aspect-[2/3]"}`}>
                             {card.imageUrl ? (
                               <img
                                 src={card.imageUrl}

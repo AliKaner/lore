@@ -108,6 +108,7 @@ export default defineSchema({
     cardTypeId: v.id("cardTypes"),
     name: v.string(),
     level: v.number(),
+    orientation: v.union(v.literal("vertical"), v.literal("horizontal")),
     imageStorageId: v.optional(v.id("_storage")),
     descriptionTr: v.optional(v.string()),
     descriptionEn: v.optional(v.string()),

@@ -27,9 +27,9 @@ export default function Header() {
             <Image
               src="/logo.png"
               alt="Logo"
-              width={140}
-              height={60}
-              className="object-contain hover:opacity-80 transition-opacity"
+              width={48}
+              height={48}
+              className="w-12 h-12 object-contain hover:opacity-80 transition-opacity"
               priority
             />
           </Link>

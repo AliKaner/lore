@@ -9,7 +9,10 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as boardGames from "../boardGames.js";
 import type * as books from "../books.js";
+import type * as cardTypes from "../cardTypes.js";
+import type * as cards from "../cards.js";
 import type * as categories from "../categories.js";
 import type * as chapters from "../chapters.js";
 import type * as comments from "../comments.js";
@@ -27,7 +30,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  boardGames: typeof boardGames;
   books: typeof books;
+  cardTypes: typeof cardTypes;
+  cards: typeof cards;
   categories: typeof categories;
   chapters: typeof chapters;
   comments: typeof comments;

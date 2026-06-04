@@ -82,4 +82,39 @@ export default defineSchema({
     message: v.optional(v.string()),
     createdAt: v.number(),
   }),
+
+  boardGames: defineTable({
+    universeId: v.id("universes"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    coverStorageId: v.optional(v.id("_storage")),
+    minPlayers: v.number(),
+    maxPlayers: v.number(),
+    rulesTr: v.optional(v.string()),
+    rulesEn: v.optional(v.string()),
+    order: v.optional(v.number()),
+  }).index("by_universe", ["universeId"]),
+
+  cardTypes: defineTable({
+    boardGameId: v.id("boardGames"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    levelCount: v.number(),
+    order: v.optional(v.number()),
+  }).index("by_boardGame", ["boardGameId"]),
+
+  cards: defineTable({
+    boardGameId: v.id("boardGames"),
+    cardTypeId: v.id("cardTypes"),
+    name: v.string(),
+    level: v.number(),
+    imageStorageId: v.optional(v.id("_storage")),
+    descriptionTr: v.optional(v.string()),
+    descriptionEn: v.optional(v.string()),
+    order: v.optional(v.number()),
+  })
+    .index("by_boardGame", ["boardGameId"])
+    .index("by_cardType", ["cardTypeId"])
+    .index("by_boardGame_and_cardType", ["boardGameId", "cardTypeId"])
+    .index("by_boardGame_and_level", ["boardGameId", "level"]),
 });

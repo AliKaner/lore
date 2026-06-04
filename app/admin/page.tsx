@@ -11,6 +11,9 @@ const SECTIONS = [
   { label: "Lore Entries", href: "/admin/entries", icon: "📜", query: "entries" },
   { label: "Books", href: "/admin/books", icon: "📚", query: "books" },
   { label: "Chapters", href: "/admin/chapters", icon: "📖", query: "chapters" },
+  { label: "Board Games", href: "/admin/board-games", icon: "🎲", query: "boardGames" },
+  { label: "Card Types", href: "/admin/card-types", icon: "🃏", query: "cardTypes" },
+  { label: "Cards", href: "/admin/cards", icon: "🎴", query: "cards" },
   { label: "Writer Requests", href: "/admin/requests", icon: "✍️", query: "requests" },
 ];
 
@@ -22,6 +25,7 @@ export default function AdminDashboard() {
   const entries = useQuery(api.loreEntries.list);
   const books = useQuery(api.books.list);
   const chapters = useQuery(api.chapters.list);
+  const boardGames = useQuery(api.boardGames.list);
   const requests = useQuery(
     api.writerRequests.list,
     token ? { sessionToken: token } : "skip"
@@ -33,6 +37,7 @@ export default function AdminDashboard() {
     entries: entries?.length,
     books: books?.length,
     chapters: chapters?.length,
+    boardGames: boardGames?.length,
     requests: requests?.length,
   };
 

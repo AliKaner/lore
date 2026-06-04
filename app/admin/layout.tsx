@@ -13,6 +13,9 @@ const NAV = [
   { label: "Lore Entries", href: "/admin/entries" },
   { label: "Books", href: "/admin/books" },
   { label: "Chapters", href: "/admin/chapters" },
+  { label: "Board Games", href: "/admin/board-games" },
+  { label: "Card Types", href: "/admin/card-types" },
+  { label: "Cards", href: "/admin/cards" },
   { label: "Writer Requests", href: "/admin/requests" },
 ];
 

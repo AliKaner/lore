@@ -59,7 +59,7 @@ export default function UniverseClient({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex flex-col">
       <Header />
 
       {/* Universe Hero */}
@@ -82,7 +82,7 @@ export default function UniverseClient({
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
         {/* Tabs */}
         <div className="flex gap-4 mb-8 border-b border-white/20">
           {(["lore", "books", "boardGames"] as const).map((tab) => (

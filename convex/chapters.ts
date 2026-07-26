@@ -24,7 +24,9 @@ export const listByBook = query({
       .query("chapters")
       .withIndex("by_book", (q) => q.eq("bookId", args.bookId))
       .collect();
-    return chapters.sort((a, b) => a.order - b.order);
+    return chapters
+      .filter((c) => c.status !== "pending")
+      .sort((a, b) => a.order - b.order);
   },
 });
 
@@ -39,7 +41,9 @@ export const getById = query({
       .query("chapters")
       .withIndex("by_book", (q) => q.eq("bookId", chapter.bookId))
       .collect();
-    const sorted = allChapters.sort((a, b) => a.order - b.order);
+    const sorted = allChapters
+      .filter((c) => c.status !== "pending" || c._id === chapter._id)
+      .sort((a, b) => a.order - b.order);
     return {
       ...chapter,
       book,
@@ -85,6 +89,7 @@ export const update = mutation({
     contentTr: v.optional(v.string()),
     contentEn: v.optional(v.string()),
     order: v.optional(v.number()),
+    status: v.optional(v.union(v.literal("pending"), v.literal("published"))),
     sessionToken: v.string(),
   },
   handler: async (ctx, args) => {

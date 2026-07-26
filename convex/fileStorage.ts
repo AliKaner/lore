@@ -11,10 +11,29 @@ async function verifySession(ctx: { db: any }, token: string) {
   }
 }
 
+async function verifyWriterToken(ctx: { db: any }, token: string) {
+  const session = await ctx.db
+    .query("writerSessions")
+    .withIndex("by_token", (q: any) => q.eq("token", token))
+    .first();
+  if (!session || session.expiresAt < Date.now()) {
+    throw new Error("Unauthorized");
+  }
+}
+
 export const generateUploadUrl = mutation({
-  args: { sessionToken: v.string() },
+  args: {
+    sessionToken: v.optional(v.string()),
+    writerToken: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
-    await verifySession(ctx, args.sessionToken);
+    if (args.sessionToken) {
+      await verifySession(ctx, args.sessionToken);
+    } else if (args.writerToken) {
+      await verifyWriterToken(ctx, args.writerToken);
+    } else {
+      throw new Error("Unauthorized");
+    }
     return ctx.storage.generateUploadUrl();
   },
 });

@@ -17,6 +17,8 @@ const NAV = [
   { label: "Card Types", href: "/admin/card-types" },
   { label: "Cards", href: "/admin/cards" },
   { label: "Writer Requests", href: "/admin/requests" },
+  { label: "Pending Submissions", href: "/admin/pending" },
+  { label: "Comments", href: "/admin/comments" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

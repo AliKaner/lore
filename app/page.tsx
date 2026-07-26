@@ -3,6 +3,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -35,7 +36,14 @@ export default function Home() {
             </p>
           </div>
 
-          {universes !== undefined && universes.length === 0 && null}
+          {universes !== undefined && universes.length === 0 && (
+            <div className="text-center text-gray-400 font-text py-16">
+              <p className="text-lg">Henüz hiç evren eklenmedi.</p>
+              <p className="text-sm mt-1 text-gray-500">
+                Yakında burada keşfedebileceğin evrenler olacak.
+              </p>
+            </div>
+          )}
 
           {universes && universes.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -103,6 +111,7 @@ export default function Home() {
             </div>
           )}
         </main>
+        <Footer />
       </div>
     </div>
   );

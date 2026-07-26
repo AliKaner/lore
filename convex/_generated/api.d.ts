@@ -10,6 +10,7 @@
 
 import type * as admin from "../admin.js";
 import type * as boardGames from "../boardGames.js";
+import type * as bookNotes from "../bookNotes.js";
 import type * as books from "../books.js";
 import type * as cardTypes from "../cardTypes.js";
 import type * as cards from "../cards.js";
@@ -20,6 +21,9 @@ import type * as fileStorage from "../fileStorage.js";
 import type * as likes from "../likes.js";
 import type * as loreEntries from "../loreEntries.js";
 import type * as universes from "../universes.js";
+import type * as writerAuth from "../writerAuth.js";
+import type * as writerAuthLib from "../writerAuthLib.js";
+import type * as writerContent from "../writerContent.js";
 import type * as writerRequests from "../writerRequests.js";
 
 import type {
@@ -31,6 +35,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   boardGames: typeof boardGames;
+  bookNotes: typeof bookNotes;
   books: typeof books;
   cardTypes: typeof cardTypes;
   cards: typeof cards;
@@ -41,6 +46,9 @@ declare const fullApi: ApiFromModules<{
   likes: typeof likes;
   loreEntries: typeof loreEntries;
   universes: typeof universes;
+  writerAuth: typeof writerAuth;
+  writerAuthLib: typeof writerAuthLib;
+  writerContent: typeof writerContent;
   writerRequests: typeof writerRequests;
 }>;
 

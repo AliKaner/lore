@@ -4,6 +4,16 @@ import { v } from "convex/values";
 // Simple email regex validation
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+async function verifySession(ctx: { db: any }, token: string) {
+  const session = await ctx.db
+    .query("sessions")
+    .withIndex("by_token", (q: any) => q.eq("token", token))
+    .first();
+  if (!session || session.expiresAt < Date.now()) {
+    throw new Error("Unauthorized");
+  }
+}
+
 export const listByTarget = query({
   args: {
     targetId: v.union(v.id("loreEntries"), v.id("chapters")),
@@ -73,5 +83,34 @@ export const add = mutation({
       createdAt: Date.now(),
       clientId: args.clientId,
     });
+  },
+});
+
+export const listAll = query({
+  args: { sessionToken: v.string() },
+  handler: async (ctx, args) => {
+    await verifySession(ctx, args.sessionToken);
+    const comments = await ctx.db.query("comments").collect();
+    const withTarget = await Promise.all(
+      comments.map(async (c) => {
+        const target: any = await ctx.db.get(c.targetId);
+        const targetLabel = target ? target.name ?? target.title ?? null : null;
+        const targetType = target
+          ? "name" in target
+            ? "lore"
+            : "chapter"
+          : null;
+        return { ...c, targetLabel, targetType };
+      })
+    );
+    return withTarget.sort((a, b) => b.createdAt - a.createdAt);
+  },
+});
+
+export const remove = mutation({
+  args: { id: v.id("comments"), sessionToken: v.string() },
+  handler: async (ctx, args) => {
+    await verifySession(ctx, args.sessionToken);
+    await ctx.db.delete(args.id);
   },
 });

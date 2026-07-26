@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cinzel_Decorative, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "./constants/site";
 
 const cinzelDecorative = Cinzel_Decorative({
   subsets: ["latin"],
@@ -16,7 +17,11 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Booktions",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
   description: "Discover the rich lore and stories that shape our universe",
   icons: {
     icon: [
@@ -28,16 +33,16 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   openGraph: {
-    title: "Booktions",
+    title: SITE_NAME,
     description: "Discover the rich lore and stories that shape our universe",
-    url: "https://your-domain.com",
-    siteName: "Booktions",
+    url: SITE_URL,
+    siteName: SITE_NAME,
     images: [
       {
-        url: "/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "Booktions Logo",
+        url: DEFAULT_OG_IMAGE,
+        width: 500,
+        height: 500,
+        alt: `${SITE_NAME} Logo`,
       },
     ],
     locale: "en_US",
@@ -45,9 +50,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Booktions",
+    title: SITE_NAME,
     description: "Discover the rich lore and stories that shape our universe",
-    images: ["/logo.png"],
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

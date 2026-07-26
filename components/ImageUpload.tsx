@@ -5,7 +5,8 @@ import { api } from "@/convex/_generated/api";
 import Image from "next/image";
 
 interface ImageUploadProps {
-  sessionToken: string;
+  sessionToken?: string;
+  writerToken?: string;
   currentImageUrl?: string | null;
   onUpload: (storageId: string) => void;
   label?: string;
@@ -13,6 +14,7 @@ interface ImageUploadProps {
 
 export function ImageUpload({
   sessionToken,
+  writerToken,
   currentImageUrl,
   onUpload,
   label = "Image",
@@ -31,7 +33,7 @@ export function ImageUpload({
 
     setUploading(true);
     try {
-      const uploadUrl = await generateUploadUrl({ sessionToken });
+      const uploadUrl = await generateUploadUrl({ sessionToken, writerToken });
       const response = await fetch(uploadUrl, {
         method: "POST",
         headers: { "Content-Type": file.type },

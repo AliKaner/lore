@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { ImageUpload } from "@/components/ImageUpload";
-import { CleanTextarea } from "@/components/CleanTextarea";
+import { ContentEditor } from "@/components/ContentEditor";
 
 const TYPES = ["character", "city", "item", "story", "other"] as const;
 type LoreType = (typeof TYPES)[number];
@@ -20,11 +20,12 @@ interface FormData {
   contentEn: string;
   order: string;
   imageStorageId: string;
+  relatedEntryIds: string[];
 }
 
 const EMPTY: FormData = {
   universeId: "", categoryId: "", name: "", type: "other",
-  contentTr: "", contentEn: "", order: "", imageStorageId: "",
+  contentTr: "", contentEn: "", order: "", imageStorageId: "", relatedEntryIds: [],
 };
 
 export default function AdminEntries() {
@@ -61,6 +62,7 @@ export default function AdminEntries() {
       contentEn: e.contentEn,
       order: e.order?.toString() ?? "",
       imageStorageId: e.imageStorageId ?? "",
+      relatedEntryIds: e.relatedEntryIds ?? [],
     });
     setEditId(e._id);
     setMode("edit");
@@ -83,6 +85,7 @@ export default function AdminEntries() {
         contentEn: form.contentEn,
         order: form.order ? parseInt(form.order) : undefined,
         imageStorageId: form.imageStorageId ? (form.imageStorageId as Id<"_storage">) : undefined,
+        relatedEntryIds: form.relatedEntryIds as Id<"loreEntries">[],
         sessionToken: token,
       };
       if (mode === "create") {
@@ -219,21 +222,62 @@ export default function AdminEntries() {
                 </button>
               </div>
               {contentLang === "tr" ? (
-                <CleanTextarea
+                <ContentEditor
                   value={form.contentTr}
                   onChange={(v) => setForm({ ...form, contentTr: v })}
                   rows={10}
                   placeholder="Türkçe içerik..."
+                  storageKey={mode === "create" ? "draft_admin_entry_tr" : undefined}
                 />
               ) : (
-                <CleanTextarea
+                <ContentEditor
                   value={form.contentEn}
                   onChange={(v) => setForm({ ...form, contentEn: v })}
                   rows={10}
                   placeholder="English content..."
+                  storageKey={mode === "create" ? "draft_admin_entry_en" : undefined}
                 />
               )}
             </div>
+            {form.universeId && (
+              <div>
+                <label className="block text-sm text-gray-300 mb-1 font-text">
+                  İlgili Girdiler
+                </label>
+                <div className="max-h-48 overflow-y-auto bg-white/5 border border-white/10 rounded-lg p-3 space-y-1">
+                  {entries
+                    ?.filter((e) => e.universeId === form.universeId && e._id !== editId)
+                    .map((e) => (
+                      <label
+                        key={e._id}
+                        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 cursor-pointer text-sm font-text text-gray-300"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={form.relatedEntryIds.includes(e._id)}
+                          onChange={(ev) =>
+                            setForm({
+                              ...form,
+                              relatedEntryIds: ev.target.checked
+                                ? [...form.relatedEntryIds, e._id]
+                                : form.relatedEntryIds.filter((id) => id !== e._id),
+                            })
+                          }
+                          className="accent-blue-500"
+                        />
+                        <span className="capitalize text-gray-500">{e.type}</span>
+                        {e.name}
+                      </label>
+                    ))}
+                  {entries?.filter((e) => e.universeId === form.universeId && e._id !== editId)
+                    .length === 0 && (
+                    <p className="text-gray-500 text-sm font-text px-2 py-1">
+                      Bu evrende başka girdi yok.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
             {token && (
               <ImageUpload
                 sessionToken={token}

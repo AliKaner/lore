@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { CleanTextarea } from "@/components/CleanTextarea";
+import { ContentEditor } from "@/components/ContentEditor";
 
 type Mode = "list" | "create" | "edit";
 
@@ -17,11 +17,6 @@ interface FormData {
 }
 
 const EMPTY: FormData = { bookId: "", title: "", contentTr: "", contentEn: "", order: "1" };
-
-const getWordCount = (text: string) => {
-  if (!text) return 0;
-  return text.trim().split(/\s+/).filter((word) => word.length > 0).length;
-};
 
 export default function AdminChapters() {
   const { token } = useAdminAuth();
@@ -215,32 +210,27 @@ export default function AdminChapters() {
                   <button type="button" onClick={() => setContentLang("tr")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "tr" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>Türkçe</button>
                   <button type="button" onClick={() => setContentLang("en")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "en" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>English</button>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-sm text-gray-400 font-text">
-                    {contentLang === "tr" 
-                      ? `${getWordCount(form.contentTr)} kelime (~${Math.ceil(getWordCount(form.contentTr) / 250)} sayfa)` 
-                      : `${getWordCount(form.contentEn)} words (~${Math.ceil(getWordCount(form.contentEn) / 250)} pages)`}
-                  </div>
-                  {form.bookId && (
-                    <button type="button" onClick={() => setShowCharModal(true)} className="px-3 py-1 bg-green-600/30 border border-green-500/30 rounded text-green-300 hover:bg-green-600/50 transition-colors text-sm font-text">
-                      + Hızlı Karakter
-                    </button>
-                  )}
-                </div>
+                {form.bookId && (
+                  <button type="button" onClick={() => setShowCharModal(true)} className="px-3 py-1 bg-green-600/30 border border-green-500/30 rounded text-green-300 hover:bg-green-600/50 transition-colors text-sm font-text">
+                    + Hızlı Karakter
+                  </button>
+                )}
               </div>
               {contentLang === "tr" ? (
-                <CleanTextarea
+                <ContentEditor
                   value={form.contentTr}
                   onChange={(v) => setForm({ ...form, contentTr: v })}
                   rows={24}
                   placeholder="Türkçe içerik..."
+                  storageKey={mode === "create" ? "draft_admin_chapter_tr" : undefined}
                 />
               ) : (
-                <CleanTextarea
+                <ContentEditor
                   value={form.contentEn}
                   onChange={(v) => setForm({ ...form, contentEn: v })}
                   rows={24}
                   placeholder="English content..."
+                  storageKey={mode === "create" ? "draft_admin_chapter_en" : undefined}
                 />
               )}
             </div>

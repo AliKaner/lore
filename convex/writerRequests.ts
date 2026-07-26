@@ -1,8 +1,19 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { generateWriterPassword, hashPassword } from "./writerAuthLib";
 
 // Simple email regex validation
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function verifySession(ctx: { db: any }, token: string) {
+  const session = await ctx.db
+    .query("sessions")
+    .withIndex("by_token", (q: any) => q.eq("token", token))
+    .first();
+  if (!session || session.expiresAt < Date.now()) {
+    throw new Error("Unauthorized");
+  }
+}
 
 export const list = query({
   args: {
@@ -64,6 +75,30 @@ export const create = mutation({
       email,
       message,
       createdAt: Date.now(),
+      status: "pending",
     });
+  },
+});
+
+export const approve = mutation({
+  args: { id: v.id("writerRequests"), sessionToken: v.string() },
+  handler: async (ctx, args) => {
+    await verifySession(ctx, args.sessionToken);
+    const request = await ctx.db.get(args.id);
+    if (!request) throw new Error("Request not found");
+
+    const password = generateWriterPassword();
+    const passwordHash = await hashPassword(password);
+    await ctx.db.patch(args.id, { status: "approved", passwordHash });
+
+    return { password };
+  },
+});
+
+export const reject = mutation({
+  args: { id: v.id("writerRequests"), sessionToken: v.string() },
+  handler: async (ctx, args) => {
+    await verifySession(ctx, args.sessionToken);
+    await ctx.db.patch(args.id, { status: "rejected" });
   },
 });

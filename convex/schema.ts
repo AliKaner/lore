@@ -35,9 +35,12 @@ export default defineSchema({
     order: v.optional(v.number()),
     views: v.optional(v.number()),
     likeCount: v.optional(v.number()),
+    status: v.optional(v.union(v.literal("pending"), v.literal("published"))),
+    submittedByWriterId: v.optional(v.id("writerRequests")),
   })
     .index("by_universe", ["universeId"])
-    .index("by_category", ["categoryId"]),
+    .index("by_category", ["categoryId"])
+    .index("by_submittedByWriter", ["submittedByWriterId"]),
 
   books: defineTable({
     universeId: v.id("universes"),
@@ -55,12 +58,29 @@ export default defineSchema({
     order: v.number(),
     views: v.optional(v.number()),
     likeCount: v.optional(v.number()),
-  }).index("by_book", ["bookId"]),
+    status: v.optional(v.union(v.literal("pending"), v.literal("published"))),
+    submittedByWriterId: v.optional(v.id("writerRequests")),
+  })
+    .index("by_book", ["bookId"])
+    .index("by_submittedByWriter", ["submittedByWriterId"]),
 
   sessions: defineTable({
     token: v.string(),
     expiresAt: v.number(),
   }).index("by_token", ["token"]),
+
+  writerSessions: defineTable({
+    token: v.string(),
+    writerRequestId: v.id("writerRequests"),
+    expiresAt: v.number(),
+  }).index("by_token", ["token"]),
+
+  bookNotes: defineTable({
+    bookId: v.id("books"),
+    authorKey: v.string(),
+    content: v.string(),
+    updatedAt: v.number(),
+  }).index("by_book_and_author", ["bookId", "authorKey"]),
 
   likes: defineTable({
     targetId: v.union(v.id("loreEntries"), v.id("chapters")),
@@ -81,6 +101,10 @@ export default defineSchema({
     email: v.string(),
     message: v.optional(v.string()),
     createdAt: v.number(),
+    status: v.optional(
+      v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"))
+    ),
+    passwordHash: v.optional(v.string()),
   }),
 
   boardGames: defineTable({

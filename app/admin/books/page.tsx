@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -197,6 +198,7 @@ export default function AdminBooks() {
                 {b.description && <p className="text-gray-500 text-sm font-text line-clamp-1">{b.description}</p>}
               </div>
               <div className="flex gap-2">
+                <Link href={`/admin/books/${b._id}/write`} className="px-3 py-1.5 bg-green-600/30 border border-green-500/30 rounded text-green-300 hover:bg-green-600/50 transition-colors text-sm font-text">📝 Stüdyoda Yaz</Link>
                 <button onClick={() => openEdit(b)} className="px-3 py-1.5 bg-blue-600/30 border border-blue-500/30 rounded text-blue-300 hover:bg-blue-600/50 transition-colors text-sm font-text">Edit</button>
                 <button onClick={() => handleDelete(b._id)} className="px-3 py-1.5 bg-red-600/30 border border-red-500/30 rounded text-red-300 hover:bg-red-600/50 transition-colors text-sm font-text">Delete</button>
               </div>

@@ -15,6 +15,8 @@ const SECTIONS = [
   { label: "Card Types", href: "/admin/card-types", icon: "🃏", query: "cardTypes" },
   { label: "Cards", href: "/admin/cards", icon: "🎴", query: "cards" },
   { label: "Writer Requests", href: "/admin/requests", icon: "✍️", query: "requests" },
+  { label: "Pending Submissions", href: "/admin/pending", icon: "🕓", query: "pending" },
+  { label: "Comments", href: "/admin/comments", icon: "💬", query: "comments" },
 ];
 
 export default function AdminDashboard() {
@@ -30,6 +32,14 @@ export default function AdminDashboard() {
     api.writerRequests.list,
     token ? { sessionToken: token } : "skip"
   );
+  const comments = useQuery(
+    api.comments.listAll,
+    token ? { sessionToken: token } : "skip"
+  );
+
+  const pendingCount =
+    (entries?.filter((e) => e.status === "pending").length ?? 0) +
+    (chapters?.filter((c) => c.status === "pending").length ?? 0);
 
   const counts: Record<string, number | undefined> = {
     universes: universes?.length,
@@ -39,6 +49,8 @@ export default function AdminDashboard() {
     chapters: chapters?.length,
     boardGames: boardGames?.length,
     requests: requests?.length,
+    pending: pendingCount,
+    comments: comments?.length,
   };
 
   return (

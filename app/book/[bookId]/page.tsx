@@ -1,124 +1,45 @@
-"use client";
-import React, { use } from "react";
-import Link from "next/link";
-import Header from "@/components/Header";
-import { useQuery } from "convex/react";
+import type { Metadata } from "next";
+import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { SITE_URL, DEFAULT_OG_IMAGE } from "@/app/constants/site";
+import BookClient from "./BookClient";
 
-export default function BookDetailPage({ params }: { params: Promise<{ bookId: string }> }) {
-  const { bookId: bookIdRaw } = use(params);
-  const bookId = bookIdRaw as Id<"books">;
-  const book = useQuery(api.books.getById, { id: bookId });
-  const chapters = useQuery(api.chapters.listByBook, { bookId });
+type Props = { params: Promise<{ bookId: string }> };
 
-  if (book === undefined || chapters === undefined) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <Header />
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-        </div>
-      </div>
-    );
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { bookId } = await params;
+  const book = await fetchQuery(api.books.getById, {
+    id: bookId as Id<"books">,
+  });
+
+  if (!book) {
+    return { title: "Book Not Found" };
   }
 
-  if (book === null) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <Header />
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="text-center text-white">
-            <h1 className="text-4xl font-bold mb-4 font-title">Book Not Found</h1>
-            <Link href="/" className="text-blue-400 hover:text-blue-300">Back to Home</Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const description =
+    book.description ?? "Discover the rich lore and stories that shape our universe";
+  const image = book.coverUrl ?? DEFAULT_OG_IMAGE;
 
-  const backHref = book.universe ? `/universe/${book.universeId}` : "/";
+  return {
+    title: book.title,
+    description,
+    alternates: { canonical: `${SITE_URL}/book/${bookId}` },
+    openGraph: {
+      title: book.title,
+      description,
+      url: `${SITE_URL}/book/${bookId}`,
+      images: [{ url: image }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: book.title,
+      description,
+      images: [image],
+    },
+  };
+}
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      <Header />
-      <div className="max-w-5xl mx-auto px-4 py-16">
-        <Link href={backHref} className="inline-flex items-center text-blue-400 hover:text-blue-300 mb-8 transition-colors">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {book.universe ? `Back to ${book.universe.name}` : "Back to Home"}
-        </Link>
-
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 mb-8">
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="flex-shrink-0">
-              <div className="w-48 h-64 bg-gray-700 rounded-lg overflow-hidden">
-                {book.coverUrl ? (
-                  <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-600 text-5xl">📚</div>
-                )}
-              </div>
-            </div>
-            <div className="flex-1 space-y-4">
-              <div>
-                <h1 className="text-4xl font-bold text-white font-title mb-2">{book.title}</h1>
-                {book.universe && <p className="text-gray-400 font-text mb-2">{book.universe.name}</p>}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-md text-sm text-amber-200/90 flex items-center gap-1.5 font-text">
-                    #️⃣ {(book as any).chapterCount ?? 0} Sayfa
-                  </span>
-                  <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-md text-sm text-amber-200/90 flex items-center gap-1.5 font-text">
-                    ⏱️ {(book as any).totalReadingTime ?? 0} dk okuma
-                  </span>
-                </div>
-                {book.description && <p className="text-gray-300 font-text text-lg">{book.description}</p>}
-              </div>
-
-              {chapters.length > 0 && (
-                <div className="flex flex-wrap gap-4">
-                  <Link href={`/book/${bookId}/${chapters[0]._id}`} className="px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all">
-                    Read First Chapter
-                  </Link>
-                  {chapters.length > 1 && (
-                    <Link href={`/book/${bookId}/${chapters[chapters.length - 1]._id}`} className="px-6 py-3 bg-transparent border border-white/50 rounded-lg text-white hover:bg-white/10 transition-all">
-                      Read Last Chapter
-                    </Link>
-                  )}
-                  <Link href={`/book/${bookId}/pdf`} className="px-6 py-3 bg-red-600/20 border border-red-500/30 text-red-300 rounded-lg hover:bg-red-600/30 hover:border-red-500/50 hover:text-white transition-all flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    PDF / Kitap Olarak Kaydet
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8">
-          <h2 className="text-2xl font-bold text-white mb-6 font-title">Chapters</h2>
-          {chapters.length === 0 ? (
-            <p className="text-gray-500 font-text">No chapters yet.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {chapters.map((chapter, index) => (
-                <Link key={chapter._id} href={`/book/${bookId}/${chapter._id}`} className="group bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 hover:border-white/20 transition-all">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-400 font-text">Chapter {index + 1}</span>
-                    <svg className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-white group-hover:text-blue-300 transition-colors font-title">{chapter.title}</h3>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+export default function BookDetailPage({ params }: Props) {
+  return <BookClient params={params} />;
 }

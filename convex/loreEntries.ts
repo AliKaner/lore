@@ -32,8 +32,9 @@ export const listByUniverse = query({
       .query("loreEntries")
       .withIndex("by_universe", (q) => q.eq("universeId", args.universeId))
       .collect();
+    const published = entries.filter((e) => e.status !== "pending");
     return Promise.all(
-      entries.map(async (e) => ({
+      published.map(async (e) => ({
         ...e,
         imageUrl: e.imageStorageId
           ? await ctx.storage.getUrl(e.imageStorageId)
@@ -50,8 +51,9 @@ export const listByCategory = query({
       .query("loreEntries")
       .withIndex("by_category", (q) => q.eq("categoryId", args.categoryId))
       .collect();
+    const published = entries.filter((e) => e.status !== "pending");
     return Promise.all(
-      entries.map(async (e) => ({
+      published.map(async (e) => ({
         ...e,
         imageUrl: e.imageStorageId
           ? await ctx.storage.getUrl(e.imageStorageId)
@@ -154,6 +156,7 @@ export const update = mutation({
     contentEn: v.optional(v.string()),
     relatedEntryIds: v.optional(v.array(v.id("loreEntries"))),
     order: v.optional(v.number()),
+    status: v.optional(v.union(v.literal("pending"), v.literal("published"))),
     sessionToken: v.string(),
   },
   handler: async (ctx, args) => {

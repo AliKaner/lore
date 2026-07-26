@@ -1,5 +1,6 @@
 import React from "react";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 export default function FAQ() {
   const faqs = [
@@ -72,6 +73,7 @@ export default function FAQ() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

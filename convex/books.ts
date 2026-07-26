@@ -12,11 +12,12 @@ async function verifySession(ctx: { db: any }, token: string) {
 }
 
 async function getBookStats(ctx: { db: any }, bookId: any) {
-  const chapters = await ctx.db
+  const allChapters = await ctx.db
     .query("chapters")
     .withIndex("by_book", (q: any) => q.eq("bookId", bookId))
     .collect();
-  
+  const chapters = allChapters.filter((c: any) => c.status !== "pending");
+
   let totalWords = 0;
   for (const ch of chapters) {
     const text = ch.contentTr || ch.contentEn || "";

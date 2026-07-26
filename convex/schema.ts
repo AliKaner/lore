@@ -78,8 +78,15 @@ export default defineSchema({
   bookNotes: defineTable({
     bookId: v.id("books"),
     authorKey: v.string(),
+    type: v.union(
+      v.literal("fikir"),
+      v.literal("hatirlatma"),
+      v.literal("karakter"),
+      v.literal("tutarsizlik"),
+      v.literal("genel")
+    ),
     content: v.string(),
-    updatedAt: v.number(),
+    createdAt: v.number(),
   }).index("by_book_and_author", ["bookId", "authorKey"]),
 
   likes: defineTable({

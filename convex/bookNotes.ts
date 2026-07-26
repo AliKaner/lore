@@ -1,6 +1,14 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+const NOTE_TYPE = v.union(
+  v.literal("fikir"),
+  v.literal("hatirlatma"),
+  v.literal("karakter"),
+  v.literal("tutarsizlik"),
+  v.literal("genel")
+);
+
 async function resolveAuthorKey(
   ctx: { db: any },
   args: { sessionToken?: string; writerToken?: string }
@@ -30,7 +38,7 @@ async function resolveAuthorKey(
   throw new Error("Unauthorized");
 }
 
-export const get = query({
+export const list = query({
   args: {
     bookId: v.id("books"),
     sessionToken: v.optional(v.string()),
@@ -38,40 +46,50 @@ export const get = query({
   },
   handler: async (ctx, args) => {
     const authorKey = await resolveAuthorKey(ctx, args);
-    const note = await ctx.db
+    const notes = await ctx.db
       .query("bookNotes")
       .withIndex("by_book_and_author", (q: any) =>
         q.eq("bookId", args.bookId).eq("authorKey", authorKey)
       )
-      .first();
-    return note?.content ?? "";
+      .collect();
+    return notes.sort((a: any, b: any) => b.createdAt - a.createdAt);
   },
 });
 
-export const save = mutation({
+export const add = mutation({
   args: {
     bookId: v.id("books"),
+    type: NOTE_TYPE,
     content: v.string(),
     sessionToken: v.optional(v.string()),
     writerToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const authorKey = await resolveAuthorKey(ctx, args);
-    const existing = await ctx.db
-      .query("bookNotes")
-      .withIndex("by_book_and_author", (q: any) =>
-        q.eq("bookId", args.bookId).eq("authorKey", authorKey)
-      )
-      .first();
-    if (existing) {
-      await ctx.db.patch(existing._id, { content: args.content, updatedAt: Date.now() });
-    } else {
-      await ctx.db.insert("bookNotes", {
-        bookId: args.bookId,
-        authorKey,
-        content: args.content,
-        updatedAt: Date.now(),
-      });
+    const content = args.content.trim();
+    if (!content) throw new Error("Not boş olamaz.");
+    return ctx.db.insert("bookNotes", {
+      bookId: args.bookId,
+      authorKey,
+      type: args.type,
+      content,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const remove = mutation({
+  args: {
+    id: v.id("bookNotes"),
+    sessionToken: v.optional(v.string()),
+    writerToken: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const authorKey = await resolveAuthorKey(ctx, args);
+    const note = await ctx.db.get(args.id);
+    if (!note || note.authorKey !== authorKey) {
+      throw new Error("Unauthorized");
     }
+    await ctx.db.delete(args.id);
   },
 });

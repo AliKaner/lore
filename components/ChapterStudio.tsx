@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { ContentEditor } from "./ContentEditor";
+import { ImageUpload } from "./ImageUpload";
 
 type StudioAuth =
   | { kind: "admin"; sessionToken: string }
@@ -52,11 +53,19 @@ const NOTE_TYPES: { value: NoteType; label: string; dot: string }[] = [
 
 type StudioTab =
   | { kind: "editor" }
+  | { kind: "newLore" }
   | { kind: "chapter"; id: Id<"chapters">; title: string }
   | { kind: "lore"; id: Id<"loreEntries">; title: string };
 
 function tabKey(tab: StudioTab): string {
-  return tab.kind === "editor" ? "editor" : `${tab.kind}:${tab.id}`;
+  return tab.kind === "chapter" || tab.kind === "lore" ? `${tab.kind}:${tab.id}` : tab.kind;
+}
+
+interface EntryLite {
+  _id: string;
+  name: string;
+  type: LoreType;
+  imageUrl: string | null;
 }
 
 function LangToggle({
@@ -174,11 +183,171 @@ function LorePreviewTab({ entryId }: { entryId: Id<"loreEntries"> }) {
   );
 }
 
+function NewLoreEntryTab({
+  bookId,
+  universeId,
+  auth,
+  categories,
+  defaultType,
+  onCreated,
+}: {
+  bookId: Id<"books">;
+  universeId: Id<"universes">;
+  auth: StudioAuth;
+  categories: { _id: Id<"categories">; name: string }[];
+  defaultType: LoreType;
+  onCreated: (entry: EntryLite) => void;
+}) {
+  const createEntryAdmin = useMutation(api.loreEntries.create);
+  const createEntryWriter = useMutation(api.writerContent.createLoreEntry);
+
+  const [categoryId, setCategoryId] = useState("");
+  const [name, setName] = useState("");
+  const [type, setType] = useState<LoreType>(defaultType);
+  const [contentTr, setContentTr] = useState("");
+  const [contentEn, setContentEn] = useState("");
+  const [contentLang, setContentLang] = useState<"tr" | "en">("tr");
+  const [imageStorageId, setImageStorageId] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!categoryId || !name.trim()) {
+      setError("Kategori ve isim gerekli.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const base = {
+        universeId,
+        categoryId: categoryId as Id<"categories">,
+        name: name.trim(),
+        type,
+        contentTr,
+        contentEn,
+        imageStorageId: imageStorageId ? (imageStorageId as Id<"_storage">) : undefined,
+      };
+      const newId =
+        auth.kind === "admin"
+          ? await createEntryAdmin({ ...base, sessionToken: auth.sessionToken })
+          : await createEntryWriter({ ...base, writerToken: auth.writerToken });
+
+      onCreated({ _id: newId, name: name.trim(), type, imageUrl: null });
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err.message || "Bir hata oluştu");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-16 space-y-4">
+        <p className="text-4xl">✅</p>
+        <p className="text-white font-title text-xl">"{name}" eklendi.</p>
+        <button
+          type="button"
+          onClick={() => {
+            setSuccess(false);
+            setName("");
+            setContentTr("");
+            setContentEn("");
+            setImageStorageId("");
+          }}
+          className="px-5 py-2 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-colors font-text"
+        >
+          Başka Bir Tane Daha Ekle
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-4">
+      <h2 className="text-2xl font-title font-bold text-white">Yeni Lore Girdisi</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-gray-300 mb-1 font-text">Kategori *</label>
+          <select
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+          >
+            <option value="">Kategori seçin</option>
+            {categories.map((c) => (
+              <option key={c._id} value={c._id} className="bg-gray-900">{c.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm text-gray-300 mb-1 font-text">Tür *</label>
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as LoreType)}
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+          >
+            {(Object.keys(TYPE_LABEL) as LoreType[]).map((t) => (
+              <option key={t} value={t} className="bg-gray-900">{TYPE_LABEL[t]}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm text-gray-300 mb-1 font-text">İsim *</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+        />
+      </div>
+      <LangToggle lang={contentLang} onChange={setContentLang} />
+      {contentLang === "tr" ? (
+        <ContentEditor
+          value={contentTr}
+          onChange={setContentTr}
+          rows={10}
+          placeholder="Türkçe içerik..."
+          storageKey={`draft_studio_${bookId}_newlore_tr`}
+        />
+      ) : (
+        <ContentEditor
+          value={contentEn}
+          onChange={setContentEn}
+          rows={10}
+          placeholder="English content..."
+          storageKey={`draft_studio_${bookId}_newlore_en`}
+        />
+      )}
+      {auth.kind === "admin" ? (
+        <ImageUpload sessionToken={auth.sessionToken} onUpload={setImageStorageId} label="Görsel (opsiyonel)" />
+      ) : (
+        <ImageUpload writerToken={auth.writerToken} onUpload={setImageStorageId} label="Görsel (opsiyonel)" />
+      )}
+      {error && <p className="text-red-400 text-sm font-text">{error}</p>}
+      <button
+        onClick={handleSubmit}
+        disabled={saving}
+        className="w-full px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-50 font-text"
+      >
+        {saving ? "Ekleniyor..." : "Ekle"}
+      </button>
+    </div>
+  );
+}
+
 export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
   const book = useQuery(api.books.getById, { id: bookId });
   const existingChapters = useQuery(api.chapters.listByBook, { bookId });
   const universeEntries = useQuery(
     api.loreEntries.listByUniverse,
+    book ? { universeId: book.universeId } : "skip"
+  );
+  const categories = useQuery(
+    api.categories.listByUniverse,
     book ? { universeId: book.universeId } : "skip"
   );
 
@@ -201,6 +370,7 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
   const [error, setError] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
   const [sessionChapters, setSessionChapters] = useState<SessionChapter[]>([]);
+  const [sessionEntries, setSessionEntries] = useState<EntryLite[]>([]);
 
   const [openTabs, setOpenTabs] = useState<StudioTab[]>([{ kind: "editor" }]);
   const [activeKey, setActiveKey] = useState("editor");
@@ -236,7 +406,19 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
       ? Math.max(...allPreviousChapters.map((c) => c.order)) + 1
       : 0;
 
-  const filteredEntries = (universeEntries ?? []).filter((e) => {
+  const allEntries: EntryLite[] = [
+    ...(universeEntries ?? []).map((e) => ({
+      _id: e._id,
+      name: e.name,
+      type: e.type as LoreType,
+      imageUrl: e.imageUrl,
+    })),
+    ...sessionEntries.filter(
+      (se) => !(universeEntries ?? []).some((e) => e._id === se._id)
+    ),
+  ];
+
+  const filteredEntries = allEntries.filter((e) => {
     const typeMatch = entryTypeFilter === "all" || e.type === entryTypeFilter;
     const searchMatch =
       !entrySearch.trim() ||
@@ -355,9 +537,18 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[260px_1fr_280px]">
         {/* Left: Lore entries */}
         <div className="hidden lg:flex flex-col border-r border-white/10 overflow-y-auto p-4">
-          <h2 className="text-sm font-bold text-gray-300 font-title uppercase mb-3">
-            Lore Girdileri
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-gray-300 font-title uppercase">
+              Lore Girdileri
+            </h2>
+            <button
+              type="button"
+              onClick={() => openTab({ kind: "newLore" })}
+              className="text-xs px-2 py-1 bg-white/10 border border-white/20 rounded text-white hover:bg-white/20 transition-colors font-text flex-shrink-0"
+            >
+              + Ekle
+            </button>
+          </div>
           <input
             type="text"
             value={entrySearch}
@@ -386,12 +577,13 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
           ) : (
             <div className="space-y-1">
               {filteredEntries.map((e) => {
-                const key = tabKey({ kind: "lore", id: e._id, title: e.name });
+                const entryId = e._id as Id<"loreEntries">;
+                const key = tabKey({ kind: "lore", id: entryId, title: e.name });
                 return (
                   <button
                     key={e._id}
                     type="button"
-                    onClick={() => openTab({ kind: "lore", id: e._id, title: e.name })}
+                    onClick={() => openTab({ kind: "lore", id: entryId, title: e.name })}
                     className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm font-text text-left transition-colors ${
                       activeKey === key
                         ? "bg-white/20 text-white"
@@ -418,7 +610,12 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
           <div className="flex items-center gap-1 border-b border-white/10 px-2 pt-2 overflow-x-auto flex-shrink-0">
             {openTabs.map((tab) => {
               const key = tabKey(tab);
-              const label = tab.kind === "editor" ? "✍️ Yazma" : tab.title;
+              const label =
+                tab.kind === "editor"
+                  ? "✍️ Yazma"
+                  : tab.kind === "newLore"
+                  ? "+ Yeni Girdi"
+                  : tab.title;
               return (
                 <div
                   key={key}
@@ -495,6 +692,15 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
               <ChapterPreviewTab chapterId={activeTab.id} />
             ) : activeTab?.kind === "lore" ? (
               <LorePreviewTab entryId={activeTab.id} />
+            ) : activeTab?.kind === "newLore" ? (
+              <NewLoreEntryTab
+                bookId={bookId}
+                universeId={book.universeId}
+                auth={auth}
+                categories={categories ?? []}
+                defaultType={entryTypeFilter === "all" ? "character" : entryTypeFilter}
+                onCreated={(entry) => setSessionEntries((prev) => [...prev, entry])}
+              />
             ) : null}
           </div>
         </div>

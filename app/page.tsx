@@ -6,8 +6,10 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useLocale } from "@/hooks/useLocale";
 
 export default function Home() {
+  const { t } = useLocale();
   const universes = useQuery(api.universes.list);
 
   return (
@@ -29,18 +31,18 @@ export default function Home() {
         <main className="max-w-7xl mx-auto px-4 py-16 flex-1 w-full">
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent font-title">
-              Choose Your Universe
+              {t("home.title")}
             </h1>
             <p className="text-xl md:text-2xl text-gray-200 font-text">
-              Discover the rich lore and stories that shape our universes
+              {t("home.subtitle")}
             </p>
           </div>
 
           {universes !== undefined && universes.length === 0 && (
             <div className="text-center text-gray-400 font-text py-16">
-              <p className="text-lg">Henüz hiç evren eklenmedi.</p>
+              <p className="text-lg">{t("home.emptyTitle")}</p>
               <p className="text-sm mt-1 text-gray-500">
-                Yakında burada keşfedebileceğin evrenler olacak.
+                {t("home.emptySubtitle")}
               </p>
             </div>
           )}
@@ -96,13 +98,13 @@ export default function Home() {
                       )}
                       <div className="px-4 pb-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-gray-400 font-text">
                         <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
-                          📚 {(universe as any).counts?.books ?? 0} Kitap
+                          📚 {(universe as any).counts?.books ?? 0} {t("home.books")}
                         </span>
                         <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
-                          🗂️ {(universe as any).counts?.categories ?? 0} Kategori
+                          🗂️ {(universe as any).counts?.categories ?? 0} {t("home.categories")}
                         </span>
                         <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
-                          ✨ {(universe as any).counts?.entries ?? 0} Lore Girdisi
+                          ✨ {(universe as any).counts?.entries ?? 0} {t("home.entries")}
                         </span>
                       </div>
                     </div>

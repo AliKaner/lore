@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useLocale } from "@/hooks/useLocale";
 
 type WriterRequestModalProps = {
   isOpen: boolean;
@@ -10,6 +11,7 @@ type WriterRequestModalProps = {
 };
 
 export default function WriterRequestModal({ isOpen, onClose }: WriterRequestModalProps) {
+  const { t } = useLocale();
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -40,11 +42,11 @@ export default function WriterRequestModal({ isOpen, onClose }: WriterRequestMod
     setSuccess(false);
 
     if (!name.trim() || name.trim().length < 2) {
-      setError("Lütfen geçerli bir isim girin (en az 2 karakter).");
+      setError(t("writerModal.errNameLength"));
       return;
     }
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Lütfen geçerli bir e-posta adresi girin.");
+      setError(t("writerModal.errEmail"));
       return;
     }
 
@@ -68,9 +70,9 @@ export default function WriterRequestModal({ isOpen, onClose }: WriterRequestMod
     } catch (err: any) {
       const errMsg = err.message || "";
       if (errMsg.includes("bekleyin")) {
-        setError("Çok hızlı başvuru gönderiyorsunuz! Lütfen 2 dakika bekleyin.");
+        setError(t("writerModal.errCooldown"));
       } else {
-        setError(errMsg.replace("ConvexError: ", "") || "Başvuru gönderilirken bir hata oluştu.");
+        setError(errMsg.replace("ConvexError: ", "") || t("writerModal.errGeneric"));
       }
     } finally {
       setSubmitting(false);
@@ -110,27 +112,27 @@ export default function WriterRequestModal({ isOpen, onClose }: WriterRequestMod
                 <line x1="16" y1="8" x2="2" y2="22" />
                 <line x1="17.5" y1="15" x2="9" y2="15" />
               </svg>
-              Lore Yazarı Ol
+              {t("writerModal.title")}
             </h2>
             <div className="relative flex items-center justify-center my-3">
               <div className="w-full border-t border-amber-900/20"></div>
               <span className="absolute px-3 bg-[#f5ebd0] text-amber-900/70 text-xs">✦ ⚜ ✦</span>
             </div>
             <p className="text-amber-900/80 text-sm font-text">
-              Evrenlerimize yeni hikayeler, karakterler ve efsaneler eklemek için başvuruda bulunun. Kadim yazıcıların arasına katılın.
+              {t("writerModal.subtitle")}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-amber-900 font-title tracking-wide uppercase mb-1">
-                İsim
+                {t("writerModal.name")}
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Adınız ve soyadınız"
+                placeholder={t("writerModal.namePlaceholder")}
                 className="w-full bg-[#ebdcae]/25 border border-amber-900/30 rounded-lg px-4 py-2.5 text-amber-950 font-text placeholder-amber-900/40 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/20 focus:shadow-[0_0_8px_rgba(120,53,4,0.15)] transition-all duration-300"
                 disabled={submitting || success}
               />
@@ -138,13 +140,13 @@ export default function WriterRequestModal({ isOpen, onClose }: WriterRequestMod
 
             <div>
               <label className="block text-xs font-semibold text-amber-900 font-title tracking-wide uppercase mb-1">
-                E-posta
+                {t("writerModal.email")}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ornek@mail.com"
+                placeholder={t("writerModal.emailPlaceholder")}
                 className="w-full bg-[#ebdcae]/25 border border-amber-900/30 rounded-lg px-4 py-2.5 text-amber-950 font-text placeholder-amber-900/40 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/20 focus:shadow-[0_0_8px_rgba(120,53,4,0.15)] transition-all duration-300"
                 disabled={submitting || success}
               />
@@ -152,13 +154,13 @@ export default function WriterRequestModal({ isOpen, onClose }: WriterRequestMod
 
             <div>
               <label className="block text-xs font-semibold text-amber-900 font-title tracking-wide uppercase mb-1">
-                Neden yazar olmak istiyorsunuz? (İsteğe bağlı)
+                {t("writerModal.reasonLabel")}
               </label>
               <textarea
                 rows={4}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Hangi evrenlerle ilgilisiniz? Yazarlık deneyiminizden bahsedin..."
+                placeholder={t("writerModal.reasonPlaceholder")}
                 className="w-full bg-[#ebdcae]/25 border border-amber-900/30 rounded-lg px-4 py-2.5 text-amber-950 font-text placeholder-amber-900/40 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/20 focus:shadow-[0_0_8px_rgba(120,53,4,0.15)] transition-all duration-300 resize-none"
                 disabled={submitting || success}
               />
@@ -172,7 +174,7 @@ export default function WriterRequestModal({ isOpen, onClose }: WriterRequestMod
 
             {success && (
               <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-green-950 text-sm font-text">
-                ✅ Başvurunuz başarıyla gönderildi! Pencere kapatılıyor...
+                ✅ {t("writerModal.successMsg")}
               </div>
             )}
 
@@ -183,7 +185,7 @@ export default function WriterRequestModal({ isOpen, onClose }: WriterRequestMod
                 className="px-5 py-2.5 bg-amber-900/10 hover:bg-amber-900/20 text-amber-950 border border-amber-900/20 font-semibold font-title rounded-lg transition-colors cursor-pointer text-xs tracking-wider"
                 disabled={submitting}
               >
-                İptal
+                {t("writerModal.cancel")}
               </button>
               <button
                 type="submit"
@@ -193,10 +195,10 @@ export default function WriterRequestModal({ isOpen, onClose }: WriterRequestMod
                 {submitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin mr-2" />
-                    Gönderiliyor...
+                    {t("writerModal.submitting")}
                   </>
                 ) : (
-                  "Başvuruyu Gönder"
+                  t("writerModal.submit")
                 )}
               </button>
             </div>

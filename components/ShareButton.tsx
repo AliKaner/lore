@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
+import { useLocale } from "@/hooks/useLocale";
 
 export default function ShareButton() {
+  const { t } = useLocale();
   const [copied, setCopied] = React.useState(false);
 
   async function handleCopy() {
@@ -36,7 +38,7 @@ export default function ShareButton() {
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
-          Copied!
+          {t("share.copied")}
         </>
       ) : (
         <>
@@ -53,7 +55,7 @@ export default function ShareButton() {
             <polyline points="16 6 12 2 8 6" />
             <line x1="12" y1="2" x2="12" y2="15" />
           </svg>
-          Share
+          {t("share.share")}
         </>
       )}
     </button>

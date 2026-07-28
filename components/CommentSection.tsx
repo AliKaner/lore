@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useLocale } from "@/hooks/useLocale";
 
 type CommentSectionProps = {
   targetId: Id<"loreEntries"> | Id<"chapters">;
@@ -16,6 +17,7 @@ export default function CommentSection({
   initialLikeCount,
   viewsCount,
 }: CommentSectionProps) {
+  const { t } = useLocale();
   const [clientId, setClientId] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -64,15 +66,15 @@ export default function CommentSection({
     setSuccess(false);
 
     if (!name.trim() || name.trim().length < 2) {
-      setError("Lütfen geçerli bir isim girin (en az 2 karakter).");
+      setError(t("comments.errNameLength"));
       return;
     }
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Lütfen geçerli bir e-posta adresi girin.");
+      setError(t("comments.errEmail"));
       return;
     }
     if (!content.trim() || content.trim().length < 3) {
-      setError("Lütfen bir yorum yazın (en az 3 karakter).");
+      setError(t("comments.errContentLength"));
       return;
     }
 
@@ -97,9 +99,9 @@ export default function CommentSection({
       // Capture Convex errors (like rate-limiting warnings)
       const errMsg = err.message || "";
       if (errMsg.includes("bekleyin")) {
-        setError("Çok hızlı yorum yazıyorsunuz! Lütfen 15 saniye bekleyin.");
+        setError(t("comments.errCooldown"));
       } else {
-        setError(errMsg.replace("ConvexError: ", "") || "Yorum gönderilirken bir hata oluştu.");
+        setError(errMsg.replace("ConvexError: ", "") || t("comments.errGeneric"));
       }
     } finally {
       setSubmitting(false);
@@ -135,42 +137,42 @@ export default function CommentSection({
               />
             </svg>
             <span className="text-xs">
-              {initialLikeCount} Beğeni
+              {t("comments.likes", { count: initialLikeCount })}
             </span>
           </button>
           <div className="text-gray-400 text-sm font-text">
-            👁️ <span className="text-white font-semibold">{viewsCount}</span> görüntülenme
+            👁️ <span className="text-white font-semibold">{viewsCount}</span> {t("comments.viewsLabel")}
           </div>
         </div>
       </div>
 
       {/* Yorum Yap Formu */}
       <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mb-8">
-        <h3 className="text-xl font-bold text-white font-title mb-4">Bir Yorum Bırak</h3>
+        <h3 className="text-xl font-bold text-white font-title mb-4">{t("comments.leaveComment")}</h3>
         <form onSubmit={handleCommentSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-400 font-text uppercase mb-1">
-                İsim
+                {t("comments.name")}
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Adınız ve soyadınız"
+                placeholder={t("comments.namePlaceholder")}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white font-text focus:outline-none focus:border-blue-500 transition-colors"
                 disabled={submitting}
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-400 font-text uppercase mb-1">
-                E-posta (Yayınlanmayacak)
+                {t("comments.email")}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ornek@mail.com"
+                placeholder={t("comments.emailPlaceholder")}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white font-text focus:outline-none focus:border-blue-500 transition-colors"
                 disabled={submitting}
               />
@@ -178,13 +180,13 @@ export default function CommentSection({
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-400 font-text uppercase mb-1">
-              Yorumunuz
+              {t("comments.yourComment")}
             </label>
             <textarea
               rows={4}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Düşüncelerinizi paylaşın..."
+              placeholder={t("comments.commentPlaceholder")}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white font-text focus:outline-none focus:border-blue-500 transition-colors resize-none"
               disabled={submitting}
             />
@@ -198,7 +200,7 @@ export default function CommentSection({
 
           {success && (
             <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3 text-green-200 text-sm font-text">
-              ✅ Yorumunuz başarıyla gönderildi!
+              ✅ {t("comments.successMsg")}
             </div>
           )}
 
@@ -210,7 +212,7 @@ export default function CommentSection({
             {submitting ? (
               <>
                 <div className="w-4 h-4 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin mr-2" />
-                Gönderiliyor...
+                {t("comments.submitting")}
               </>
             ) : (
               <>
@@ -219,7 +221,7 @@ export default function CommentSection({
                   <line x1="16" y1="8" x2="2" y2="22" />
                   <line x1="17.5" y1="15" x2="9" y2="15" />
                 </svg>
-                Yorum Gönder
+                {t("comments.submit")}
               </>
             )}
           </button>
@@ -229,7 +231,7 @@ export default function CommentSection({
       {/* Yorumlar Listesi */}
       <div className="space-y-4">
         <h3 className="text-xl font-bold text-white font-title mb-6">
-          Yorumlar ({comments?.length ?? 0})
+          {t("comments.title", { count: comments?.length ?? 0 })}
         </h3>
 
         {comments === undefined && (
@@ -240,7 +242,7 @@ export default function CommentSection({
 
         {comments !== undefined && comments.length === 0 && (
           <p className="text-gray-500 text-center font-text py-8 bg-white/5 rounded-xl border border-white/5">
-            Henüz yorum yapılmamış. İlk yorumu siz yapın!
+            {t("comments.empty")}
           </p>
         )}
 

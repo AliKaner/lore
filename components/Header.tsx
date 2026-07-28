@@ -4,17 +4,36 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import WriterRequestModal from "./WriterRequestModal";
+import { useLocale } from "@/hooks/useLocale";
 
 export default function Header() {
   const pathname = usePathname();
+  const { locale, setLocale, t } = useLocale();
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
   const navItems = [
-    { name: "Home", href: "/" },
-    { name: "FAQs", href: "/faq" },
-    { name: "Admin", href: "/admin" },
+    { name: t("nav.home"), href: "/" },
+    { name: t("nav.faqs"), href: "/faq" },
+    { name: t("nav.admin"), href: "/admin" },
   ];
+
+  const LocaleSwitcher = ({ className = "" }: { className?: string }) => (
+    <div className={`flex items-center bg-white/10 border border-white/20 rounded-md overflow-hidden text-xs font-title font-semibold ${className}`}>
+      <button
+        onClick={() => setLocale("tr")}
+        className={`px-2.5 py-1.5 transition-colors ${locale === "tr" ? "bg-white/30 text-white" : "text-white/60 hover:text-white"}`}
+      >
+        TR
+      </button>
+      <button
+        onClick={() => setLocale("en")}
+        className={`px-2.5 py-1.5 transition-colors ${locale === "en" ? "bg-white/30 text-white" : "text-white/60 hover:text-white"}`}
+      >
+        EN
+      </button>
+    </div>
+  );
 
   return (
     <>
@@ -38,7 +57,7 @@ export default function Header() {
           <nav className="hidden md:flex items-center space-x-2">
             {navItems.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 font-title ${
                   pathname === item.href
@@ -49,6 +68,7 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
+            <LocaleSwitcher className="ml-2" />
             <button
               onClick={() => setModalOpen(true)}
               className="ml-2 px-5 py-2.5 bg-gradient-to-r from-blue-950 via-blue-900 to-blue-950 border-4 border-double border-amber-600/70 hover:border-amber-500 hover:shadow-[0_0_15px_rgba(245,158,11,0.35)] text-amber-200 hover:text-amber-100 text-xs font-semibold tracking-wider font-title cursor-pointer flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95"
@@ -58,26 +78,29 @@ export default function Header() {
                 <line x1="16" y1="8" x2="2" y2="22" />
                 <line x1="17.5" y1="15" x2="9" y2="15" />
               </svg>
-              Lore Yazarı Ol
+              {t("header.becomeWriter")}
             </button>
           </nav>
 
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden text-white p-2"
-            aria-label="Menu"
-          >
-            {menuOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
+          {/* Mobile: locale switcher + hamburger */}
+          <div className="md:hidden flex items-center gap-2">
+            <LocaleSwitcher />
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="text-white p-2"
+              aria-label="Menu"
+            >
+              {menuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -87,7 +110,7 @@ export default function Header() {
           <div className="px-4 py-3 space-y-1">
             {navItems.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
                 className={`block px-4 py-3 rounded-md text-sm font-medium transition-colors font-title ${
@@ -111,7 +134,7 @@ export default function Header() {
                 <line x1="16" y1="8" x2="2" y2="22" />
                 <line x1="17.5" y1="15" />
               </svg>
-              Lore Yazarı Ol
+              {t("header.becomeWriter")}
             </button>
           </div>
         </div>
@@ -122,4 +145,3 @@ export default function Header() {
   </>
 );
 }
-

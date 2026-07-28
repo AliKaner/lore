@@ -9,10 +9,20 @@ import CommentSection from "@/components/CommentSection";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useLocale } from "@/hooks/useLocale";
+
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  character: "universe.typeCharacter",
+  city: "universe.typeCity",
+  item: "universe.typeItem",
+  story: "universe.typeStory",
+  other: "universe.typeOther",
+};
 
 export default function LoreDetailClient({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const entryId = id as Id<"loreEntries">;
+  const { t } = useLocale();
   const entry = useQuery(api.loreEntries.getById, { id: entryId });
   const incrementViews = useMutation(api.loreEntries.incrementViews);
 
@@ -41,9 +51,9 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
         <Header />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="text-center text-white">
-            <h1 className="text-4xl font-bold mb-4 font-title">Lore Not Found</h1>
+            <h1 className="text-4xl font-bold mb-4 font-title">{t("lore.notFound")}</h1>
             <Link href="/" className="px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all">
-              Back to Home
+              {t("lore.backHome")}
             </Link>
           </div>
         </div>
@@ -61,12 +71,12 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {entry.universe ? `Back to ${entry.universe.name}` : "Back to Home"}
+          {entry.universe ? t("lore.backToUniverse", { name: entry.universe.name }) : t("lore.backHome")}
         </Link>
 
         {entry.status === "pending" && (
           <div className="mb-8 px-4 py-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-sm font-text">
-            📝 Taslak — bu içerik henüz admin onayı bekliyor, sadece bu linke sahip olanlar görebilir.
+            {t("lore.pendingBanner")}
           </div>
         )}
 
@@ -74,11 +84,11 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
           <div className="space-y-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="px-3 py-1 bg-white/20 text-white text-sm rounded-full capitalize font-text">{entry.type}</span>
+                <span className="px-3 py-1 bg-white/20 text-white text-sm rounded-full font-text">{t(TYPE_LABEL_KEYS[entry.type])}</span>
                 {entry.category && <span className="text-gray-400 font-text text-sm">{entry.category.name}</span>}
               </div>
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 font-title">{entry.name}</h1>
-              {entry.universe && <p className="text-gray-400 font-text">Universe: {entry.universe.name}</p>}
+              {entry.universe && <p className="text-gray-400 font-text">{t("lore.universeLabel", { name: entry.universe.name })}</p>}
             </div>
 
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-8">
@@ -87,14 +97,14 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
 
             {entry.relatedEntries && entry.relatedEntries.length > 0 && (
               <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-white mb-4 font-title">Related Entries</h3>
+                <h3 className="text-lg font-bold text-white mb-4 font-title">{t("lore.relatedEntries")}</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {entry.relatedEntries.map((rel: any) => (
                     <Link key={rel._id} href={`/lore/${rel._id}`} className="flex items-center gap-2 bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-colors">
                       {rel.imageUrl && <img src={rel.imageUrl} alt={rel.name} className="w-10 h-10 rounded object-cover flex-shrink-0" />}
                       <div>
                         <p className="text-white text-sm font-semibold font-title">{rel.name}</p>
-                        <p className="text-gray-400 text-xs capitalize font-text">{rel.type}</p>
+                        <p className="text-gray-400 text-xs font-text">{t(TYPE_LABEL_KEYS[rel.type])}</p>
                       </div>
                     </Link>
                   ))}
@@ -129,7 +139,7 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
 
         <div className="flex justify-between mt-12">
           <Link href={backHref} className="px-6 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all">
-            Back
+            {t("lore.back")}
           </Link>
           <ShareButton />
         </div>

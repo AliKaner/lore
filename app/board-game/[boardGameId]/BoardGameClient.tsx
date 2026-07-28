@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useLocale } from "@/hooks/useLocale";
 
 export default function BoardGameClient({
   params,
@@ -14,6 +15,7 @@ export default function BoardGameClient({
 }) {
   const { boardGameId: rawId } = use(params);
   const boardGameId = rawId as Id<"boardGames">;
+  const { t } = useLocale();
 
   const [activeTab, setActiveTab] = useState<"rules" | "cards">("cards");
   const [selectedTypeId, setSelectedTypeId] = useState<string>("all");
@@ -42,8 +44,8 @@ export default function BoardGameClient({
         <Header />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="text-center text-white">
-            <h1 className="text-4xl font-bold mb-4 font-title">Game Not Found</h1>
-            <Link href="/" className="text-blue-400 hover:text-blue-300">Back to Home</Link>
+            <h1 className="text-4xl font-bold mb-4 font-title">{t("boardgame.notFound")}</h1>
+            <Link href="/" className="text-blue-400 hover:text-blue-300">{t("boardgame.backHome")}</Link>
           </div>
         </div>
       </div>
@@ -70,8 +72,8 @@ export default function BoardGameClient({
             <div className="flex items-center justify-center gap-4 mt-3">
               <span className="bg-white/20 backdrop-blur border border-white/30 px-3 py-1 rounded-full text-sm text-white font-text">
                 {game.minPlayers === game.maxPlayers
-                  ? `${game.minPlayers} oyuncu`
-                  : `${game.minPlayers}–${game.maxPlayers} oyuncu`}
+                  ? t("boardgame.playersOne", { min: game.minPlayers })
+                  : t("boardgame.playersRange", { min: game.minPlayers, max: game.maxPlayers })}
               </span>
               {game.universe && (
                 <Link
@@ -102,7 +104,7 @@ export default function BoardGameClient({
                   : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              {tab === "cards" ? "Kartlar" : "Kurallar"}
+              {tab === "cards" ? t("boardgame.tabCards") : t("boardgame.tabRules")}
             </button>
           ))}
         </div>
@@ -120,7 +122,7 @@ export default function BoardGameClient({
                     : "bg-white/10 text-gray-300 border border-white/20 hover:bg-white/20"
                 }`}
               >
-                Tüm Kartlar
+                {t("boardgame.allCards")}
               </button>
               {cardTypes?.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((type) => (
                 <button
@@ -133,14 +135,14 @@ export default function BoardGameClient({
                   }`}
                 >
                   <span className="block font-semibold">{type.name}</span>
-                  <span className="block text-xs text-gray-400">{type.levelCount} seviye</span>
+                  <span className="block text-xs text-gray-400">{t("boardgame.levelsCount", { count: type.levelCount })}</span>
                 </button>
               ))}
 
               {/* Level filter (only when a type is selected) */}
               {selectedType && levelOptions.length > 0 && (
                 <div className="pt-3 border-t border-white/10 space-y-1">
-                  <p className="text-xs text-gray-500 px-1 font-text mb-1">Seviye</p>
+                  <p className="text-xs text-gray-500 px-1 font-text mb-1">{t("boardgame.levelWord")}</p>
                   <button
                     onClick={() => setSelectedLevel("all")}
                     className={`w-full text-left px-3 py-1.5 rounded text-xs font-text transition-colors ${
@@ -149,7 +151,7 @@ export default function BoardGameClient({
                         : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
                     }`}
                   >
-                    Tümü
+                    {t("boardgame.all")}
                   </button>
                   {levelOptions.map((lvl) => (
                     <button
@@ -161,7 +163,7 @@ export default function BoardGameClient({
                           : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
                       }`}
                     >
-                      Seviye {lvl}
+                      {t("boardgame.levelN", { n: lvl })}
                     </button>
                   ))}
                 </div>
@@ -176,7 +178,7 @@ export default function BoardGameClient({
                 </div>
               )}
               {filteredCards !== undefined && filteredCards.length === 0 && (
-                <p className="text-center text-gray-500 font-text py-16">Kart bulunamadı.</p>
+                <p className="text-center text-gray-500 font-text py-16">{t("boardgame.noCards")}</p>
               )}
               {filteredCards && filteredCards.length > 0 && (
                 <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4">
@@ -235,7 +237,7 @@ export default function BoardGameClient({
         {activeTab === "rules" && (
           <div className="max-w-3xl">
             {!game?.rulesTr && !game?.rulesEn ? (
-              <p className="text-gray-500 font-text text-center py-16">Henüz kural eklenmedi.</p>
+              <p className="text-gray-500 font-text text-center py-16">{t("boardgame.noRules")}</p>
             ) : (
               <div className="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-6">
                 <div className="prose prose-invert max-w-none font-text text-gray-200 whitespace-pre-wrap">

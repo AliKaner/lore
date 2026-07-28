@@ -6,17 +6,18 @@ import Footer from "@/components/Footer";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useLocale } from "@/hooks/useLocale";
 
 const TYPES = ["all", "character", "city", "item", "story", "other"] as const;
 type TypeFilter = (typeof TYPES)[number];
 
-const TYPE_LABELS: Record<string, string> = {
-  all: "All",
-  character: "Characters",
-  city: "Cities",
-  item: "Items",
-  story: "Stories",
-  other: "Other",
+const TYPE_LABEL_KEYS: Record<TypeFilter, string> = {
+  all: "universe.typeAll",
+  character: "universe.typeCharacter",
+  city: "universe.typeCity",
+  item: "universe.typeItem",
+  story: "universe.typeStory",
+  other: "universe.typeOther",
 };
 
 export default function UniverseClient({
@@ -26,6 +27,7 @@ export default function UniverseClient({
 }) {
   const { universeId: universeIdRaw } = use(params);
   const universeId = universeIdRaw as Id<"universes">;
+  const { t } = useLocale();
 
   const [activeTab, setActiveTab] = useState<"lore" | "books" | "boardGames">("lore");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -50,8 +52,8 @@ export default function UniverseClient({
         <Header />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="text-center text-white">
-            <h1 className="text-4xl font-bold mb-4 font-title">Universe Not Found</h1>
-            <Link href="/" className="text-blue-400 hover:text-blue-300">Back to Home</Link>
+            <h1 className="text-4xl font-bold mb-4 font-title">{t("universe.notFound")}</h1>
+            <Link href="/" className="text-blue-400 hover:text-blue-300">{t("universe.backHome")}</Link>
           </div>
         </div>
       </div>
@@ -95,7 +97,7 @@ export default function UniverseClient({
                   : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              {tab === "lore" ? "Lore" : tab === "books" ? "Books" : "Board Games"}
+              {tab === "lore" ? t("universe.tabLore") : tab === "books" ? t("universe.tabBooks") : t("universe.tabBoardGames")}
             </button>
           ))}
         </div>
@@ -113,7 +115,7 @@ export default function UniverseClient({
                     : "bg-white/10 text-gray-300 border border-white/20 hover:bg-white/20"
                 }`}
               >
-                All Categories
+                {t("universe.allCategories")}
               </button>
               {categories?.map((cat) => (
                 <button
@@ -162,7 +164,7 @@ export default function UniverseClient({
                           : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
                       }`}
                     >
-                      {TYPE_LABELS[type]}
+                      {t(TYPE_LABEL_KEYS[type])}
                     </button>
                   ))}
                 </div>
@@ -177,7 +179,7 @@ export default function UniverseClient({
                 </div>
               )}
               {filteredEntries !== undefined && filteredEntries.length === 0 && (
-                <p className="text-center text-gray-500 font-text py-16">No entries found.</p>
+                <p className="text-center text-gray-500 font-text py-16">{t("universe.noEntries")}</p>
               )}
               {filteredEntries && filteredEntries.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -235,7 +237,7 @@ export default function UniverseClient({
               </div>
             )}
             {boardGames !== undefined && boardGames.length === 0 && (
-              <p className="text-center text-gray-500 font-text py-16">Bu evrende henüz kutu oyunu yok.</p>
+              <p className="text-center text-gray-500 font-text py-16">{t("universe.noBoardGames")}</p>
             )}
             {boardGames && boardGames.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -262,8 +264,8 @@ export default function UniverseClient({
                           <span className="inline-block bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-md text-xs text-amber-200/90 font-text mb-2">
                             🎮{" "}
                             {game.minPlayers === game.maxPlayers
-                              ? `${game.minPlayers} oyuncu`
-                              : `${game.minPlayers}–${game.maxPlayers} oyuncu`}
+                              ? t("universe.playersOne", { min: game.minPlayers })
+                              : t("universe.playersRange", { min: game.minPlayers, max: game.maxPlayers })}
                           </span>
                           {game.description && (
                             <p className="text-sm text-gray-400 font-text line-clamp-2">{game.description}</p>
@@ -286,7 +288,7 @@ export default function UniverseClient({
               </div>
             )}
             {books !== undefined && books.length === 0 && (
-              <p className="text-center text-gray-500 font-text py-16">No books in this universe yet.</p>
+              <p className="text-center text-gray-500 font-text py-16">{t("universe.noBooks")}</p>
             )}
             {books && books.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -316,10 +318,10 @@ export default function UniverseClient({
                           </h3>
                           <div className="flex flex-wrap gap-2 mb-3">
                             <span className="bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-md text-xs text-amber-200/90 flex items-center gap-1 font-text">
-                              #️⃣ {(book as any).chapterCount ?? 0} Sayfa
+                              #️⃣ {t("universe.pages", { count: (book as any).chapterCount ?? 0 })}
                             </span>
                             <span className="bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-md text-xs text-amber-200/90 flex items-center gap-1 font-text">
-                              ⏱️ {(book as any).totalReadingTime ?? 0} dk okuma
+                              ⏱️ {t("universe.readingTime", { count: (book as any).totalReadingTime ?? 0 })}
                             </span>
                           </div>
                           {book.description && (

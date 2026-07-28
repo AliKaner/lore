@@ -1,39 +1,19 @@
+"use client";
 import React from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import { useLocale } from "@/hooks/useLocale";
 
 export default function FAQ() {
+  const { t } = useLocale();
+
   const faqs = [
-    {
-      question: "What is this website about?",
-      answer:
-        "This website is dedicated to exploring and sharing the rich lore and stories of our fictional universe. You can discover various characters, locations, and events that make up our world.",
-    },
-    {
-      question: "How do I navigate the lore?",
-      answer:
-        "You can browse through different lore entries on the Lore page. Each entry contains detailed information about characters, locations, or events. Click on any lore card to read the full story.",
-    },
-    {
-      question: "Can I contribute to the lore?",
-      answer:
-        "Currently, the lore is curated by our team. However, we're always open to feedback and suggestions from our community members.",
-    },
-    {
-      question: "Is this content free to access?",
-      answer:
-        "Yes, all lore content on this website is completely free to access and read. We believe in sharing our stories with everyone.",
-    },
-    {
-      question: "How often is new content added?",
-      answer:
-        "We regularly update our lore with new stories, characters, and events. Check back frequently to discover new content.",
-    },
-    {
-      question: "Can I share the lore with others?",
-      answer:
-        "Absolutely! Feel free to share our lore with friends and family. We encourage spreading the stories and building our community.",
-    },
+    { question: t("faq.q1"), answer: t("faq.a1") },
+    { question: t("faq.q2"), answer: t("faq.a2") },
+    { question: t("faq.q3"), answer: t("faq.a3") },
+    { question: t("faq.q4"), answer: t("faq.a4") },
+    { question: t("faq.q5"), answer: t("faq.a5") },
+    { question: t("faq.q6"), answer: t("faq.a6") },
   ];
 
   return (
@@ -43,10 +23,10 @@ export default function FAQ() {
       <div className="max-w-4xl mx-auto px-4 py-16 flex-1 w-full">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 font-title">
-            Frequently Asked Questions
+            {t("faq.title")}
           </h1>
           <p className="text-xl text-gray-300 font-text">
-            Find answers to common questions about our lore and website
+            {t("faq.subtitle")}
           </p>
         </div>
 
@@ -67,9 +47,9 @@ export default function FAQ() {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-gray-400 mb-4 font-text">Still have questions?</p>
+          <p className="text-gray-400 mb-4 font-text">{t("faq.stillHaveQuestions")}</p>
           <button className="px-6 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-lg text-white font-semibold hover:bg-white/30 transition-all duration-300">
-            Contact Us
+            {t("faq.contactUs")}
           </button>
         </div>
       </div>

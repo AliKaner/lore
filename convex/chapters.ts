@@ -72,6 +72,8 @@ export const create = mutation({
     contentTr: v.string(),
     contentEn: v.string(),
     order: v.number(),
+    parentChapterId: v.optional(v.id("chapters")),
+    branchIds: v.optional(v.array(v.id("chapters"))),
     sessionToken: v.string(),
   },
   handler: async (ctx, args) => {
@@ -90,6 +92,8 @@ export const update = mutation({
     contentEn: v.optional(v.string()),
     order: v.optional(v.number()),
     status: v.optional(v.union(v.literal("pending"), v.literal("published"))),
+    parentChapterId: v.optional(v.id("chapters")),
+    branchIds: v.optional(v.array(v.id("chapters"))),
     sessionToken: v.string(),
   },
   handler: async (ctx, args) => {

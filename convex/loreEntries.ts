@@ -1,6 +1,16 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+const LORE_TYPE = v.union(
+  v.literal("character"),
+  v.literal("city"),
+  v.literal("item"),
+  v.literal("story"),
+  v.literal("other"),
+  v.literal("location"),
+  v.literal("faction")
+);
+
 async function verifySession(ctx: { db: any }, token: string) {
   const session = await ctx.db
     .query("sessions")
@@ -115,13 +125,7 @@ export const create = mutation({
     universeId: v.id("universes"),
     categoryId: v.id("categories"),
     name: v.string(),
-    type: v.union(
-      v.literal("character"),
-      v.literal("city"),
-      v.literal("item"),
-      v.literal("story"),
-      v.literal("other")
-    ),
+    type: LORE_TYPE,
     imageStorageId: v.optional(v.id("_storage")),
     contentTr: v.string(),
     contentEn: v.string(),
@@ -142,15 +146,7 @@ export const update = mutation({
     universeId: v.optional(v.id("universes")),
     categoryId: v.optional(v.id("categories")),
     name: v.optional(v.string()),
-    type: v.optional(
-      v.union(
-        v.literal("character"),
-        v.literal("city"),
-        v.literal("item"),
-        v.literal("story"),
-        v.literal("other")
-      )
-    ),
+    type: v.optional(LORE_TYPE),
     imageStorageId: v.optional(v.id("_storage")),
     contentTr: v.optional(v.string()),
     contentEn: v.optional(v.string()),

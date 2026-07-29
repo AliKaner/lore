@@ -8,7 +8,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useLocale } from "@/hooks/useLocale";
 
-const TYPES = ["all", "character", "city", "item", "story", "other"] as const;
+const TYPES = ["all", "character", "city", "item", "story", "other", "location", "faction"] as const;
 type TypeFilter = (typeof TYPES)[number];
 
 const TYPE_LABEL_KEYS: Record<TypeFilter, string> = {
@@ -18,6 +18,8 @@ const TYPE_LABEL_KEYS: Record<TypeFilter, string> = {
   item: "universe.typeItem",
   story: "universe.typeStory",
   other: "universe.typeOther",
+  location: "universe.typeLocation",
+  faction: "universe.typeFaction",
 };
 
 export default function UniverseClient({
@@ -205,6 +207,8 @@ export default function UniverseClient({
                               {entry.type === "item" && "⚔️"}
                               {entry.type === "story" && "📖"}
                               {entry.type === "other" && "✨"}
+                              {entry.type === "location" && "🗺️"}
+                              {entry.type === "faction" && "🛡️"}
                             </div>
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

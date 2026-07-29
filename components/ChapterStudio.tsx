@@ -24,7 +24,7 @@ interface SessionChapter {
   order: number;
 }
 
-type LoreType = "character" | "city" | "item" | "story" | "other";
+type LoreType = "character" | "city" | "item" | "story" | "other" | "location" | "faction";
 type NoteType = "fikir" | "hatirlatma" | "karakter" | "tutarsizlik" | "genel";
 
 const TYPE_EMOJI: Record<LoreType, string> = {
@@ -33,6 +33,8 @@ const TYPE_EMOJI: Record<LoreType, string> = {
   item: "⚔️",
   story: "📖",
   other: "✨",
+  location: "🗺️",
+  faction: "🛡️",
 };
 
 const TYPE_LABEL: Record<LoreType, string> = {
@@ -41,6 +43,8 @@ const TYPE_LABEL: Record<LoreType, string> = {
   item: "Eşya",
   story: "Hikaye",
   other: "Diğer",
+  location: "Mekan",
+  faction: "Hizip",
 };
 
 const NOTE_TYPES: { value: NoteType; label: string; dot: string }[] = [
@@ -557,7 +561,7 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
             className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none mb-2 font-text"
           />
           <div className="flex flex-wrap gap-1 mb-3">
-            {(["all", "character", "city", "item", "story", "other"] as const).map((t) => (
+            {(["all", "character", "city", "item", "story", "other", "location", "faction"] as const).map((t) => (
               <button
                 key={t}
                 type="button"

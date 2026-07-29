@@ -17,6 +17,8 @@ const TYPE_LABEL_KEYS: Record<string, string> = {
   item: "universe.typeItem",
   story: "universe.typeStory",
   other: "universe.typeOther",
+  location: "universe.typeLocation",
+  faction: "universe.typeFaction",
 };
 
 export default function LoreDetailClient({ params }: { params: Promise<{ id: string }> }) {
@@ -124,6 +126,8 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
                   {entry.type === "item" && "⚔️"}
                   {entry.type === "story" && "📖"}
                   {entry.type === "other" && "✨"}
+                  {entry.type === "location" && "🗺️"}
+                  {entry.type === "faction" && "🛡️"}
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />

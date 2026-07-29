@@ -1,5 +1,6 @@
 ﻿"use client";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -7,7 +8,7 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { ImageUpload } from "@/components/ImageUpload";
 import { ContentEditor } from "@/components/ContentEditor";
 
-const TYPES = ["character", "city", "item", "story", "other"] as const;
+const TYPES = ["character", "city", "item", "story", "other", "location", "faction"] as const;
 type LoreType = (typeof TYPES)[number];
 type Mode = "list" | "create" | "edit";
 
@@ -69,6 +70,19 @@ export default function AdminEntries() {
     setError("");
   };
   const cancel = () => { setMode("list"); setError(""); };
+
+  // Auto-open an entry for editing when linked here with ?edit=<id> (e.g. from the graph view).
+  const searchParams = useSearchParams();
+  const autoEditHandled = useRef(false);
+  useEffect(() => {
+    const editParam = searchParams.get("edit");
+    if (!editParam || autoEditHandled.current || !entries) return;
+    const target = entries.find((e) => e._id === editParam);
+    if (target) {
+      openEdit(target);
+      autoEditHandled.current = true;
+    }
+  }, [searchParams, entries]);
 
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();

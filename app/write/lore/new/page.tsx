@@ -8,7 +8,7 @@ import { useWriterAuth } from "@/hooks/useWriterAuth";
 import { ImageUpload } from "@/components/ImageUpload";
 import { ContentEditor } from "@/components/ContentEditor";
 
-const TYPES = ["character", "city", "item", "story", "other"] as const;
+const TYPES = ["character", "city", "item", "story", "other", "location", "faction"] as const;
 type LoreType = (typeof TYPES)[number];
 
 export default function WriteNewLoreEntry() {

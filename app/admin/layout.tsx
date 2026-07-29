@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { GraphOverlay } from "@/components/graph/GraphOverlay";
 
 const NAV = [
   { label: "Dashboard", href: "/admin" },
@@ -19,6 +20,7 @@ const NAV = [
   { label: "Writer Requests", href: "/admin/requests" },
   { label: "Pending Submissions", href: "/admin/pending" },
   { label: "Comments", href: "/admin/comments" },
+  { label: "Graph", href: "/admin/graph" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { token, logout, loaded } = useAdminAuth();
   const logoutAction = useAction(api.admin.logoutPublic);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [graphOpen, setGraphOpen] = useState(false);
 
   useEffect(() => {
     if (loaded && !token && pathname !== "/admin/login") {
@@ -38,6 +41,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
+
+  // Global Ctrl/Cmd+G toggles the graph overlay from anywhere in the admin area.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "g") {
+        e.preventDefault();
+        setGraphOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   if (!loaded) {
     return (
@@ -129,6 +144,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="max-w-6xl mx-auto p-4 md:p-8">{children}</div>
         </main>
       </div>
+
+      <GraphOverlay open={graphOpen} onClose={() => setGraphOpen(false)} />
     </div>
   );
 }

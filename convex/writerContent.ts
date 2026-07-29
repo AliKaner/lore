@@ -27,7 +27,9 @@ export const createLoreEntry = mutation({
       v.literal("city"),
       v.literal("item"),
       v.literal("story"),
-      v.literal("other")
+      v.literal("other"),
+      v.literal("location"),
+      v.literal("faction")
     ),
     imageStorageId: v.optional(v.id("_storage")),
     contentTr: v.string(),

@@ -26,7 +26,9 @@ export default defineSchema({
       v.literal("city"),
       v.literal("item"),
       v.literal("story"),
-      v.literal("other")
+      v.literal("other"),
+      v.literal("location"),
+      v.literal("faction")
     ),
     imageStorageId: v.optional(v.id("_storage")),
     contentTr: v.string(),
@@ -60,9 +62,12 @@ export default defineSchema({
     likeCount: v.optional(v.number()),
     status: v.optional(v.union(v.literal("pending"), v.literal("published"))),
     submittedByWriterId: v.optional(v.id("writerRequests")),
+    parentChapterId: v.optional(v.id("chapters")),
+    branchIds: v.optional(v.array(v.id("chapters"))),
   })
     .index("by_book", ["bookId"])
-    .index("by_submittedByWriter", ["submittedByWriterId"]),
+    .index("by_submittedByWriter", ["submittedByWriterId"])
+    .index("by_parentChapter", ["parentChapterId"]),
 
   sessions: defineTable({
     token: v.string(),
@@ -88,6 +93,28 @@ export default defineSchema({
     content: v.string(),
     createdAt: v.number(),
   }).index("by_book_and_author", ["bookId", "authorKey"]),
+
+  links: defineTable({
+    sourceId: v.string(),
+    sourceType: v.union(
+      v.literal("chapter"),
+      v.literal("character"),
+      v.literal("location"),
+      v.literal("lore"),
+      v.literal("faction")
+    ),
+    targetId: v.string(),
+    targetType: v.union(
+      v.literal("chapter"),
+      v.literal("character"),
+      v.literal("location"),
+      v.literal("lore"),
+      v.literal("faction")
+    ),
+    linkType: v.string(),
+  })
+    .index("by_source", ["sourceId"])
+    .index("by_target", ["targetId"]),
 
   likes: defineTable({
     targetId: v.union(v.id("loreEntries"), v.id("chapters")),

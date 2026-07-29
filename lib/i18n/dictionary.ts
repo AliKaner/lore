@@ -116,6 +116,8 @@ export const dictionary: Record<string, Entry> = {
   "universe.typeItem": { tr: "Eşyalar", en: "Items" },
   "universe.typeStory": { tr: "Hikayeler", en: "Stories" },
   "universe.typeOther": { tr: "Diğer", en: "Other" },
+  "universe.typeLocation": { tr: "Mekanlar", en: "Locations" },
+  "universe.typeFaction": { tr: "Hizipler", en: "Factions" },
   "universe.noEntries": { tr: "Girdi bulunamadı.", en: "No entries found." },
   "universe.noBoardGames": { tr: "Bu evrende henüz kutu oyunu yok.", en: "No board games in this universe yet." },
   "universe.noBooks": { tr: "Bu evrende henüz kitap yok.", en: "No books in this universe yet." },

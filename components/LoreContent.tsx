@@ -1,6 +1,48 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+
+export type HighlightEntry = { id: string; name: string };
+
+function escapeRegex(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const WORD_CHAR = "A-Za-z0-9_ÇĞİIıÖŞÜçğıöşü";
+
+function renderWithHighlights(text: string, entries: HighlightEntry[]): React.ReactNode {
+  const byLower = new Map<string, HighlightEntry>();
+  for (const e of entries) {
+    if (e.name.trim()) byLower.set(e.name.toLowerCase(), e);
+  }
+  const names = Array.from(byLower.values())
+    .map((e) => e.name)
+    .sort((a, b) => b.length - a.length);
+  if (names.length === 0) return text;
+
+  const pattern = new RegExp(
+    `(?<![${WORD_CHAR}])(${names.map(escapeRegex).join("|")})(?![${WORD_CHAR}])`,
+    "gi"
+  );
+  const parts = text.split(pattern);
+
+  return parts.map((part, i) => {
+    const match = byLower.get(part.toLowerCase());
+    if (match) {
+      return (
+        <Link
+          key={i}
+          href={`/lore/${match.id}`}
+          className="text-amber-300 font-semibold rounded px-0.5 -mx-0.5 shadow-[0_0_10px_rgba(251,191,36,0.7)] hover:shadow-[0_0_16px_rgba(251,191,36,0.9)] transition-shadow"
+        >
+          {part}
+        </Link>
+      );
+    }
+    return <React.Fragment key={i}>{part}</React.Fragment>;
+  });
+}
 
 type LoreContentProps = {
   content: {
@@ -10,6 +52,8 @@ type LoreContentProps = {
   defaultLang?: "tr" | "en";
   lang?: "tr" | "en";
   onLangChange?: (lang: "tr" | "en") => void;
+  /** Lore entries whose titles should glow/link when they appear verbatim in the text. */
+  entries?: HighlightEntry[];
 };
 
 export default function LoreContent({
@@ -17,6 +61,7 @@ export default function LoreContent({
   defaultLang = "tr",
   lang: externalLang,
   onLangChange,
+  entries,
 }: LoreContentProps) {
   const [internalLang, setInternalLang] = React.useState<"tr" | "en">(defaultLang);
 
@@ -43,7 +88,7 @@ export default function LoreContent({
         </select>
       </div>
       <div className="text-gray-300 leading-relaxed whitespace-pre-wrap font-text text-lg">
-        {text}
+        {entries && entries.length > 0 ? renderWithHighlights(text, entries) : text}
       </div>
     </div>
   );

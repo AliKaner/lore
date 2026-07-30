@@ -25,6 +25,10 @@ export default function ChapterClient({ params }: { params: Promise<{ bookId: st
 
   const chapter = useQuery(api.chapters.getById, { id: chapterId });
   const book = useQuery(api.books.getById, { id: bookId });
+  const loreEntries = useQuery(
+    api.loreEntries.listByUniverse,
+    book?.universeId ? { universeId: book.universeId } : "skip"
+  );
   const incrementViews = useMutation(api.chapters.incrementViews);
 
   useEffect(() => {
@@ -105,7 +109,12 @@ export default function ChapterClient({ params }: { params: Promise<{ bookId: st
         </div>
 
         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-8 mb-8">
-          <LoreContent content={{ tr: chapter.contentTr, en: chapter.contentEn }} lang={lang} onLangChange={setLang} />
+          <LoreContent
+            content={{ tr: chapter.contentTr, en: chapter.contentEn }}
+            lang={lang}
+            onLangChange={setLang}
+            entries={(loreEntries ?? []).map((e) => ({ id: e._id, name: e.name }))}
+          />
         </div>
 
         <div className="flex justify-between items-center mb-12">

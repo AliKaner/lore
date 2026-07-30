@@ -26,6 +26,10 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
   const entryId = id as Id<"loreEntries">;
   const { t } = useLocale();
   const entry = useQuery(api.loreEntries.getById, { id: entryId });
+  const universeEntries = useQuery(
+    api.loreEntries.listByUniverse,
+    entry?.universeId ? { universeId: entry.universeId } : "skip"
+  );
   const incrementViews = useMutation(api.loreEntries.incrementViews);
 
   useEffect(() => {
@@ -94,7 +98,12 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
             </div>
 
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-8">
-              <LoreContent content={{ tr: entry.contentTr, en: entry.contentEn }} />
+              <LoreContent
+                content={{ tr: entry.contentTr, en: entry.contentEn }}
+                entries={(universeEntries ?? [])
+                  .filter((e) => e._id !== entryId)
+                  .map((e) => ({ id: e._id, name: e.name }))}
+              />
             </div>
 
             {entry.relatedEntries && entry.relatedEntries.length > 0 && (

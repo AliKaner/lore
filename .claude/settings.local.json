@@ -12,7 +12,8 @@
       "Bash(node_modules/.bin/next build *)",
       "Bash(grep -v \"^$\")",
       "Bash(xargs grep -l \"generateMetadata\\\\|export const metadata\")",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }

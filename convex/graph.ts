@@ -92,9 +92,29 @@ export const getUniverseGraph = query({
       linkType: l.linkType,
     }));
 
-    // De-dupe tree edges that were also entered via the generic links table.
+    // relatedEntryIds is symmetric (kept in sync both ways by loreEntries.create/update),
+    // so dedupe by unordered pair — otherwise X->Y and Y->X would draw as two edges.
+    const entryIdSet = new Set(entries.map((e) => e._id as string));
+    const relatedSeenPairs = new Set<string>();
+    const relatedEdges: { id: string; source: string; target: string; linkType: string }[] = [];
+    for (const e of entries) {
+      for (const relId of e.relatedEntryIds ?? []) {
+        if (!entryIdSet.has(relId as string)) continue;
+        const pairKey = [e._id as string, relId as string].sort().join("|");
+        if (relatedSeenPairs.has(pairKey)) continue;
+        relatedSeenPairs.add(pairKey);
+        relatedEdges.push({
+          id: `related:${pairKey}`,
+          source: e._id as string,
+          target: relId as string,
+          linkType: "related_to",
+        });
+      }
+    }
+
+    // De-dupe tree/link edges that overlap (e.g. entered both as tree fields and via links table).
     const seen = new Set<string>();
-    const edges = [...treeEdges, ...linkEdges].filter((e) => {
+    const edges = [...treeEdges, ...linkEdges, ...relatedEdges].filter((e) => {
       const key = `${e.source}->${e.target}`;
       if (seen.has(key)) return false;
       seen.add(key);

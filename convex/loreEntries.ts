@@ -21,6 +21,25 @@ async function verifySession(ctx: { db: any }, token: string) {
   }
 }
 
+// relatedEntryIds is meant to be a symmetric relationship — if X lists Y, Y should
+// list X back. These helpers keep the other side of each edge in sync so the
+// connection shows up no matter which entry you edited it from.
+async function addBacklink(ctx: { db: any }, targetId: any, backId: any) {
+  const target = await ctx.db.get(targetId);
+  if (!target) return;
+  const ids = target.relatedEntryIds ?? [];
+  if (!ids.some((x: any) => String(x) === String(backId))) {
+    await ctx.db.patch(targetId, { relatedEntryIds: [...ids, backId] });
+  }
+}
+
+async function removeBacklink(ctx: { db: any }, targetId: any, backId: any) {
+  const target = await ctx.db.get(targetId);
+  if (!target) return;
+  const ids = (target.relatedEntryIds ?? []).filter((x: any) => String(x) !== String(backId));
+  await ctx.db.patch(targetId, { relatedEntryIds: ids });
+}
+
 export const list = query({
   handler: async (ctx) => {
     const entries = await ctx.db.query("loreEntries").collect();
@@ -136,7 +155,11 @@ export const create = mutation({
   handler: async (ctx, args) => {
     await verifySession(ctx, args.sessionToken);
     const { sessionToken, ...data } = args;
-    return ctx.db.insert("loreEntries", data);
+    const newId = await ctx.db.insert("loreEntries", data);
+    for (const relId of data.relatedEntryIds ?? []) {
+      await addBacklink(ctx, relId, newId);
+    }
+    return newId;
   },
 });
 
@@ -158,6 +181,20 @@ export const update = mutation({
   handler: async (ctx, args) => {
     await verifySession(ctx, args.sessionToken);
     const { id, sessionToken, ...data } = args;
+
+    if (data.relatedEntryIds !== undefined) {
+      const existing = await ctx.db.get(id);
+      const oldIds = new Set((existing?.relatedEntryIds ?? []).map((x: any) => String(x)));
+      const newIds = new Set(data.relatedEntryIds.map((x) => String(x)));
+
+      for (const relId of data.relatedEntryIds) {
+        if (!oldIds.has(String(relId))) await addBacklink(ctx, relId, id);
+      }
+      for (const relId of existing?.relatedEntryIds ?? []) {
+        if (!newIds.has(String(relId))) await removeBacklink(ctx, relId, id);
+      }
+    }
+
     await ctx.db.patch(id, data);
   },
 });
@@ -166,6 +203,10 @@ export const remove = mutation({
   args: { id: v.id("loreEntries"), sessionToken: v.string() },
   handler: async (ctx, args) => {
     await verifySession(ctx, args.sessionToken);
+    const existing = await ctx.db.get(args.id);
+    for (const relId of existing?.relatedEntryIds ?? []) {
+      await removeBacklink(ctx, relId, args.id);
+    }
     await ctx.db.delete(args.id);
   },
 });

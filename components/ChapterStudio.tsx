@@ -398,6 +398,22 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
     setActiveKey((cur) => (cur === key ? "editor" : cur));
   };
 
+  const [dragKey, setDragKey] = useState<string | null>(null);
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+
+  const moveTab = (fromKey: string, toKey: string) => {
+    if (fromKey === toKey) return;
+    setOpenTabs((prev) => {
+      const fromIndex = prev.findIndex((t) => tabKey(t) === fromKey);
+      const toIndex = prev.findIndex((t) => tabKey(t) === toKey);
+      if (fromIndex === -1 || toIndex === -1) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  };
+
   const allPreviousChapters: SessionChapter[] = [
     ...(existingChapters ?? []).map((c) => ({ _id: c._id, title: c.title, order: c.order })),
     ...sessionChapters.filter(
@@ -623,8 +639,37 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
               return (
                 <div
                   key={key}
+                  draggable
                   onClick={() => setActiveKey(key)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-sm font-text cursor-pointer transition-colors flex-shrink-0 ${
+                  onDragStart={(e) => {
+                    setDragKey(key);
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    if (dragKey && dragKey !== key) setDragOverKey(key);
+                  }}
+                  onDragLeave={() => {
+                    setDragOverKey((cur) => (cur === key ? null : cur));
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (dragKey) moveTab(dragKey, key);
+                    setDragKey(null);
+                    setDragOverKey(null);
+                  }}
+                  onDragEnd={() => {
+                    setDragKey(null);
+                    setDragOverKey(null);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-sm font-text cursor-grab active:cursor-grabbing transition-colors flex-shrink-0 border-t-2 ${
+                    dragKey === key ? "opacity-40" : ""
+                  } ${
+                    dragOverKey === key && dragKey !== key
+                      ? "border-white/60"
+                      : "border-transparent"
+                  } ${
                     activeKey === key
                       ? "bg-white/10 text-white"
                       : "text-gray-500 hover:text-gray-300"

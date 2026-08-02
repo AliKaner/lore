@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -14,9 +15,12 @@ type StudioAuth =
   | { kind: "writer"; writerToken: string };
 
 interface ChapterStudioProps {
-  bookId: Id<"books">;
+  /** Pass "new" to open the studio without a book yet — admins can create one inline. */
+  bookId: Id<"books"> | "new";
   auth: StudioAuth;
   exitHref: string;
+  /** If set, opens this chapter's tab as soon as it's found among the book's chapters. */
+  initialChapterId?: Id<"chapters">;
 }
 
 interface SessionChapter {
@@ -135,6 +139,102 @@ function ChapterPreviewTab({ chapterId }: { chapterId: Id<"chapters"> }) {
   );
 }
 
+function ChapterEditTab({
+  chapterId,
+  sessionToken,
+}: {
+  chapterId: Id<"chapters">;
+  sessionToken: string;
+}) {
+  const chapter = useQuery(api.chapters.getById, { id: chapterId });
+  const updateChapter = useMutation(api.chapters.update);
+
+  const [initialized, setInitialized] = useState(false);
+  const [title, setTitle] = useState("");
+  const [contentTr, setContentTr] = useState("");
+  const [contentEn, setContentEn] = useState("");
+  const [lang, setLang] = useState<"tr" | "en">("tr");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [savedMessage, setSavedMessage] = useState("");
+
+  useEffect(() => {
+    if (chapter && !initialized) {
+      setTitle(chapter.title);
+      setContentTr(chapter.contentTr);
+      setContentEn(chapter.contentEn);
+      setInitialized(true);
+    }
+  }, [chapter, initialized]);
+
+  if (chapter === undefined || !initialized) {
+    return (
+      <div className="flex justify-center py-16">
+        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
+  if (chapter === null) {
+    return <p className="text-gray-500 font-text">Bölüm bulunamadı.</p>;
+  }
+
+  const handleSave = async () => {
+    if (!title.trim()) {
+      setError("Başlık gerekli.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await updateChapter({ id: chapterId, title, contentTr, contentEn, sessionToken });
+      setSavedMessage("Kaydedildi.");
+      setTimeout(() => setSavedMessage(""), 2000);
+    } catch (err: any) {
+      setError(err.message || "Bir hata oluştu");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-4">
+      <div className="flex items-center gap-3">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Bölüm başlığı..."
+          className="flex-1 bg-transparent border-b border-white/20 px-1 py-2 text-2xl font-title text-white placeholder-gray-600 focus:outline-none focus:border-white/50"
+        />
+        {chapter.status === "pending" && (
+          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-text flex-shrink-0">
+            Beklemede
+          </span>
+        )}
+      </div>
+
+      <LangToggle lang={lang} onChange={setLang} />
+
+      {lang === "tr" ? (
+        <ContentEditor value={contentTr} onChange={setContentTr} rows={22} placeholder="Türkçe içerik..." />
+      ) : (
+        <ContentEditor value={contentEn} onChange={setContentEn} rows={22} placeholder="English content..." />
+      )}
+
+      {error && <p className="text-red-400 text-sm font-text">{error}</p>}
+      {savedMessage && <p className="text-green-400 text-sm font-text">✅ {savedMessage}</p>}
+
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="w-full px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-50 font-text"
+      >
+        {saving ? "Kaydediliyor..." : "Bölümü Kaydet"}
+      </button>
+    </div>
+  );
+}
+
 function LorePreviewTab({ entryId }: { entryId: Id<"loreEntries"> }) {
   const entry = useQuery(api.loreEntries.getById, { id: entryId });
   const [lang, setLang] = useState<"tr" | "en">("tr");
@@ -193,6 +293,7 @@ function NewLoreEntryTab({
   universeId,
   auth,
   categories,
+  onCategoryCreated,
   defaultType,
   onCreated,
 }: {
@@ -200,11 +301,13 @@ function NewLoreEntryTab({
   universeId: Id<"universes">;
   auth: StudioAuth;
   categories: { _id: Id<"categories">; name: string }[];
+  onCategoryCreated: (category: { _id: Id<"categories">; name: string }) => void;
   defaultType: LoreType;
   onCreated: (entry: EntryLite) => void;
 }) {
   const createEntryAdmin = useMutation(api.loreEntries.create);
   const createEntryWriter = useMutation(api.writerContent.createLoreEntry);
+  const createCategory = useMutation(api.categories.create);
 
   const [categoryId, setCategoryId] = useState("");
   const [name, setName] = useState("");
@@ -216,6 +319,32 @@ function NewLoreEntryTab({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const [showNewCategory, setShowNewCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [categorySaving, setCategorySaving] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
+
+  const handleCreateCategory = async () => {
+    if (auth.kind !== "admin" || !newCategoryName.trim()) return;
+    setCategorySaving(true);
+    setCategoryError("");
+    try {
+      const newId = await createCategory({
+        universeId,
+        name: newCategoryName.trim(),
+        sessionToken: auth.sessionToken,
+      });
+      onCategoryCreated({ _id: newId, name: newCategoryName.trim() });
+      setCategoryId(newId);
+      setNewCategoryName("");
+      setShowNewCategory(false);
+    } catch (err: any) {
+      setCategoryError(err.message || "Bir hata oluştu");
+    } finally {
+      setCategorySaving(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!categoryId || !name.trim()) {
@@ -275,17 +404,49 @@ function NewLoreEntryTab({
       <h2 className="text-2xl font-title font-bold text-white">Yeni Lore Girdisi</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-gray-300 mb-1 font-text">Kategori *</label>
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
-          >
-            <option value="">Kategori seçin</option>
-            {categories.map((c) => (
-              <option key={c._id} value={c._id} className="bg-gray-900">{c.name}</option>
-            ))}
-          </select>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm text-gray-300 font-text">Kategori *</label>
+            {auth.kind === "admin" && (
+              <button
+                type="button"
+                onClick={() => setShowNewCategory((v) => !v)}
+                className="text-xs px-2 py-0.5 bg-white/10 border border-white/20 rounded text-white hover:bg-white/20 transition-colors font-text"
+              >
+                + Yeni Kategori
+              </button>
+            )}
+          </div>
+          {showNewCategory ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="Kategori adı..."
+                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleCreateCategory}
+                disabled={categorySaving || !newCategoryName.trim()}
+                className="px-3 py-2 bg-green-600/30 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-600/50 transition-colors disabled:opacity-50 font-text text-sm flex-shrink-0"
+              >
+                {categorySaving ? "..." : "Ekle"}
+              </button>
+            </div>
+          ) : (
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+            >
+              <option value="">Kategori seçin</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id} className="bg-gray-900">{c.name}</option>
+              ))}
+            </select>
+          )}
+          {categoryError && <p className="text-red-400 text-xs font-text mt-1">{categoryError}</p>}
         </div>
         <div>
           <label className="block text-sm text-gray-300 mb-1 font-text">Tür *</label>
@@ -344,9 +505,123 @@ function NewLoreEntryTab({
   );
 }
 
-export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
-  const book = useQuery(api.books.getById, { id: bookId });
-  const existingChapters = useQuery(api.chapters.listByBook, { bookId });
+function CreateBookGate({
+  auth,
+  exitHref,
+  onCreated,
+}: {
+  auth: StudioAuth;
+  exitHref: string;
+  onCreated: (id: Id<"books">) => void;
+}) {
+  const universes = useQuery(api.universes.list);
+  const createBook = useMutation(api.books.create);
+
+  const [universeId, setUniverseId] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [coverStorageId, setCoverStorageId] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  if (auth.kind !== "admin") {
+    return (
+      <div className="fixed inset-0 z-40 bg-gray-950 flex flex-col items-center justify-center gap-4 text-white">
+        <p className="font-title text-2xl">Yeni kitap oluşturma yetkisi sadece adminlerde.</p>
+        <Link href={exitHref} className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg font-text">
+          Geri Dön
+        </Link>
+      </div>
+    );
+  }
+
+  const handleCreate = async () => {
+    if (!universeId || !title.trim()) {
+      setError("Evren ve başlık gerekli.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const newId = await createBook({
+        universeId: universeId as Id<"universes">,
+        title: title.trim(),
+        description: description.trim() || undefined,
+        coverStorageId: coverStorageId ? (coverStorageId as Id<"_storage">) : undefined,
+        sessionToken: auth.sessionToken,
+      });
+      onCreated(newId);
+    } catch (err: any) {
+      setError(err.message || "Bir hata oluştu");
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-40 bg-gray-950 text-white flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-lg space-y-4">
+        <h2 className="text-2xl font-title font-bold text-white">Yeni Kitap</h2>
+        <p className="text-sm text-gray-400 font-text">
+          Önce bir kitap oluştur, kaydettiğin anda yazma stüdyosuna geçeceksin.
+        </p>
+        <div>
+          <label className="block text-sm text-gray-300 mb-1 font-text">Evren *</label>
+          <select
+            value={universeId}
+            onChange={(e) => setUniverseId(e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+          >
+            <option value="">Evren seçin</option>
+            {universes?.map((u) => (
+              <option key={u._id} value={u._id} className="bg-gray-900">{u.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm text-gray-300 mb-1 font-text">Başlık *</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-sm text-gray-300 mb-1 font-text">Açıklama</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none resize-none"
+          />
+        </div>
+        <ImageUpload sessionToken={auth.sessionToken} onUpload={setCoverStorageId} label="Kapak (opsiyonel)" />
+        {error && <p className="text-red-400 text-sm font-text">{error}</p>}
+        <div className="flex gap-3">
+          <button
+            onClick={handleCreate}
+            disabled={saving}
+            className="flex-1 px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-50 font-text"
+          >
+            {saving ? "Oluşturuluyor..." : "Kitabı Oluştur ve Yazmaya Başla →"}
+          </button>
+          <Link href={exitHref} className="px-6 py-3 bg-transparent border border-white/20 rounded-lg text-gray-400 hover:text-white transition-colors font-text">
+            İptal
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapterId }: ChapterStudioProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [pendingBookId, setPendingBookId] = useState<Id<"books"> | null>(null);
+  const bookId = bookIdProp === "new" ? pendingBookId : bookIdProp;
+
+  const book = useQuery(api.books.getById, bookId ? { id: bookId } : "skip");
+  const existingChapters = useQuery(api.chapters.listByBook, bookId ? { bookId } : "skip");
   const universeEntries = useQuery(
     api.loreEntries.listByUniverse,
     book ? { universeId: book.universeId } : "skip"
@@ -356,11 +631,12 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
     book ? { universeId: book.universeId } : "skip"
   );
 
-  const notesArgs =
-    auth.kind === "admin"
+  const notesArgs = bookId
+    ? auth.kind === "admin"
       ? { bookId, sessionToken: auth.sessionToken }
-      : { bookId, writerToken: auth.writerToken };
-  const notesList = useQuery(api.bookNotes.list, notesArgs);
+      : { bookId, writerToken: auth.writerToken }
+    : null;
+  const notesList = useQuery(api.bookNotes.list, notesArgs ?? "skip");
   const addNote = useMutation(api.bookNotes.add);
   const removeNote = useMutation(api.bookNotes.remove);
 
@@ -376,6 +652,7 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
   const [savedMessage, setSavedMessage] = useState("");
   const [sessionChapters, setSessionChapters] = useState<SessionChapter[]>([]);
   const [sessionEntries, setSessionEntries] = useState<EntryLite[]>([]);
+  const [sessionCategories, setSessionCategories] = useState<{ _id: Id<"categories">; name: string }[]>([]);
 
   const [openTabs, setOpenTabs] = useState<StudioTab[]>([{ kind: "editor" }]);
   const [activeKey, setActiveKey] = useState("editor");
@@ -398,6 +675,16 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
     setOpenTabs((prev) => prev.filter((t) => tabKey(t) !== key));
     setActiveKey((cur) => (cur === key ? "editor" : cur));
   };
+
+  const openedInitialChapter = useRef(false);
+  useEffect(() => {
+    if (openedInitialChapter.current || !initialChapterId || !existingChapters) return;
+    const chapter = existingChapters.find((c) => c._id === initialChapterId);
+    if (chapter) {
+      openTab({ kind: "chapter", id: chapter._id as Id<"chapters">, title: chapter.title });
+      openedInitialChapter.current = true;
+    }
+  }, [initialChapterId, existingChapters]);
 
   const [dragKey, setDragKey] = useState<string | null>(null);
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
@@ -439,6 +726,13 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
     ),
   ];
 
+  const allCategories: { _id: Id<"categories">; name: string }[] = [
+    ...(categories ?? []).map((c) => ({ _id: c._id, name: c.name })),
+    ...sessionCategories.filter(
+      (sc) => !(categories ?? []).some((c) => c._id === sc._id)
+    ),
+  ];
+
   const filteredEntries = allEntries.filter((e) => {
     const typeMatch = entryTypeFilter === "all" || e.type === entryTypeFilter;
     const searchMatch =
@@ -454,7 +748,7 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
   );
 
   const handleAddNote = async () => {
-    if (!noteContent.trim()) return;
+    if (!noteContent.trim() || !notesArgs) return;
     setNoteBusy(true);
     try {
       await addNote({ ...notesArgs, type: noteType, content: noteContent.trim() });
@@ -467,6 +761,7 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
   };
 
   const handleRemoveNote = async (id: Id<"bookNotes">) => {
+    if (!notesArgs) return;
     try {
       await removeNote({ ...notesArgs, id });
     } catch {
@@ -475,6 +770,7 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
   };
 
   const handleSaveAndContinue = async () => {
+    if (!bookId) return;
     if (!title.trim()) {
       setError("Başlık gerekli.");
       return;
@@ -516,6 +812,19 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
       setSaving(false);
     }
   };
+
+  if (!bookId) {
+    return (
+      <CreateBookGate
+        auth={auth}
+        exitHref={exitHref}
+        onCreated={(id) => {
+          setPendingBookId(id);
+          router.replace(pathname.replace("/new/", `/${id}/`));
+        }}
+      />
+    );
+  }
 
   if (book === undefined) {
     return (
@@ -739,7 +1048,11 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
                 </button>
               </div>
             ) : activeTab?.kind === "chapter" ? (
-              <ChapterPreviewTab chapterId={activeTab.id} />
+              auth.kind === "admin" ? (
+                <ChapterEditTab chapterId={activeTab.id} sessionToken={auth.sessionToken} />
+              ) : (
+                <ChapterPreviewTab chapterId={activeTab.id} />
+              )
             ) : activeTab?.kind === "lore" ? (
               <LorePreviewTab entryId={activeTab.id} />
             ) : activeTab?.kind === "newLore" ? (
@@ -747,7 +1060,8 @@ export function ChapterStudio({ bookId, auth, exitHref }: ChapterStudioProps) {
                 bookId={bookId}
                 universeId={book.universeId}
                 auth={auth}
-                categories={categories ?? []}
+                categories={allCategories}
+                onCategoryCreated={(cat) => setSessionCategories((prev) => [...prev, cat])}
                 defaultType={entryTypeFilter === "all" ? "character" : entryTypeFilter}
                 onCreated={(entry) => setSessionEntries((prev) => [...prev, entry])}
               />

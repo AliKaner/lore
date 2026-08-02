@@ -16,7 +16,7 @@ export default function WriteBookStudioPage({
 
   return (
     <ChapterStudio
-      bookId={bookId as Id<"books">}
+      bookId={bookId === "new" ? "new" : (bookId as Id<"books">)}
       auth={{ kind: "writer", writerToken: token }}
       exitHref="/write"
     />

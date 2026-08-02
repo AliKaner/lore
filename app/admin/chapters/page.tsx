@@ -1,12 +1,13 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { ContentEditor } from "@/components/ContentEditor";
 
-type Mode = "list" | "create" | "edit";
+type Mode = "list" | "create";
 
 interface FormData {
   bookId: string;
@@ -19,16 +20,15 @@ interface FormData {
 const EMPTY: FormData = { bookId: "", title: "", contentTr: "", contentEn: "", order: "1" };
 
 export default function AdminChapters() {
+  const router = useRouter();
   const { token } = useAdminAuth();
   const universes = useQuery(api.universes.list);
   const books = useQuery(api.books.list);
   const chapters = useQuery(api.chapters.list);
   const createMutation = useMutation(api.chapters.create);
-  const updateMutation = useMutation(api.chapters.update);
   const removeMutation = useMutation(api.chapters.remove);
 
   const [mode, setMode] = useState<Mode>("list");
-  const [editId, setEditId] = useState<Id<"chapters"> | null>(null);
   const [form, setForm] = useState<FormData>(EMPTY);
   const [filterUniverse, setFilterUniverse] = useState("all");
   const [filterBook, setFilterBook] = useState("all");
@@ -49,18 +49,9 @@ export default function AdminChapters() {
     (b) => !filterUniverse || filterUniverse === "all" || b.universeId === filterUniverse
   );
 
-  const openCreate = () => { setForm(EMPTY); setEditId(null); setMode("create"); setError(""); };
-  const openEdit = (c: any) => {
-    setForm({
-      bookId: c.bookId,
-      title: c.title,
-      contentTr: c.contentTr,
-      contentEn: c.contentEn,
-      order: c.order.toString(),
-    });
-    setEditId(c._id);
-    setMode("edit");
-    setError("");
+  const openCreate = () => { setForm(EMPTY); setMode("create"); setError(""); };
+  const openEditInStudio = (c: any) => {
+    router.push(`/admin/books/${c.bookId}/write?chapterId=${c._id}`);
   };
   const cancel = () => { setMode("list"); setError(""); };
 
@@ -78,11 +69,7 @@ export default function AdminChapters() {
         order: parseInt(form.order) || 1,
         sessionToken: token,
       };
-      if (mode === "create") {
-        await createMutation(data);
-      } else if (editId) {
-        await updateMutation({ id: editId, ...data });
-      }
+      await createMutation(data);
       setMode("list");
     } catch (err: any) {
       setError(err.message || "An error occurred");
@@ -149,11 +136,9 @@ export default function AdminChapters() {
       </div>
 
       {/* Form */}
-      {(mode === "create" || mode === "edit") && (
+      {mode === "create" && (
         <div className="bg-white/10 border border-white/20 rounded-xl p-6 mb-8">
-          <h2 className="text-xl font-bold text-white mb-6 font-title">
-            {mode === "create" ? "New Chapter" : "Edit Chapter"}
-          </h2>
+          <h2 className="text-xl font-bold text-white mb-6 font-title">New Chapter</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -279,7 +264,7 @@ export default function AdminChapters() {
                   <p className="text-gray-400 text-xs font-text">{getBookName(c.bookId)}</p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
-                  <button onClick={() => openEdit(c)} className="px-3 py-1.5 bg-blue-600/30 border border-blue-500/30 rounded text-blue-300 hover:bg-blue-600/50 transition-colors text-sm font-text">Edit</button>
+                  <button onClick={() => openEditInStudio(c)} className="px-3 py-1.5 bg-blue-600/30 border border-blue-500/30 rounded text-blue-300 hover:bg-blue-600/50 transition-colors text-sm font-text">Edit</button>
                   <button onClick={() => handleDelete(c._id)} className="px-3 py-1.5 bg-red-600/30 border border-red-500/30 rounded text-red-300 hover:bg-red-600/50 transition-colors text-sm font-text">Delete</button>
                 </div>
               </div>

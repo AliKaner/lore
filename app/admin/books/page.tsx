@@ -96,9 +96,14 @@ export default function AdminBooks() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-white font-title">Books</h1>
         {mode === "list" && (
-          <button onClick={openCreate} className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-colors font-text">
-            + Add Book
-          </button>
+          <div className="flex gap-2">
+            <Link href="/admin/books/new/write" className="px-4 py-2 bg-green-600/30 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-600/50 transition-colors font-text">
+              📝 Stüdyoda Yeni Kitap
+            </Link>
+            <button onClick={openCreate} className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-colors font-text">
+              + Add Book
+            </button>
+          </div>
         )}
       </div>
 

@@ -6,19 +6,23 @@ import { ChapterStudio } from "@/components/ChapterStudio";
 
 export default function AdminBookStudioPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ bookId: string }>;
+  searchParams: Promise<{ chapterId?: string }>;
 }) {
   const { bookId } = use(params);
+  const { chapterId } = use(searchParams);
   const { token, loaded } = useAdminAuth();
 
   if (!loaded || !token) return null;
 
   return (
     <ChapterStudio
-      bookId={bookId as Id<"books">}
+      bookId={bookId === "new" ? "new" : (bookId as Id<"books">)}
       auth={{ kind: "admin", sessionToken: token }}
       exitHref="/admin/chapters"
+      initialChapterId={chapterId as Id<"chapters"> | undefined}
     />
   );
 }

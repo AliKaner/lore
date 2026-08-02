@@ -21,7 +21,8 @@
       "Bash(curl -s -o /tmp/chapters.html -w \"%{http_code}\\\\n\" http://localhost:3000/admin/chapters)",
       "Bash(curl -s -o /tmp/write.html -w \"%{http_code}\\\\n\" \"http://localhost:3000/admin/books/abc/write?chapterId=xyz\")",
       "Bash(curl -s -o /tmp/newbook.html -w \"%{http_code}\\\\n\" \"http://localhost:3000/admin/books/new/write\")",
-      "Bash(curl -s -o /tmp/books.html -w \"%{http_code}\\\\n\" \"http://localhost:3000/admin/books\")"
+      "Bash(curl -s -o /tmp/books.html -w \"%{http_code}\\\\n\" \"http://localhost:3000/admin/books\")",
+      "Bash(curl -s -o /tmp/write2.html -w \"%{http_code}\\\\n\" \"http://localhost:3000/admin/books/abc/write\")"
     ]
   }
 }

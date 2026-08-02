@@ -866,7 +866,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
 
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[260px_1fr_280px]">
         {/* Left: Lore entries */}
-        <div className="hidden lg:flex flex-col border-r border-white/10 overflow-y-auto p-4">
+        <div className="hidden lg:flex flex-col border-r border-white/10 overflow-y-auto p-4 custom-scrollbar">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-gray-300 font-title uppercase">
               Lore Girdileri
@@ -937,7 +937,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
 
         {/* Center: Tabs + Editor / Preview */}
         <div className="flex flex-col min-h-0">
-          <div className="flex items-center gap-1 border-b border-white/10 px-2 pt-2 overflow-x-auto flex-shrink-0">
+          <div className="flex items-center gap-1 border-b border-white/10 px-2 pt-2 overflow-x-auto flex-shrink-0 custom-scrollbar">
             {openTabs.map((tab) => {
               const key = tabKey(tab);
               const label =
@@ -1003,7 +1003,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
             })}
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-8">
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-8 custom-scrollbar">
             {activeKey === "editor" ? (
               <div className="max-w-2xl mx-auto space-y-4">
                 <input
@@ -1070,7 +1070,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
         </div>
 
         {/* Right: Previous chapters + notes */}
-        <div className="hidden lg:flex flex-col border-l border-white/10 overflow-y-auto p-4 gap-6">
+        <div className="hidden lg:flex flex-col border-l border-white/10 overflow-y-auto p-4 gap-6 custom-scrollbar">
           <div>
             <h2 className="text-sm font-bold text-gray-300 font-title uppercase mb-3">
               Önceki Bölümler
@@ -1141,7 +1141,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
                 + Not Ekle
               </button>
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto space-y-2">
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-2 custom-scrollbar">
               {(notesList ?? []).length === 0 ? (
                 <p className="text-xs text-gray-600 font-text">Henüz not yok.</p>
               ) : (

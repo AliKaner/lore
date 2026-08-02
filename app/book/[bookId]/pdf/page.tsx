@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { renderRichText } from "@/components/RichText";
 
 export default function BookPdfPage({ params }: { params: Promise<{ bookId: string }> }) {
   const { bookId: bookIdRaw } = use(params);
@@ -186,8 +187,8 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
                   <div className="w-16 h-0.5 bg-blue-500/50 mt-4 print:bg-gray-300" />
                 </div>
 
-                <div className="text-gray-300 leading-relaxed font-text text-lg whitespace-pre-wrap print:text-black print:text-base print:leading-extra-loose">
-                  {content}
+                <div className="text-gray-300 leading-relaxed font-text text-lg print:text-black print:text-base print:leading-extra-loose">
+                  {renderRichText(content)}
                 </div>
               </div>
             );

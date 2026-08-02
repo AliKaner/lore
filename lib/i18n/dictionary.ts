@@ -7,6 +7,7 @@ export const dictionary: Record<string, Entry> = {
   "nav.home": { tr: "Anasayfa", en: "Home" },
   "nav.faqs": { tr: "SSS", en: "FAQs" },
   "nav.admin": { tr: "Yönetim", en: "Admin" },
+  "nav.login": { tr: "Giriş", en: "Login" },
   "header.becomeWriter": { tr: "Lore Yazarı Ol", en: "Become a Writer" },
 
   // ShareButton

@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { ContentEditor } from "./ContentEditor";
 import { ImageUpload } from "./ImageUpload";
+import { renderRichText } from "./RichText";
 
 type StudioAuth =
   | { kind: "admin"; sessionToken: string }
@@ -127,8 +128,8 @@ function ChapterPreviewTab({ chapterId }: { chapterId: Id<"chapters"> }) {
         )}
       </div>
       <LangToggle lang={lang} onChange={setLang} />
-      <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-gray-300 font-text whitespace-pre-wrap leading-relaxed">
-        {content || <span className="text-gray-600 italic">İçerik yok.</span>}
+      <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-gray-300 font-text leading-relaxed">
+        {content ? renderRichText(content) : <span className="text-gray-600 italic">İçerik yok.</span>}
       </div>
     </div>
   );
@@ -180,8 +181,8 @@ function LorePreviewTab({ entryId }: { entryId: Id<"loreEntries"> }) {
         </div>
       </div>
       <LangToggle lang={lang} onChange={setLang} />
-      <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-gray-300 font-text whitespace-pre-wrap leading-relaxed">
-        {content || <span className="text-gray-600 italic">İçerik yok.</span>}
+      <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-gray-300 font-text leading-relaxed">
+        {content ? renderRichText(content) : <span className="text-gray-600 italic">İçerik yok.</span>}
       </div>
     </div>
   );

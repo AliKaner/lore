@@ -5,17 +5,25 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import WriterRequestModal from "./WriterRequestModal";
 import { useLocale } from "@/hooks/useLocale";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export default function Header() {
   const pathname = usePathname();
   const { locale, setLocale, t } = useLocale();
+  const { token, loaded } = useAdminAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
   const navItems = [
     { name: t("nav.home"), href: "/" },
     { name: t("nav.faqs"), href: "/faq" },
-    { name: t("nav.admin"), href: "/admin" },
+    ...(loaded
+      ? [
+          token
+            ? { name: t("nav.admin"), href: "/admin" }
+            : { name: t("nav.login"), href: "/admin/login" },
+        ]
+      : []),
   ];
 
   const LocaleSwitcher = ({ className = "" }: { className?: string }) => (

@@ -13,7 +13,9 @@
       "Bash(grep -v \"^$\")",
       "Bash(xargs grep -l \"generateMetadata\\\\|export const metadata\")",
       "Bash(node *)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(npx eslint *)",
+      "Bash(npm run *)"
     ]
   }
 }

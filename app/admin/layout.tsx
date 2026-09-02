@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useAction } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { GraphOverlay } from "@/components/graph/GraphOverlay";
 
@@ -31,11 +31,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
 
+  // Live server-side check: a token can still sit in localStorage after its
+  // session has expired (7 days) or been revoked. Without this, the admin UI
+  // looks logged-in while every mutation silently throws "Unauthorized".
+  const isValid = useQuery(api.admin.verifyToken, token ? { token } : "skip");
+
   useEffect(() => {
     if (loaded && !token && pathname !== "/admin/login") {
       router.replace("/admin/login");
     }
   }, [loaded, token, pathname, router]);
+
+  useEffect(() => {
+    if (loaded && token && isValid === false && pathname !== "/admin/login") {
+      logout();
+      router.replace("/admin/login");
+    }
+  }, [loaded, token, isValid, pathname, logout, router]);
 
   // Close sidebar on route change
   useEffect(() => {
@@ -64,6 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (pathname === "/admin/login") return <>{children}</>;
   if (!token) return null;
+  if (isValid === false) return null;
 
   const handleLogout = async () => {
     try { await logoutAction({ token }); } catch {}

@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LoreContent from "@/components/LoreContent";
 import CommentSection from "@/components/CommentSection";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useLocale } from "@/hooks/useLocale";

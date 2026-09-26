@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useWriterAuth } from "@/hooks/useWriterAuth";

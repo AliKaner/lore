@@ -2,7 +2,7 @@
 
 import React, { use, useState } from "react";
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { renderRichText } from "@/components/RichText";

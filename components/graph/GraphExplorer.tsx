@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { GraphView } from "./GraphView";
@@ -16,7 +16,7 @@ interface GraphExplorerProps {
 
 export function GraphExplorer({ onClose, className = "" }: GraphExplorerProps) {
   const router = useRouter();
-  const universes = useQuery(api.universes.list);
+  const universes = useQuery(api.universes.list, {});
   const [universeId, setUniverseId] = useState<string>("");
 
   useEffect(() => {

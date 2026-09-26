@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as access from "../access.js";
 import type * as admin from "../admin.js";
 import type * as boardGames from "../boardGames.js";
 import type * as bookNotes from "../bookNotes.js";
@@ -19,9 +20,11 @@ import type * as chapters from "../chapters.js";
 import type * as comments from "../comments.js";
 import type * as fileStorage from "../fileStorage.js";
 import type * as graph from "../graph.js";
+import type * as invitations from "../invitations.js";
 import type * as likes from "../likes.js";
 import type * as links from "../links.js";
 import type * as loreEntries from "../loreEntries.js";
+import type * as notebook from "../notebook.js";
 import type * as universes from "../universes.js";
 import type * as writerAuth from "../writerAuth.js";
 import type * as writerAuthLib from "../writerAuthLib.js";
@@ -35,6 +38,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  access: typeof access;
   admin: typeof admin;
   boardGames: typeof boardGames;
   bookNotes: typeof bookNotes;
@@ -46,9 +50,11 @@ declare const fullApi: ApiFromModules<{
   comments: typeof comments;
   fileStorage: typeof fileStorage;
   graph: typeof graph;
+  invitations: typeof invitations;
   likes: typeof likes;
   links: typeof links;
   loreEntries: typeof loreEntries;
+  notebook: typeof notebook;
   universes: typeof universes;
   writerAuth: typeof writerAuth;
   writerAuthLib: typeof writerAuthLib;

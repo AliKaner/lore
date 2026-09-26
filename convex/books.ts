@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { privateQuery as query, ownerMutation as mutation } from "./access";
 import { v } from "convex/values";
 
 async function verifySession(ctx: { db: any }, token: string) {
@@ -33,6 +33,7 @@ async function getBookStats(ctx: { db: any }, bookId: any) {
 }
 
 export const list = query({
+  args: {},
   handler: async (ctx) => {
     const books = await ctx.db.query("books").collect();
     return Promise.all(

@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { privateQuery as query, ownerMutation as mutation } from "./access";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 

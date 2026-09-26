@@ -2,13 +2,7 @@ import { action, internalMutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
-function generateToken(): string {
-  return (
-    Math.random().toString(36).substring(2) +
-    Math.random().toString(36).substring(2) +
-    Date.now().toString(36)
-  );
-}
+import { generateSessionToken as generateToken } from "./writerAuthLib";
 
 export const login = action({
   args: { password: v.string() },

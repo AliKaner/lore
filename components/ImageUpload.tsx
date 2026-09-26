@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import Image from "next/image";
 

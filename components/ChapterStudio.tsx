@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { ContentEditor } from "./ContentEditor";
@@ -514,7 +514,7 @@ function CreateBookGate({
   exitHref: string;
   onCreated: (id: Id<"books">) => void;
 }) {
-  const universes = useQuery(api.universes.list);
+  const universes = useQuery(api.universes.list, {});
   const createBook = useMutation(api.books.create);
 
   const [universeId, setUniverseId] = useState("");

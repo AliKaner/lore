@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { privateQuery as query, ownerMutation as mutation } from "./access";
 import { v } from "convex/values";
 
 async function verifySession(ctx: { db: any }, token: string) {

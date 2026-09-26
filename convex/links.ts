@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { ownerMutation as mutation } from "./access";
 import { v } from "convex/values";
 
 async function verifySession(ctx: { db: any }, token: string) {

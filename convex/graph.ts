@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { privateQuery as query } from "./access";
 import { v } from "convex/values";
 
 const TYPE_LABEL: Record<string, string> = {

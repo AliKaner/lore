@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -9,8 +9,8 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 export default function AdminPendingPage() {
   const { token } = useAdminAuth();
 
-  const entries = useQuery(api.loreEntries.list);
-  const chapters = useQuery(api.chapters.list);
+  const entries = useQuery(api.loreEntries.list, {});
+  const chapters = useQuery(api.chapters.list, {});
   const requests = useQuery(
     api.writerRequests.list,
     token ? { sessionToken: token } : "skip"

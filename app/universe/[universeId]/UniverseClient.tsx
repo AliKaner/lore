@@ -3,7 +3,7 @@ import React, { useState, use } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useLocale } from "@/hooks/useLocale";

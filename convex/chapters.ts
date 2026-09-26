@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { privateQuery as query, ownerMutation as mutation } from "./access";
 import { v } from "convex/values";
 
 async function verifySession(ctx: { db: any }, token: string) {
@@ -12,6 +12,7 @@ async function verifySession(ctx: { db: any }, token: string) {
 }
 
 export const list = query({
+  args: {},
   handler: async (ctx) => {
     return ctx.db.query("chapters").collect();
   },
@@ -99,7 +100,8 @@ export const update = mutation({
   handler: async (ctx, args) => {
     await verifySession(ctx, args.sessionToken);
     const { id, sessionToken, ...data } = args;
-    await ctx.db.patch(id, data);
+    const chapter = await ctx.db.get(id);
+    await ctx.db.patch(id, { ...data, revision: (chapter?.revision ?? 0) + 1, updatedAt: Date.now(), ...(data.contentTr !== undefined ? { editorJson: undefined } : {}) });
   },
 });
 

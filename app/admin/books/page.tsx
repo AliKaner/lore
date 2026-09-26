@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -21,8 +21,8 @@ const EMPTY: FormData = { universeId: "", title: "", description: "", order: "",
 
 export default function AdminBooks() {
   const { token } = useAdminAuth();
-  const universes = useQuery(api.universes.list);
-  const books = useQuery(api.books.list);
+  const universes = useQuery(api.universes.list, {});
+  const books = useQuery(api.books.list, {});
   const createMutation = useMutation(api.books.create);
   const updateMutation = useMutation(api.books.update);
   const removeMutation = useMutation(api.books.remove);

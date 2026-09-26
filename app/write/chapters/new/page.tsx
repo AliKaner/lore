@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useWriterAuth } from "@/hooks/useWriterAuth";
@@ -9,8 +9,8 @@ import { ContentEditor } from "@/components/ContentEditor";
 
 export default function WriteNewChapter() {
   const { token } = useWriterAuth();
-  const universes = useQuery(api.universes.list);
-  const books = useQuery(api.books.list);
+  const universes = useQuery(api.universes.list, {});
+  const books = useQuery(api.books.list, {});
   const createChapter = useMutation(api.writerContent.createChapter);
 
   const [universeId, setUniverseId] = useState("");

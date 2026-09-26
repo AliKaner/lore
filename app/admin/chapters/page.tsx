@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -22,9 +22,9 @@ const EMPTY: FormData = { bookId: "", title: "", contentTr: "", contentEn: "", o
 export default function AdminChapters() {
   const router = useRouter();
   const { token } = useAdminAuth();
-  const universes = useQuery(api.universes.list);
-  const books = useQuery(api.books.list);
-  const chapters = useQuery(api.chapters.list);
+  const universes = useQuery(api.universes.list, {});
+  const books = useQuery(api.books.list, {});
+  const chapters = useQuery(api.chapters.list, {});
   const createMutation = useMutation(api.chapters.create);
   const removeMutation = useMutation(api.chapters.remove);
 
@@ -36,7 +36,7 @@ export default function AdminChapters() {
   const [error, setError] = useState("");
   const [contentLang, setContentLang] = useState<"tr" | "en">("tr");
 
-  const categories = useQuery(api.categories.list);
+  const categories = useQuery(api.categories.list, {});
   const createEntryMutation = useMutation(api.loreEntries.create);
   const [showCharModal, setShowCharModal] = useState(false);
   const [charForm, setCharForm] = useState({ name: "", categoryId: "" });

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel_Decorative, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import "./desk.css";
 import { Providers } from "./providers";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "./constants/site";
 
@@ -18,11 +19,12 @@ const cormorantGaramond = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  robots: { index: false, follow: false },
   title: {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
-  description: "Discover the rich lore and stories that shape our universe",
+  description: "Kitaplar, eskizler ve ?iirler i?in ki?isel yaz? alan?",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   openGraph: {
     title: SITE_NAME,
-    description: "Discover the rich lore and stories that shape our universe",
+    description: "Kitaplar, eskizler ve ?iirler i?in ki?isel yaz? alan?",
     url: SITE_URL,
     siteName: SITE_NAME,
     images: [
@@ -51,7 +53,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: SITE_NAME,
-    description: "Discover the rich lore and stories that shape our universe",
+    description: "Kitaplar, eskizler ve ?iirler i?in ki?isel yaz? alan?",
     images: [DEFAULT_OG_IMAGE],
   },
 };
@@ -63,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="tr">
       <body
         className={`${cinzelDecorative.variable} ${cormorantGaramond.variable}`}
       >

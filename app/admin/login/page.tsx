@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAction } from "convex/react";
+import { useAction } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 

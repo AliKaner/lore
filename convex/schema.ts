@@ -2,6 +2,10 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  invitations: defineTable({ name: v.string(), tokenHash: v.string(), expiresAt: v.number(), revoked: v.boolean(), usedAt: v.optional(v.number()) }).index("by_tokenHash", ["tokenHash"]),
+  readerSessions: defineTable({ tokenHash: v.string(), inviteId: v.id("invitations"), expiresAt: v.number() }).index("by_tokenHash", ["tokenHash"]),
+  documents: defineTable({ title: v.string(), kind: v.union(v.literal("sketch"), v.literal("poem")), content: v.string(), updatedAt: v.number(), revision: v.number(), shared: v.boolean() }).index("by_updatedAt", ["updatedAt"]),
+
   universes: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
@@ -57,6 +61,9 @@ export default defineSchema({
     title: v.string(),
     contentTr: v.string(),
     contentEn: v.string(),
+    editorJson: v.optional(v.string()),
+    revision: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
     order: v.number(),
     views: v.optional(v.number()),
     likeCount: v.optional(v.number()),

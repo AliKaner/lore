@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -19,7 +19,7 @@ const EMPTY: FormData = { name: "", description: "", order: "", imageStorageId: 
 
 export default function AdminUniverses() {
   const { token } = useAdminAuth();
-  const universes = useQuery(api.universes.list);
+  const universes = useQuery(api.universes.list, {});
   const createMutation = useMutation(api.universes.create);
   const updateMutation = useMutation(api.universes.update);
   const removeMutation = useMutation(api.universes.remove);

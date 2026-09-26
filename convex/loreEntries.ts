@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { privateQuery as query, ownerMutation as mutation } from "./access";
 import { v } from "convex/values";
 
 const LORE_TYPE = v.union(
@@ -41,6 +41,7 @@ async function removeBacklink(ctx: { db: any }, targetId: any, backId: any) {
 }
 
 export const list = query({
+  args: {},
   handler: async (ctx) => {
     const entries = await ctx.db.query("loreEntries").collect();
     return Promise.all(

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -34,7 +34,7 @@ const EMPTY: FormData = {
 
 export default function AdminCards() {
   const { token } = useAdminAuth();
-  const games = useQuery(api.boardGames.list);
+  const games = useQuery(api.boardGames.list, {});
 
   const [filterGameId, setFilterGameId] = useState("all");
   const [filterTypeId, setFilterTypeId] = useState("all");

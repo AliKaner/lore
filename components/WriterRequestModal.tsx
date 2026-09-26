@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useMutation } from "convex/react";
+import { useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { useLocale } from "@/hooks/useLocale";
 

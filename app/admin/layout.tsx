@@ -7,8 +7,7 @@ const nav = [
   ["/", "← Yazı masam"], ["/admin/entries", "Karakterler ve olaylar"],
   ["/admin/universes", "Evrenler"], ["/admin/categories", "Kategoriler"],
   ["/admin/graph", "İlişki haritası"], ["/admin/books", "Kitap ayrıntıları"],
-  ["/admin/chapters", "Bölüm düzeni"], ["/admin/board-games", "Masa oyunları"],
-  ["/admin/cards", "Kartlar"], ["/admin/card-types", "Kart türleri"],
+  ["/admin/chapters", "Bölüm düzeni"],
 ];
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

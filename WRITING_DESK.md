@@ -1,6 +1,6 @@
 # Personal writing desk
 
-The home screen is the writing workspace. Books open directly in a chapter editor; new books include an empty first chapter. Sketches and poems are independent documents. Existing universes, characters, relationships, notes, branching chapters, cards and board games remain available from the workspace.
+The home screen is the writing workspace. Books open directly in a chapter editor; new books include an empty first chapter. Sketches and poems are independent documents. Existing universes, characters, relationships, notes and branching chapters remain available from the workspace. Board game and card screens have been removed; their historical database records are retained.
 
 The rich editor includes headings, lists, quotes, alignment, fonts, sizes, color, tables, uploaded images, undo/redo, find/replace, focus mode, word targets, TXT/HTML export and browser PDF printing. It does not implement the Apple Pages file format, DOCX interchange, tracked changes, or exact printed pagination. Existing chapter text is preserved and opened as plain text; legacy markup remains literal in the new editor until edited. The older chapter studio still renders that markup.
 
@@ -31,5 +31,7 @@ npx convex dev --once
 The opt-in live smoke test runs only against a configured **development** deployment. Start `npm run dev -- --port 3101`, install Chromium with `npx playwright install chromium`, and run `npm run test:live`. It reads the configured owner credential without printing it, creates temporary content, verifies owner and reader flows, and cleans up its documents, invitation and sessions. Screenshots are written to ignored `artifacts/`.
 
 ## Release
+
+Set `NEXT_PUBLIC_CONVEX_URL` in the hosting environment before building, for each deployment target (for example, both Vercel Preview and Production). Next.js embeds this value in the client bundle, so setting it requires a new build. Without it, the app displays a configuration message and does not render private pages or call Convex hooks.
 
 Schema additions are backward compatible and preserve existing books and chapters. The private API change requires the new frontend: deploy frontend and Convex changes together. `npx convex dev --once` updates only the development deployment; production requires `npx convex deploy` and a matching frontend release configured with that production Convex URL. Do not point the new frontend at an older backend or leave the old frontend using the new private endpoints.

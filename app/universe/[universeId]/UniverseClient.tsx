@@ -31,7 +31,7 @@ export default function UniverseClient({
   const universeId = universeIdRaw as Id<"universes">;
   const { t } = useLocale();
 
-  const [activeTab, setActiveTab] = useState<"lore" | "books" | "boardGames">("lore");
+  const [activeTab, setActiveTab] = useState<"lore" | "books">("lore");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
@@ -39,7 +39,6 @@ export default function UniverseClient({
   const categories = useQuery(api.categories.listByUniverse, { universeId });
   const allEntries = useQuery(api.loreEntries.listByUniverse, { universeId });
   const books = useQuery(api.books.listByUniverse, { universeId });
-  const boardGames = useQuery(api.boardGames.listByUniverse, { universeId });
 
   const filteredEntries = allEntries?.filter((entry) => {
     const catMatch =
@@ -89,7 +88,7 @@ export default function UniverseClient({
       <div className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
         {/* Tabs */}
         <div className="flex gap-4 mb-8 border-b border-white/20">
-          {(["lore", "books", "boardGames"] as const).map((tab) => (
+          {(["lore", "books"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -99,7 +98,7 @@ export default function UniverseClient({
                   : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              {tab === "lore" ? t("universe.tabLore") : tab === "books" ? t("universe.tabBooks") : t("universe.tabBoardGames")}
+              {tab === "lore" ? t("universe.tabLore") : t("universe.tabBooks")}
             </button>
           ))}
         </div>
@@ -229,57 +228,6 @@ export default function UniverseClient({
                 </div>
               )}
             </div>
-          </div>
-        )}
-
-        {/* Board Games Tab */}
-        {activeTab === "boardGames" && (
-          <div>
-            {boardGames === undefined && (
-              <div className="flex justify-center py-16">
-                <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              </div>
-            )}
-            {boardGames !== undefined && boardGames.length === 0 && (
-              <p className="text-center text-gray-500 font-text py-16">{t("universe.noBoardGames")}</p>
-            )}
-            {boardGames && boardGames.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {boardGames
-                  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-                  .map((game) => (
-                    <Link
-                      key={game._id}
-                      href={`/board-game/${game._id}`}
-                      className="group bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden hover:bg-white/15 hover:border-white/30 transition-all duration-300"
-                    >
-                      <div className="flex gap-4 p-4">
-                        <div className="flex-shrink-0 w-20 h-20 bg-gray-700 rounded-lg overflow-hidden">
-                          {game.coverUrl ? (
-                            <img src={game.coverUrl} alt={game.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-3xl">🎲</div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-bold text-white group-hover:text-blue-300 transition-colors font-title mb-1">
-                            {game.title}
-                          </h3>
-                          <span className="inline-block bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-md text-xs text-amber-200/90 font-text mb-2">
-                            🎮{" "}
-                            {game.minPlayers === game.maxPlayers
-                              ? t("universe.playersOne", { min: game.minPlayers })
-                              : t("universe.playersRange", { min: game.minPlayers, max: game.maxPlayers })}
-                          </span>
-                          {game.description && (
-                            <p className="text-sm text-gray-400 font-text line-clamp-2">{game.description}</p>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-              </div>
-            )}
           </div>
         )}
 

@@ -103,7 +103,10 @@ export function PagesEditor({ doc, readOnly, onNavigate, save }: { doc: WritingD
   );
   const linkTargetsRef = useRef(linkTargets); linkTargetsRef.current = linkTargets;
   const onNavigateRef = useRef(onNavigate); onNavigateRef.current = onNavigate;
-  const backlinks = useQuery(api.notebook.backlinks, { id: doc.id as Id<"documents"> });
+  // doc.id is a chapters._id when PagesEditor is used from ChapterPane — only query
+  // backlinks (documents-table only) when this is a real notebook document (onNavigate
+  // is only passed by DocumentPane). Passing the wrong table's id would throw at runtime.
+  const backlinks = useQuery(api.notebook.backlinks, onNavigate ? { id: doc.id as Id<"documents"> } : "skip");
 
   const wikiLinkExtension = useMemo(
     () => WikiLink.configure({

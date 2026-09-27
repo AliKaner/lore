@@ -111,7 +111,7 @@ function highlightPlainText(text: string, entries: HighlightEntry[], keyPrefix: 
         <Link
           key={`${keyPrefix}-h${i}`}
           href={`/lore/${match.id}`}
-          className="text-amber-300 font-semibold rounded px-0.5 -mx-0.5 shadow-[0_0_10px_rgba(251,191,36,0.7)] hover:shadow-[0_0_16px_rgba(251,191,36,0.9)] transition-shadow"
+          className="text-[#8c7332] font-semibold rounded px-0.5 -mx-0.5 shadow-[0_0_10px_rgba(251,191,36,0.7)] hover:shadow-[0_0_16px_rgba(251,191,36,0.9)] transition-shadow"
         >
           {part}
         </Link>
@@ -139,7 +139,7 @@ function parseInline(str: string, entries: HighlightEntry[], keyPrefix: string):
 
     if ((m = rest.match(codeRe))) {
       nodes.push(
-        <code key={`${keyPrefix}-${cursor}`} className="px-1.5 py-0.5 rounded bg-black/40 text-amber-200 text-[0.9em] font-mono">
+        <code key={`${keyPrefix}-${cursor}`} className="px-1.5 py-0.5 rounded bg-[#eef0e9] text-[#8c7332] text-[0.9em] font-mono">
           {m[1]}
         </code>
       );
@@ -184,7 +184,7 @@ function parseInline(str: string, entries: HighlightEntry[], keyPrefix: string):
 
     if ((m = rest.match(boldRe))) {
       nodes.push(
-        <strong key={`${keyPrefix}-${cursor}`} className="font-bold text-white">
+        <strong key={`${keyPrefix}-${cursor}`} className="font-bold text-[#343831]">
           {parseInline(m[1], entries, `${keyPrefix}-${cursor}b`)}
         </strong>
       );
@@ -212,7 +212,7 @@ function parseInline(str: string, entries: HighlightEntry[], keyPrefix: string):
             href={url}
             target={url.startsWith("/") ? undefined : "_blank"}
             rel={url.startsWith("/") ? undefined : "noopener noreferrer"}
-            className="text-blue-400 underline hover:text-blue-300 transition-colors"
+            className="text-[#4b6a56] underline hover:text-[#35533f] transition-colors"
           >
             {label}
           </a>
@@ -313,16 +313,16 @@ export function renderRichText(text: string, entries: HighlightEntry[] = []): Re
         const sizeClass =
           block.level === 1 ? "text-2xl mt-6 mb-2" : block.level === 2 ? "text-xl mt-5 mb-2" : "text-lg mt-4 mb-1.5";
         return (
-          <Tag key={key} className={`font-title font-bold text-white ${sizeClass}`}>
+          <Tag key={key} className={`font-title font-bold text-[#343831] ${sizeClass}`}>
             {parseInline(block.text, entries, key)}
           </Tag>
         );
       }
       case "hr":
-        return <hr key={key} className="border-white/10 my-6" />;
+        return <hr key={key} className="border-[#e5e7dd] my-6" />;
       case "quote":
         return (
-          <blockquote key={key} className="border-l-2 border-amber-400/50 pl-4 my-3 text-gray-400 italic">
+          <blockquote key={key} className="border-l-2 border-[#e3d3a6] pl-4 my-3 text-[#8b9681] italic">
             {block.lines.map((l, li) => (
               <React.Fragment key={li}>
                 {parseInline(l, entries, `${key}-${li}`)}

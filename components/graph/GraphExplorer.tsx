@@ -49,11 +49,11 @@ export function GraphExplorer({ onClose, className = "" }: GraphExplorerProps) {
         <select
           value={universeId}
           onChange={(e) => handleUniverseChange(e.target.value)}
-          className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none"
+          className="bg-white border border-[#e5e7dd] rounded-lg px-3 py-2 text-[#343831] text-sm focus:outline-none"
         >
           <option value="">Evren seçin</option>
           {universes?.map((u) => (
-            <option key={u._id} value={u._id} className="bg-gray-900">
+            <option key={u._id} value={u._id}>
               {u.name}
             </option>
           ))}
@@ -61,21 +61,21 @@ export function GraphExplorer({ onClose, className = "" }: GraphExplorerProps) {
         {onClose && (
           <button
             onClick={onClose}
-            className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-sm text-white hover:bg-white/20 transition-colors font-text"
+            className="px-3 py-2 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-sm text-[#343831] hover:bg-[#dfe6d9] transition-colors font-text"
           >
             Kapat (Esc)
           </button>
         )}
       </div>
 
-      <div className="flex-1 min-h-0 bg-gray-950 border border-white/10 rounded-xl overflow-hidden">
+      <div className="flex-1 min-h-0 bg-[#f6f7f2] border border-[#e5e7dd] rounded-xl overflow-hidden">
         {!universeId ? (
-          <div className="w-full h-full flex items-center justify-center text-gray-500 font-text">
+          <div className="w-full h-full flex items-center justify-center text-[#96998e] font-text">
             Devam etmek için bir evren seç.
           </div>
         ) : graph === undefined ? (
           <div className="w-full h-full flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" />
           </div>
         ) : (
           <GraphView

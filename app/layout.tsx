@@ -1,21 +1,8 @@
 import type { Metadata } from "next";
-import { Cinzel_Decorative, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import "./desk.css";
 import { Providers } from "./providers";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "./constants/site";
-
-const cinzelDecorative = Cinzel_Decorative({
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-  variable: "--font-cinzel-decorative",
-});
-
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-cormorant-garamond",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -66,9 +53,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr">
-      <body
-        className={`${cinzelDecorative.variable} ${cormorantGaramond.variable}`}
-      >
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

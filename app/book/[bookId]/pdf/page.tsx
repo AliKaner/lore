@@ -18,17 +18,17 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
 
   if (book === undefined || chapters === undefined) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#f9f9f6] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" />
       </div>
     );
   }
 
   if (book === null) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white text-center">
+      <div className="min-h-screen bg-[#f9f9f6] flex items-center justify-center text-[#343831] text-center">
         <h1 className="text-3xl font-bold font-title mb-4">Book Not Found</h1>
-        <Link href="/" className="text-blue-400 hover:underline">Back to Home</Link>
+        <Link href="/" className="text-[#4b6a56] hover:underline">Back to Home</Link>
       </div>
     );
   }
@@ -38,13 +38,13 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white print:bg-white print:text-black">
+    <div className="min-h-screen bg-[#f9f9f6] text-[#343831] print:bg-white print:text-black">
       {/* Control bar - Hidden in Print */}
-      <div className="no-print bg-black/40 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
+      <div className="no-print bg-[#f6f7f2] backdrop-blur-md border-b border-[#e5e7dd] sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link
             href={`/book/${bookId}`}
-            className="flex items-center text-gray-300 hover:text-white transition-colors"
+            className="flex items-center text-[#5c6653] hover:text-[#20261c] transition-colors"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -56,7 +56,7 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
             <select
               value={lang}
               onChange={(e) => setLang(e.target.value as "tr" | "en")}
-              className="bg-gray-800 border border-white/20 text-white rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-white/50 cursor-pointer"
+              className="bg-[#eef0e9] border border-[#e5e7dd] text-[#343831] rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#779884]/40 cursor-pointer"
             >
               <option value="tr">Türkçe Metin</option>
               <option value="en">English Text</option>
@@ -64,7 +64,7 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
 
             <button
               onClick={handlePrint}
-              className="px-5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-1.5 bg-[#3f5e4b] hover:bg-[#2e4939] text-[#343831] font-semibold text-sm rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h8z" />
@@ -106,14 +106,14 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
         <div className="min-h-[80vh] flex flex-col justify-between items-center text-center py-12 print:min-h-screen print:justify-center">
           <div className="space-y-4">
             {book.universe && (
-              <p className="text-blue-400 font-semibold font-text text-lg uppercase tracking-widest print:text-gray-650">
+              <p className="text-[#4b6a56] font-semibold font-text text-lg uppercase tracking-widest print:text-[#7a856f]">
                 {book.universe.name} Evreni
               </p>
             )}
             <h1 className="text-5xl md:text-6xl font-extrabold font-title tracking-tight mt-2 print:text-black print:text-4xl">
               {book.title}
             </h1>
-            <div className="w-24 h-1 bg-blue-500 mx-auto my-6 print:bg-gray-400" />
+            <div className="w-24 h-1 bg-[#3f5e4b] mx-auto my-6 print:bg-[#b9c0ab]" />
           </div>
 
           <div className="my-8 max-w-sm">
@@ -124,7 +124,7 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
                 className="w-full h-80 object-cover rounded-lg shadow-2xl print:border print:border-gray-200 print:shadow-none"
               />
             ) : (
-              <div className="w-48 h-64 bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 text-6xl mx-auto print:border print:border-gray-200">
+              <div className="w-48 h-64 bg-[#eef0e9] rounded-lg flex items-center justify-center text-[#96998e] text-6xl mx-auto print:border print:border-gray-200">
                 📚
               </div>
             )}
@@ -132,11 +132,11 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
 
           <div className="max-w-md space-y-2">
             {book.description && (
-              <p className="text-gray-300 font-text text-base italic print:text-gray-650">
+              <p className="text-[#5c6653] font-text text-base italic print:text-[#7a856f]">
                 {book.description}
               </p>
             )}
-            <p className="text-sm text-gray-500 font-text pt-4">
+            <p className="text-sm text-[#96998e] font-text pt-4">
               Basım Tarihi: {new Date().toLocaleDateString("tr-TR")}
             </p>
           </div>
@@ -147,17 +147,17 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
 
         {/* 2. TABLE OF CONTENTS */}
         <div className="min-h-[85vh] py-16 flex flex-col justify-center print:min-h-screen">
-          <h2 className="text-3xl font-bold font-title mb-8 border-b border-white/20 pb-4 print:text-black print:border-black/20">
+          <h2 className="text-3xl font-bold font-title mb-8 border-b border-[#e5e7dd] pb-4 print:text-black print:border-black/20">
             İçindekiler / Table of Contents
           </h2>
           <nav className="space-y-4 max-w-lg">
             {chapters.map((ch, index) => (
               <div key={ch._id} className="flex justify-between items-center text-lg font-text">
-                <span className="flex-1 border-b border-dotted border-white/20 mr-2 print:border-black/20">
+                <span className="flex-1 border-b border-dotted border-[#e5e7dd] mr-2 print:border-black/20">
                   <span className="font-semibold mr-4">Bölüm {index + 1}:</span>
-                  <span className="text-gray-300 print:text-black">{ch.title}</span>
+                  <span className="text-[#5c6653] print:text-black">{ch.title}</span>
                 </span>
-                <span className="text-gray-400 font-semibold print:text-black">
+                <span className="text-[#8b9681] font-semibold print:text-black">
                   s. {index + 2}
                 </span>
               </div>
@@ -178,16 +178,16 @@ export default function BookPdfPage({ params }: { params: Promise<{ bookId: stri
                 {index > 0 && <hr className="page-break" />}
 
                 <div className="mb-8">
-                  <span className="text-blue-400 font-semibold font-text text-sm uppercase tracking-wider print:text-gray-500">
+                  <span className="text-[#4b6a56] font-semibold font-text text-sm uppercase tracking-wider print:text-[#96998e]">
                     Bölüm {index + 1}
                   </span>
                   <h2 className="text-3xl md:text-4xl font-extrabold font-title mt-2 print:text-black print:text-2xl">
                     {ch.title}
                   </h2>
-                  <div className="w-16 h-0.5 bg-blue-500/50 mt-4 print:bg-gray-300" />
+                  <div className="w-16 h-0.5 bg-[#a9c2ab] mt-4 print:bg-[#cdd3c1]" />
                 </div>
 
-                <div className="text-gray-300 leading-relaxed font-text text-lg print:text-black print:text-base print:leading-extra-loose">
+                <div className="text-[#5c6653] leading-relaxed font-text text-lg print:text-black print:text-base print:leading-extra-loose">
                   {renderRichText(content)}
                 </div>
               </div>

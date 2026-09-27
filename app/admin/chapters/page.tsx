@@ -127,9 +127,9 @@ export default function AdminChapters() {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-white font-title">Chapters</h1>
+        <h1 className="text-3xl font-bold text-[#343831] font-title">Chapters</h1>
         {mode === "list" && (
-          <button onClick={openCreate} className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-colors font-text">
+          <button onClick={openCreate} className="px-4 py-2 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] hover:bg-[#cfd9c5] transition-colors font-text">
             + Add Chapter
           </button>
         )}
@@ -137,54 +137,54 @@ export default function AdminChapters() {
 
       {/* Form */}
       {mode === "create" && (
-        <div className="bg-white/10 border border-white/20 rounded-xl p-6 mb-8">
-          <h2 className="text-xl font-bold text-white mb-6 font-title">New Chapter</h2>
+        <div className="bg-white border border-[#e5e7dd] rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-bold text-[#343831] mb-6 font-title">New Chapter</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Universe (filter)</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Universe (filter)</label>
                 <select
                   value={filterUniverse}
                   onChange={(e) => setFilterUniverse(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 >
-                  <option value="all" className="bg-gray-900">All Universes</option>
-                  {universes?.map((u) => <option key={u._id} value={u._id} className="bg-gray-900">{u.name}</option>)}
+                  <option value="all" className="bg-[#f9f9f6]">All Universes</option>
+                  {universes?.map((u) => <option key={u._id} value={u._id} className="bg-[#f9f9f6]">{u.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Book *</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Book *</label>
                 <select
                   value={form.bookId}
                   onChange={(e) => setForm({ ...form, bookId: e.target.value })}
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 >
                   <option value="">Select book</option>
-                  {formBooks?.map((b) => <option key={b._id} value={b._id} className="bg-gray-900">{b.title}</option>)}
+                  {formBooks?.map((b) => <option key={b._id} value={b._id} className="bg-[#f9f9f6]">{b.title}</option>)}
                 </select>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Title *</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Title *</label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Chapter Order *</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Chapter Order *</label>
                 <input
                   type="number"
                   value={form.order}
                   onChange={(e) => setForm({ ...form, order: e.target.value })}
                   required
                   min={1}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 />
               </div>
             </div>
@@ -192,11 +192,11 @@ export default function AdminChapters() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => setContentLang("tr")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "tr" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>Türkçe</button>
-                  <button type="button" onClick={() => setContentLang("en")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "en" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}>English</button>
+                  <button type="button" onClick={() => setContentLang("tr")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "tr" ? "bg-[#dfe6d9] text-[#343831]" : "bg-white text-[#8b9681]"}`}>Türkçe</button>
+                  <button type="button" onClick={() => setContentLang("en")} className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "en" ? "bg-[#dfe6d9] text-[#343831]" : "bg-white text-[#8b9681]"}`}>English</button>
                 </div>
                 {form.bookId && (
-                  <button type="button" onClick={() => setShowCharModal(true)} className="px-3 py-1 bg-green-600/30 border border-green-500/30 rounded text-green-300 hover:bg-green-600/50 transition-colors text-sm font-text">
+                  <button type="button" onClick={() => setShowCharModal(true)} className="px-3 py-1 bg-[#e9eee4] border border-[#b7cbb0] rounded text-[#4b644b] hover:bg-[#dbe4d2] transition-colors text-sm font-text">
                     + Hızlı Karakter
                   </button>
                 )}
@@ -219,12 +219,12 @@ export default function AdminChapters() {
                 />
               )}
             </div>
-            {error && <p className="text-red-400 text-sm font-text">{error}</p>}
+            {error && <p className="text-[#996a60] text-sm font-text">{error}</p>}
             <div className="flex gap-3">
-              <button type="submit" disabled={loading} className="px-6 py-2 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-colors disabled:opacity-50 font-text">
+              <button type="submit" disabled={loading} className="px-6 py-2 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] hover:bg-[#cfd9c5] transition-colors disabled:opacity-50 font-text">
                 {loading ? "Saving..." : "Save"}
               </button>
-              <button type="button" onClick={cancel} className="px-6 py-2 bg-transparent border border-white/20 rounded-lg text-gray-400 hover:text-white transition-colors font-text">
+              <button type="button" onClick={cancel} className="px-6 py-2 bg-transparent border border-[#e5e7dd] rounded-lg text-[#8b9681] hover:text-[#20261c] transition-colors font-text">
                 Cancel
               </button>
             </div>
@@ -235,13 +235,13 @@ export default function AdminChapters() {
       {/* Filters */}
       {mode === "list" && (
         <div className="flex flex-wrap gap-2 mb-4">
-          <select value={filterUniverse} onChange={(e) => { setFilterUniverse(e.target.value); setFilterBook("all"); }} className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none">
-            <option value="all" className="bg-gray-900">All Universes</option>
-            {universes?.map((u) => <option key={u._id} value={u._id} className="bg-gray-900">{u.name}</option>)}
+          <select value={filterUniverse} onChange={(e) => { setFilterUniverse(e.target.value); setFilterBook("all"); }} className="bg-white border border-[#e5e7dd] rounded-lg px-3 py-2 text-[#343831] text-sm focus:outline-none">
+            <option value="all" className="bg-[#f9f9f6]">All Universes</option>
+            {universes?.map((u) => <option key={u._id} value={u._id} className="bg-[#f9f9f6]">{u.name}</option>)}
           </select>
-          <select value={filterBook} onChange={(e) => setFilterBook(e.target.value)} className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none">
-            <option value="all" className="bg-gray-900">All Books</option>
-            {filteredBooks?.map((b) => <option key={b._id} value={b._id} className="bg-gray-900">{b.title}</option>)}
+          <select value={filterBook} onChange={(e) => setFilterBook(e.target.value)} className="bg-white border border-[#e5e7dd] rounded-lg px-3 py-2 text-[#343831] text-sm focus:outline-none">
+            <option value="all" className="bg-[#f9f9f6]">All Books</option>
+            {filteredBooks?.map((b) => <option key={b._id} value={b._id} className="bg-[#f9f9f6]">{b.title}</option>)}
           </select>
         </div>
       )}
@@ -249,23 +249,23 @@ export default function AdminChapters() {
       {/* List */}
       {mode === "list" && (
         chapters === undefined ? (
-          <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" /></div>
+          <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" /></div>
         ) : (filtered?.length ?? 0) === 0 ? (
-          <p className="text-gray-500 font-text text-center py-16">No chapters yet.</p>
+          <p className="text-[#96998e] font-text text-center py-16">No chapters yet.</p>
         ) : (
           <div className="space-y-3">
             {filtered?.sort((a, b) => a.order - b.order).map((c) => (
-              <div key={c._id} className="bg-white/10 border border-white/20 rounded-xl p-4 flex items-center gap-4">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white font-bold font-title flex-shrink-0">
+              <div key={c._id} className="bg-white border border-[#e5e7dd] rounded-xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 bg-[#eef0e9] rounded-full flex items-center justify-center text-[#343831] font-bold font-title flex-shrink-0">
                   {c.order}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-semibold font-title truncate">{c.title}</h3>
-                  <p className="text-gray-400 text-xs font-text">{getBookName(c.bookId)}</p>
+                  <h3 className="text-[#343831] font-semibold font-title truncate">{c.title}</h3>
+                  <p className="text-[#8b9681] text-xs font-text">{getBookName(c.bookId)}</p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
-                  <button onClick={() => openEditInStudio(c)} className="px-3 py-1.5 bg-blue-600/30 border border-blue-500/30 rounded text-blue-300 hover:bg-blue-600/50 transition-colors text-sm font-text">Edit</button>
-                  <button onClick={() => handleDelete(c._id)} className="px-3 py-1.5 bg-red-600/30 border border-red-500/30 rounded text-red-300 hover:bg-red-600/50 transition-colors text-sm font-text">Delete</button>
+                  <button onClick={() => openEditInStudio(c)} className="px-3 py-1.5 bg-[#e5eee6] border border-[#a9c2ab] rounded text-[#4b6a56] hover:bg-[#d3e2d6] transition-colors text-sm font-text">Edit</button>
+                  <button onClick={() => handleDelete(c._id)} className="px-3 py-1.5 bg-[#f7ece9] border border-[#e6cfc7] rounded text-[#996a60] hover:bg-[#f0ddd6] transition-colors text-sm font-text">Delete</button>
                 </div>
               </div>
             ))}
@@ -276,38 +276,38 @@ export default function AdminChapters() {
       {/* Quick Character Modal */}
       {showCharModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-white/20 rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold text-white mb-4 font-title">Hızlı Karakter Ekle</h3>
+          <div className="bg-[#f9f9f6] border border-[#e5e7dd] rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-[#343831] mb-4 font-title">Hızlı Karakter Ekle</h3>
             <form onSubmit={handleAddCharacter} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Kategori *</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Kategori *</label>
                 <select
                   value={charForm.categoryId}
                   onChange={(e) => setCharForm({ ...charForm, categoryId: e.target.value })}
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 >
                   <option value="">Kategori seçin</option>
                   {categories?.filter(c => c.universeId === books?.find(b => b._id === form.bookId)?.universeId).map((c) => (
-                    <option key={c._id} value={c._id} className="bg-gray-900">{c.name}</option>
+                    <option key={c._id} value={c._id} className="bg-[#f9f9f6]">{c.name}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Karakter Adı *</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Karakter Adı *</label>
                 <input
                   type="text"
                   value={charForm.name}
                   onChange={(e) => setCharForm({ ...charForm, name: e.target.value })}
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 />
               </div>
               <div className="flex gap-3 pt-4">
-                <button type="submit" disabled={charLoading} className="px-6 py-2 bg-green-600/30 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-600/50 transition-colors disabled:opacity-50 font-text flex-1">
+                <button type="submit" disabled={charLoading} className="px-6 py-2 bg-[#e9eee4] border border-[#b7cbb0] rounded-lg text-[#4b644b] hover:bg-[#dbe4d2] transition-colors disabled:opacity-50 font-text flex-1">
                   {charLoading ? "Ekleniyor..." : "Ekle"}
                 </button>
-                <button type="button" onClick={() => setShowCharModal(false)} className="px-6 py-2 bg-transparent border border-white/20 rounded-lg text-gray-400 hover:text-white transition-colors font-text flex-1">
+                <button type="button" onClick={() => setShowCharModal(false)} className="px-6 py-2 bg-transparent border border-[#e5e7dd] rounded-lg text-[#8b9681] hover:text-[#20261c] transition-colors font-text flex-1">
                   İptal
                 </button>
               </div>

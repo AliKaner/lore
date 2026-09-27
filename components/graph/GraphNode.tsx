@@ -14,8 +14,8 @@ export function GraphNode({ data, selected }: NodeProps<FlowGraphNode>) {
         selected ? `ring-2 ${style.ring}` : ""
       }`}
     >
-      <Handle type="target" position={Position.Top} className="!bg-white/40 !border-0 !w-2 !h-2" />
-      <Handle type="target" position={Position.Left} className="!bg-white/40 !border-0 !w-2 !h-2" />
+      <Handle type="target" position={Position.Top} className="!bg-[#343831]/30 !border-0 !w-2 !h-2" />
+      <Handle type="target" position={Position.Left} className="!bg-[#343831]/30 !border-0 !w-2 !h-2" />
       <div className="flex items-start gap-2">
         {data.imageUrl ? (
           <img src={data.imageUrl} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
@@ -29,8 +29,8 @@ export function GraphNode({ data, selected }: NodeProps<FlowGraphNode>) {
           )}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-white/40 !border-0 !w-2 !h-2" />
-      <Handle type="source" position={Position.Right} className="!bg-white/40 !border-0 !w-2 !h-2" />
+      <Handle type="source" position={Position.Bottom} className="!bg-[#343831]/30 !border-0 !w-2 !h-2" />
+      <Handle type="source" position={Position.Right} className="!bg-[#343831]/30 !border-0 !w-2 !h-2" />
     </div>
   );
 }

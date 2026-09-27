@@ -139,9 +139,9 @@ export default function AdminEntries() {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-white font-title">Lore Entries</h1>
+        <h1 className="text-3xl font-bold text-[#343831] font-title">Lore Entries</h1>
         {mode === "list" && (
-          <button onClick={openCreate} className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-colors font-text">
+          <button onClick={openCreate} className="px-4 py-2 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] hover:bg-[#cfd9c5] transition-colors font-text">
             + Add Entry
           </button>
         )}
@@ -149,72 +149,72 @@ export default function AdminEntries() {
 
       {/* Form */}
       {(mode === "create" || mode === "edit") && (
-        <div className="bg-white/10 border border-white/20 rounded-xl p-6 mb-8">
-          <h2 className="text-xl font-bold text-white mb-6 font-title">
+        <div className="bg-white border border-[#e5e7dd] rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-bold text-[#343831] mb-6 font-title">
             {mode === "create" ? "New Lore Entry" : "Edit Lore Entry"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Universe *</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Universe *</label>
                 <select
                   value={form.universeId}
                   onChange={(e) => setForm({ ...form, universeId: e.target.value, categoryId: "" })}
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 >
                   <option value="">Select universe</option>
                   {universes?.map((u) => (
-                    <option key={u._id} value={u._id} className="bg-gray-900">{u.name}</option>
+                    <option key={u._id} value={u._id} className="bg-[#f9f9f6]">{u.name}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Category *</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Category *</label>
                 <select
                   value={form.categoryId}
                   onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 >
                   <option value="">Select category</option>
                   {filteredCategories?.map((c) => (
-                    <option key={c._id} value={c._id} className="bg-gray-900">{c.name}</option>
+                    <option key={c._id} value={c._id} className="bg-[#f9f9f6]">{c.name}</option>
                   ))}
                 </select>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Name *</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Name *</label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">Type *</label>
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">Type *</label>
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value as LoreType })}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                  className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
                 >
                   {TYPES.map((t) => (
-                    <option key={t} value={t} className="bg-gray-900 capitalize">{t}</option>
+                    <option key={t} value={t} className="bg-[#f9f9f6] capitalize">{t}</option>
                   ))}
                 </select>
               </div>
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1 font-text">Order</label>
+              <label className="block text-sm text-[#5c6653] mb-1 font-text">Order</label>
               <input
                 type="number"
                 value={form.order}
                 onChange={(e) => setForm({ ...form, order: e.target.value })}
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+                className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
               />
             </div>
             {/* Content with language tabs */}
@@ -223,14 +223,14 @@ export default function AdminEntries() {
                 <button
                   type="button"
                   onClick={() => setContentLang("tr")}
-                  className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "tr" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}
+                  className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "tr" ? "bg-[#dfe6d9] text-[#343831]" : "bg-white text-[#8b9681]"}`}
                 >
                   Türkçe
                 </button>
                 <button
                   type="button"
                   onClick={() => setContentLang("en")}
-                  className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "en" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}
+                  className={`px-4 py-1 rounded text-sm font-text transition-colors ${contentLang === "en" ? "bg-[#dfe6d9] text-[#343831]" : "bg-white text-[#8b9681]"}`}
                 >
                   English
                 </button>
@@ -255,16 +255,16 @@ export default function AdminEntries() {
             </div>
             {form.universeId && (
               <div>
-                <label className="block text-sm text-gray-300 mb-1 font-text">
+                <label className="block text-sm text-[#5c6653] mb-1 font-text">
                   İlgili Girdiler
                 </label>
-                <div className="max-h-48 overflow-y-auto bg-white/5 border border-white/10 rounded-lg p-3 space-y-1">
+                <div className="max-h-48 overflow-y-auto bg-[#f6f7f2] border border-[#e5e7dd] rounded-lg p-3 space-y-1">
                   {entries
                     ?.filter((e) => e.universeId === form.universeId && e._id !== editId)
                     .map((e) => (
                       <label
                         key={e._id}
-                        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 cursor-pointer text-sm font-text text-gray-300"
+                        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-[#f4f7f0] cursor-pointer text-sm font-text text-[#5c6653]"
                       >
                         <input
                           type="checkbox"
@@ -277,15 +277,15 @@ export default function AdminEntries() {
                                 : form.relatedEntryIds.filter((id) => id !== e._id),
                             })
                           }
-                          className="accent-blue-500"
+                          className="accent-[#3f5e4b]"
                         />
-                        <span className="capitalize text-gray-500">{e.type}</span>
+                        <span className="capitalize text-[#96998e]">{e.type}</span>
                         {e.name}
                       </label>
                     ))}
                   {entries?.filter((e) => e.universeId === form.universeId && e._id !== editId)
                     .length === 0 && (
-                    <p className="text-gray-500 text-sm font-text px-2 py-1">
+                    <p className="text-[#96998e] text-sm font-text px-2 py-1">
                       Bu evrende başka girdi yok.
                     </p>
                   )}
@@ -300,12 +300,12 @@ export default function AdminEntries() {
                 label="Entry Image"
               />
             )}
-            {error && <p className="text-red-400 text-sm font-text">{error}</p>}
+            {error && <p className="text-[#996a60] text-sm font-text">{error}</p>}
             <div className="flex gap-3">
-              <button type="submit" disabled={loading} className="px-6 py-2 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-colors disabled:opacity-50 font-text">
+              <button type="submit" disabled={loading} className="px-6 py-2 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] hover:bg-[#cfd9c5] transition-colors disabled:opacity-50 font-text">
                 {loading ? "Saving..." : "Save"}
               </button>
-              <button type="button" onClick={cancel} className="px-6 py-2 bg-transparent border border-white/20 rounded-lg text-gray-400 hover:text-white transition-colors font-text">
+              <button type="button" onClick={cancel} className="px-6 py-2 bg-transparent border border-[#e5e7dd] rounded-lg text-[#8b9681] hover:text-[#20261c] transition-colors font-text">
                 Cancel
               </button>
             </div>
@@ -316,43 +316,43 @@ export default function AdminEntries() {
       {/* Filters */}
       {mode === "list" && (
         <div className="flex flex-wrap gap-2 mb-4">
-          <select value={filterUniverse} onChange={(e) => { setFilterUniverse(e.target.value); setFilterCategory("all"); }} className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none">
-            <option value="all" className="bg-gray-900">All Universes</option>
-            {universes?.map((u) => <option key={u._id} value={u._id} className="bg-gray-900">{u.name}</option>)}
+          <select value={filterUniverse} onChange={(e) => { setFilterUniverse(e.target.value); setFilterCategory("all"); }} className="bg-white border border-[#e5e7dd] rounded-lg px-3 py-2 text-[#343831] text-sm focus:outline-none">
+            <option value="all" className="bg-[#f9f9f6]">All Universes</option>
+            {universes?.map((u) => <option key={u._id} value={u._id} className="bg-[#f9f9f6]">{u.name}</option>)}
           </select>
-          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none">
-            <option value="all" className="bg-gray-900">All Categories</option>
-            {listCats?.map((c) => <option key={c._id} value={c._id} className="bg-gray-900">{c.name}</option>)}
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="bg-white border border-[#e5e7dd] rounded-lg px-3 py-2 text-[#343831] text-sm focus:outline-none">
+            <option value="all" className="bg-[#f9f9f6]">All Categories</option>
+            {listCats?.map((c) => <option key={c._id} value={c._id} className="bg-[#f9f9f6]">{c.name}</option>)}
           </select>
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none">
-            <option value="all" className="bg-gray-900">All Types</option>
-            {TYPES.map((t) => <option key={t} value={t} className="bg-gray-900 capitalize">{t}</option>)}
+          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="bg-white border border-[#e5e7dd] rounded-lg px-3 py-2 text-[#343831] text-sm focus:outline-none">
+            <option value="all" className="bg-[#f9f9f6]">All Types</option>
+            {TYPES.map((t) => <option key={t} value={t} className="bg-[#f9f9f6] capitalize">{t}</option>)}
           </select>
         </div>
       )}
 
       {/* List */}
       {entries === undefined ? (
-        <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" /></div>
+        <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" /></div>
       ) : (filtered?.length ?? 0) === 0 ? (
-        <p className="text-gray-500 font-text text-center py-16">No entries yet.</p>
+        <p className="text-[#96998e] font-text text-center py-16">No entries yet.</p>
       ) : (
         <div className="space-y-3">
           {filtered?.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((e) => (
-            <div key={e._id} className="bg-white/10 border border-white/20 rounded-xl p-4 flex items-center gap-4">
+            <div key={e._id} className="bg-white border border-[#e5e7dd] rounded-xl p-4 flex items-center gap-4">
               {e.imageUrl && <img src={e.imageUrl} alt={e.name} className="w-14 h-14 rounded object-cover flex-shrink-0" />}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-white font-semibold font-title truncate">{e.name}</h3>
-                  <span className="text-xs bg-white/20 text-gray-300 px-2 py-0.5 rounded capitalize">{e.type}</span>
+                  <h3 className="text-[#343831] font-semibold font-title truncate">{e.name}</h3>
+                  <span className="text-xs bg-[#eef0e9] text-[#5c6653] px-2 py-0.5 rounded capitalize">{e.type}</span>
                 </div>
-                <p className="text-gray-400 text-xs font-text">
+                <p className="text-[#8b9681] text-xs font-text">
                   {getName(categories ?? [], e.categoryId)} Â· {getName(universes ?? [], e.universeId)}
                 </p>
               </div>
               <div className="flex gap-2 flex-shrink-0">
-                <button onClick={() => openEdit(e)} className="px-3 py-1.5 bg-blue-600/30 border border-blue-500/30 rounded text-blue-300 hover:bg-blue-600/50 transition-colors text-sm font-text">Edit</button>
-                <button onClick={() => handleDelete(e._id)} className="px-3 py-1.5 bg-red-600/30 border border-red-500/30 rounded text-red-300 hover:bg-red-600/50 transition-colors text-sm font-text">Delete</button>
+                <button onClick={() => openEdit(e)} className="px-3 py-1.5 bg-[#e5eee6] border border-[#a9c2ab] rounded text-[#4b6a56] hover:bg-[#d3e2d6] transition-colors text-sm font-text">Edit</button>
+                <button onClick={() => handleDelete(e._id)} className="px-3 py-1.5 bg-[#f7ece9] border border-[#e6cfc7] rounded text-[#996a60] hover:bg-[#f0ddd6] transition-colors text-sm font-text">Delete</button>
               </div>
             </div>
           ))}

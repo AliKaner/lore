@@ -49,8 +49,8 @@ export function GraphView({
         source: e.source,
         target: e.target,
         label: e.linkType,
-        style: { stroke: "rgba(255,255,255,0.25)" },
-        labelStyle: { fill: "rgba(255,255,255,0.5)", fontSize: 10 },
+        style: { stroke: "rgba(52,56,49,0.3)" },
+        labelStyle: { fill: "rgba(52,56,49,0.6)", fontSize: 10 },
       })),
     [rawEdges]
   );
@@ -75,11 +75,11 @@ export function GraphView({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="absolute top-3 left-3 z-10 flex gap-1 bg-black/50 backdrop-blur-md border border-white/10 rounded-lg p-1">
+      <div className="absolute top-3 left-3 z-10 flex gap-1 bg-white/90 backdrop-blur-md border border-[#e5e7dd] rounded-lg p-1 shadow-sm">
         <button
           onClick={() => setMode("tree")}
           className={`px-3 py-1.5 rounded-md text-xs font-title font-semibold transition-colors ${
-            mode === "tree" ? "bg-white/20 text-white" : "text-gray-400 hover:text-white"
+            mode === "tree" ? "bg-[#3f5e4b] text-white" : "text-[#8b9681] hover:text-[#343831]"
           }`}
         >
           🌳 Git-Tree
@@ -87,7 +87,7 @@ export function GraphView({
         <button
           onClick={() => setMode("web")}
           className={`px-3 py-1.5 rounded-md text-xs font-title font-semibold transition-colors ${
-            mode === "web" ? "bg-white/20 text-white" : "text-gray-400 hover:text-white"
+            mode === "web" ? "bg-[#3f5e4b] text-white" : "text-[#8b9681] hover:text-[#343831]"
           }`}
         >
           🕸️ Web
@@ -101,16 +101,16 @@ export function GraphView({
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         onNodeClick={(_, node) => onNodeClick?.(node.data as GraphNodeData)}
-        colorMode="dark"
+        colorMode="light"
         fitView
         proOptions={{ hideAttribution: true }}
       >
-        <Background color="#ffffff20" gap={24} />
-        <Controls className="!bg-black/50 !border-white/10" />
+        <Background color="#34383120" gap={24} />
+        <Controls className="!bg-white/90 !border-[#e5e7dd]" />
         <MiniMap
-          className="!bg-black/50"
-          maskColor="rgba(0,0,0,0.6)"
-          nodeColor={() => "#ffffff40"}
+          className="!bg-white/90"
+          maskColor="rgba(249,249,246,0.6)"
+          nodeColor={() => "#34383166"}
         />
       </ReactFlow>
     </div>

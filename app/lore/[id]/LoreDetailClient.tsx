@@ -5,7 +5,6 @@ import Header from "@/components/Header";
 import LoreContent from "@/components/LoreContent";
 import Footer from "@/components/Footer";
 import ShareButton from "@/components/ShareButton";
-import CommentSection from "@/components/CommentSection";
 import { useQuery, useMutation } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -42,10 +41,10 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
 
   if (entry === undefined) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      <div className="min-h-screen bg-gradient-to-br from-[#f6f7f1] via-[#f2f4ec] to-[#eef1e6]">
         <Header />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -53,12 +52,12 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
 
   if (entry === null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      <div className="min-h-screen bg-gradient-to-br from-[#f6f7f1] via-[#f2f4ec] to-[#eef1e6]">
         <Header />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="text-center text-white">
+          <div className="text-center text-[#343831]">
             <h1 className="text-4xl font-bold mb-4 font-title">{t("lore.notFound")}</h1>
-            <Link href="/" className="px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all">
+            <Link href="/" className="px-6 py-3 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] hover:bg-[#cfd9c5] transition-all">
               {t("lore.backHome")}
             </Link>
           </div>
@@ -70,10 +69,10 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
   const backHref = entry.universe ? `/universe/${entry.universeId}` : "/";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[#f6f7f1] via-[#f2f4ec] to-[#eef1e6] flex flex-col">
       <Header />
       <div className="max-w-7xl mx-auto px-4 py-16 flex-1 w-full">
-        <Link href={backHref} className="inline-flex items-center text-blue-400 hover:text-blue-300 mb-8 transition-colors">
+        <Link href={backHref} className="inline-flex items-center text-[#4b6a56] hover:text-[#35533f] mb-8 transition-colors">
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -81,7 +80,7 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
         </Link>
 
         {entry.status === "pending" && (
-          <div className="mb-8 px-4 py-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-sm font-text">
+          <div className="mb-8 px-4 py-3 bg-[#f8f3e4] border border-[#e3d3a6] rounded-lg text-[#8c7332] text-sm font-text">
             {t("lore.pendingBanner")}
           </div>
         )}
@@ -90,14 +89,14 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
           <div className="space-y-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="px-3 py-1 bg-white/20 text-white text-sm rounded-full font-text">{t(TYPE_LABEL_KEYS[entry.type])}</span>
-                {entry.category && <span className="text-gray-400 font-text text-sm">{entry.category.name}</span>}
+                <span className="px-3 py-1 bg-[#eef0e9] text-[#343831] text-sm rounded-full font-text">{t(TYPE_LABEL_KEYS[entry.type])}</span>
+                {entry.category && <span className="text-[#8b9681] font-text text-sm">{entry.category.name}</span>}
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 font-title">{entry.name}</h1>
-              {entry.universe && <p className="text-gray-400 font-text">{t("lore.universeLabel", { name: entry.universe.name })}</p>}
+              <h1 className="text-4xl md:text-5xl font-bold text-[#343831] mb-2 font-title">{entry.name}</h1>
+              {entry.universe && <p className="text-[#8b9681] font-text">{t("lore.universeLabel", { name: entry.universe.name })}</p>}
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-8">
+            <div className="bg-white backdrop-blur-md border border-[#e5e7dd] rounded-lg p-8">
               <LoreContent
                 content={{ tr: entry.contentTr, en: entry.contentEn }}
                 entries={(universeEntries ?? [])
@@ -107,15 +106,15 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
             </div>
 
             {entry.relatedEntries && entry.relatedEntries.length > 0 && (
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-white mb-4 font-title">{t("lore.relatedEntries")}</h3>
+              <div className="bg-white backdrop-blur-md border border-[#e5e7dd] rounded-lg p-6">
+                <h3 className="text-lg font-bold text-[#343831] mb-4 font-title">{t("lore.relatedEntries")}</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {entry.relatedEntries.map((rel: any) => (
-                    <Link key={rel._id} href={`/lore/${rel._id}`} className="flex items-center gap-2 bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-colors">
+                    <Link key={rel._id} href={`/lore/${rel._id}`} className="flex items-center gap-2 bg-white rounded-lg p-3 hover:bg-[#dfe6d9] transition-colors">
                       {rel.imageUrl && <img src={rel.imageUrl} alt={rel.name} className="w-10 h-10 rounded object-cover flex-shrink-0" />}
                       <div>
-                        <p className="text-white text-sm font-semibold font-title">{rel.name}</p>
-                        <p className="text-gray-400 text-xs font-text">{t(TYPE_LABEL_KEYS[rel.type])}</p>
+                        <p className="text-[#343831] text-sm font-semibold font-title">{rel.name}</p>
+                        <p className="text-[#8b9681] text-xs font-text">{t(TYPE_LABEL_KEYS[rel.type])}</p>
                       </div>
                     </Link>
                   ))}
@@ -125,11 +124,11 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
           </div>
 
           <div className="relative">
-            <div className="relative h-96 lg:h-[500px] bg-gray-700 rounded-lg overflow-hidden">
+            <div className="relative h-96 lg:h-[500px] bg-[#e5e7dd] rounded-lg overflow-hidden">
               {entry.imageUrl ? (
                 <img src={entry.imageUrl} alt={entry.name} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-600 text-8xl">
+                <div className="w-full h-full flex items-center justify-center text-[#7a856f] text-8xl">
                   {entry.type === "character" && "👤"}
                   {entry.type === "city" && "🏰"}
                   {entry.type === "item" && "⚔️"}
@@ -144,14 +143,8 @@ export default function LoreDetailClient({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        <CommentSection
-          targetId={entryId}
-          initialLikeCount={entry.likeCount ?? 0}
-          viewsCount={entry.views ?? 0}
-        />
-
         <div className="flex justify-between mt-12">
-          <Link href={backHref} className="px-6 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all">
+          <Link href={backHref} className="px-6 py-3 bg-[#eef0e9] backdrop-blur-md border border-[#dce1d4] rounded-lg text-[#343831] hover:bg-[#cfd9c5] transition-all">
             {t("lore.back")}
           </Link>
           <ShareButton />

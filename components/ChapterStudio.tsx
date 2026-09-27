@@ -53,11 +53,11 @@ const TYPE_LABEL: Record<LoreType, string> = {
 };
 
 const NOTE_TYPES: { value: NoteType; label: string; dot: string }[] = [
-  { value: "fikir", label: "Fikir", dot: "bg-amber-400" },
-  { value: "hatirlatma", label: "Hatırlatma", dot: "bg-blue-400" },
-  { value: "karakter", label: "Karakter Notu", dot: "bg-green-400" },
-  { value: "tutarsizlik", label: "Tutarsızlık / Sorun", dot: "bg-red-400" },
-  { value: "genel", label: "Genel", dot: "bg-gray-400" },
+  { value: "fikir", label: "Fikir", dot: "bg-[#c9a557]" },
+  { value: "hatirlatma", label: "Hatırlatma", dot: "bg-[#6a815e]" },
+  { value: "karakter", label: "Karakter Notu", dot: "bg-[#719076]" },
+  { value: "tutarsizlik", label: "Tutarsızlık / Sorun", dot: "bg-[#c17e6f]" },
+  { value: "genel", label: "Genel", dot: "bg-[#b9c0ab]" },
 ];
 
 type StudioTab =
@@ -89,14 +89,14 @@ function LangToggle({
       <button
         type="button"
         onClick={() => onChange("tr")}
-        className={`px-4 py-1 rounded text-sm font-text transition-colors ${lang === "tr" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}
+        className={`px-4 py-1 rounded text-sm font-text transition-colors ${lang === "tr" ? "bg-[#dfe6d9] text-[#343831]" : "bg-white text-[#8b9681]"}`}
       >
         Türkçe
       </button>
       <button
         type="button"
         onClick={() => onChange("en")}
-        className={`px-4 py-1 rounded text-sm font-text transition-colors ${lang === "en" ? "bg-white/30 text-white" : "bg-white/10 text-gray-400"}`}
+        className={`px-4 py-1 rounded text-sm font-text transition-colors ${lang === "en" ? "bg-[#dfe6d9] text-[#343831]" : "bg-white text-[#8b9681]"}`}
       >
         English
       </button>
@@ -111,12 +111,12 @@ function ChapterPreviewTab({ chapterId }: { chapterId: Id<"chapters"> }) {
   if (chapter === undefined) {
     return (
       <div className="flex justify-center py-16">
-        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" />
       </div>
     );
   }
   if (chapter === null) {
-    return <p className="text-gray-500 font-text">Bölüm bulunamadı.</p>;
+    return <p className="text-[#96998e] font-text">Bölüm bulunamadı.</p>;
   }
 
   const content = lang === "tr" ? chapter.contentTr : chapter.contentEn;
@@ -124,16 +124,16 @@ function ChapterPreviewTab({ chapterId }: { chapterId: Id<"chapters"> }) {
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-2xl font-title font-bold text-white">{chapter.title}</h2>
+        <h2 className="text-2xl font-title font-bold text-[#343831]">{chapter.title}</h2>
         {chapter.status === "pending" && (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-text flex-shrink-0">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-[#f8f3e4] border border-[#e3d3a6] text-[#8c7332] font-text flex-shrink-0">
             Beklemede
           </span>
         )}
       </div>
       <LangToggle lang={lang} onChange={setLang} />
-      <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-gray-300 font-text leading-relaxed">
-        {content ? renderRichText(content) : <span className="text-gray-600 italic">İçerik yok.</span>}
+      <div className="bg-[#f6f7f2] border border-[#e5e7dd] rounded-lg p-4 text-[#5c6653] font-text leading-relaxed">
+        {content ? renderRichText(content) : <span className="text-[#7a856f] italic">İçerik yok.</span>}
       </div>
     </div>
   );
@@ -170,12 +170,12 @@ function ChapterEditTab({
   if (chapter === undefined || !initialized) {
     return (
       <div className="flex justify-center py-16">
-        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" />
       </div>
     );
   }
   if (chapter === null) {
-    return <p className="text-gray-500 font-text">Bölüm bulunamadı.</p>;
+    return <p className="text-[#96998e] font-text">Bölüm bulunamadı.</p>;
   }
 
   const handleSave = async () => {
@@ -204,10 +204,10 @@ function ChapterEditTab({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Bölüm başlığı..."
-          className="flex-1 bg-transparent border-b border-white/20 px-1 py-2 text-2xl font-title text-white placeholder-gray-600 focus:outline-none focus:border-white/50"
+          className="flex-1 bg-transparent border-b border-[#e5e7dd] px-1 py-2 text-2xl font-title text-[#343831] placeholder-[#a8ad9d] focus:outline-none focus:border-[#779884]"
         />
         {chapter.status === "pending" && (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-text flex-shrink-0">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-[#f8f3e4] border border-[#e3d3a6] text-[#8c7332] font-text flex-shrink-0">
             Beklemede
           </span>
         )}
@@ -221,13 +221,13 @@ function ChapterEditTab({
         <ContentEditor value={contentEn} onChange={setContentEn} rows={22} placeholder="English content..." />
       )}
 
-      {error && <p className="text-red-400 text-sm font-text">{error}</p>}
-      {savedMessage && <p className="text-green-400 text-sm font-text">✅ {savedMessage}</p>}
+      {error && <p className="text-[#996a60] text-sm font-text">{error}</p>}
+      {savedMessage && <p className="text-[#4b644b] text-sm font-text">✅ {savedMessage}</p>}
 
       <button
         onClick={handleSave}
         disabled={saving}
-        className="w-full px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-50 font-text"
+        className="w-full px-6 py-3 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] font-semibold hover:bg-[#cfd9c5] transition-colors disabled:opacity-50 font-text"
       >
         {saving ? "Kaydediliyor..." : "Bölümü Kaydet"}
       </button>
@@ -242,12 +242,12 @@ function LorePreviewTab({ entryId }: { entryId: Id<"loreEntries"> }) {
   if (entry === undefined) {
     return (
       <div className="flex justify-center py-16">
-        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" />
       </div>
     );
   }
   if (entry === null) {
-    return <p className="text-gray-500 font-text">Girdi bulunamadı.</p>;
+    return <p className="text-[#96998e] font-text">Girdi bulunamadı.</p>;
   }
 
   const content = lang === "tr" ? entry.contentTr : entry.contentEn;
@@ -262,27 +262,27 @@ function LorePreviewTab({ entryId }: { entryId: Id<"loreEntries"> }) {
             className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
           />
         ) : (
-          <div className="w-20 h-20 rounded-lg bg-gray-800 flex items-center justify-center text-3xl flex-shrink-0">
+          <div className="w-20 h-20 rounded-lg bg-[#eef0e9] flex items-center justify-center text-3xl flex-shrink-0">
             {TYPE_EMOJI[entry.type as LoreType]}
           </div>
         )}
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-gray-300 font-text">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-white text-[#5c6653] font-text">
               {TYPE_LABEL[entry.type as LoreType]}
             </span>
             {entry.status === "pending" && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-text">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[#f8f3e4] border border-[#e3d3a6] text-[#8c7332] font-text">
                 Beklemede
               </span>
             )}
           </div>
-          <h2 className="text-2xl font-title font-bold text-white mt-1">{entry.name}</h2>
+          <h2 className="text-2xl font-title font-bold text-[#343831] mt-1">{entry.name}</h2>
         </div>
       </div>
       <LangToggle lang={lang} onChange={setLang} />
-      <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-gray-300 font-text leading-relaxed">
-        {content ? renderRichText(content) : <span className="text-gray-600 italic">İçerik yok.</span>}
+      <div className="bg-[#f6f7f2] border border-[#e5e7dd] rounded-lg p-4 text-[#5c6653] font-text leading-relaxed">
+        {content ? renderRichText(content) : <span className="text-[#7a856f] italic">İçerik yok.</span>}
       </div>
     </div>
   );
@@ -381,7 +381,7 @@ function NewLoreEntryTab({
     return (
       <div className="max-w-2xl mx-auto text-center py-16 space-y-4">
         <p className="text-4xl">✅</p>
-        <p className="text-white font-title text-xl">"{name}" eklendi.</p>
+        <p className="text-[#343831] font-title text-xl">"{name}" eklendi.</p>
         <button
           type="button"
           onClick={() => {
@@ -391,7 +391,7 @@ function NewLoreEntryTab({
             setContentEn("");
             setImageStorageId("");
           }}
-          className="px-5 py-2 bg-white/20 border border-white/30 rounded-lg text-white hover:bg-white/30 transition-colors font-text"
+          className="px-5 py-2 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] hover:bg-[#cfd9c5] transition-colors font-text"
         >
           Başka Bir Tane Daha Ekle
         </button>
@@ -401,16 +401,16 @@ function NewLoreEntryTab({
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
-      <h2 className="text-2xl font-title font-bold text-white">Yeni Lore Girdisi</h2>
+      <h2 className="text-2xl font-title font-bold text-[#343831]">Yeni Lore Girdisi</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm text-gray-300 font-text">Kategori *</label>
+            <label className="block text-sm text-[#5c6653] font-text">Kategori *</label>
             {auth.kind === "admin" && (
               <button
                 type="button"
                 onClick={() => setShowNewCategory((v) => !v)}
-                className="text-xs px-2 py-0.5 bg-white/10 border border-white/20 rounded text-white hover:bg-white/20 transition-colors font-text"
+                className="text-xs px-2 py-0.5 bg-white border border-[#e5e7dd] rounded text-[#343831] hover:bg-[#dfe6d9] transition-colors font-text"
               >
                 + Yeni Kategori
               </button>
@@ -423,13 +423,13 @@ function NewLoreEntryTab({
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="Kategori adı..."
-                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none"
+                className="flex-1 bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] placeholder-[#a8ad9d] focus:outline-none"
               />
               <button
                 type="button"
                 onClick={handleCreateCategory}
                 disabled={categorySaving || !newCategoryName.trim()}
-                className="px-3 py-2 bg-green-600/30 border border-green-500/30 rounded-lg text-green-300 hover:bg-green-600/50 transition-colors disabled:opacity-50 font-text text-sm flex-shrink-0"
+                className="px-3 py-2 bg-[#e9eee4] border border-[#b7cbb0] rounded-lg text-[#4b644b] hover:bg-[#dbe4d2] transition-colors disabled:opacity-50 font-text text-sm flex-shrink-0"
               >
                 {categorySaving ? "..." : "Ekle"}
               </button>
@@ -438,36 +438,36 @@ function NewLoreEntryTab({
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+              className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
             >
               <option value="">Kategori seçin</option>
               {categories.map((c) => (
-                <option key={c._id} value={c._id} className="bg-gray-900">{c.name}</option>
+                <option key={c._id} value={c._id} className="bg-[#f9f9f6]">{c.name}</option>
               ))}
             </select>
           )}
-          {categoryError && <p className="text-red-400 text-xs font-text mt-1">{categoryError}</p>}
+          {categoryError && <p className="text-[#996a60] text-xs font-text mt-1">{categoryError}</p>}
         </div>
         <div>
-          <label className="block text-sm text-gray-300 mb-1 font-text">Tür *</label>
+          <label className="block text-sm text-[#5c6653] mb-1 font-text">Tür *</label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as LoreType)}
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+            className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
           >
             {(Object.keys(TYPE_LABEL) as LoreType[]).map((t) => (
-              <option key={t} value={t} className="bg-gray-900">{TYPE_LABEL[t]}</option>
+              <option key={t} value={t} className="bg-[#f9f9f6]">{TYPE_LABEL[t]}</option>
             ))}
           </select>
         </div>
       </div>
       <div>
-        <label className="block text-sm text-gray-300 mb-1 font-text">İsim *</label>
+        <label className="block text-sm text-[#5c6653] mb-1 font-text">İsim *</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+          className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
         />
       </div>
       <LangToggle lang={contentLang} onChange={setContentLang} />
@@ -493,11 +493,11 @@ function NewLoreEntryTab({
       ) : (
         <ImageUpload writerToken={auth.writerToken} onUpload={setImageStorageId} label="Görsel (opsiyonel)" />
       )}
-      {error && <p className="text-red-400 text-sm font-text">{error}</p>}
+      {error && <p className="text-[#996a60] text-sm font-text">{error}</p>}
       <button
         onClick={handleSubmit}
         disabled={saving}
-        className="w-full px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-50 font-text"
+        className="w-full px-6 py-3 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] font-semibold hover:bg-[#cfd9c5] transition-colors disabled:opacity-50 font-text"
       >
         {saving ? "Ekleniyor..." : "Ekle"}
       </button>
@@ -526,9 +526,9 @@ function CreateBookGate({
 
   if (auth.kind !== "admin") {
     return (
-      <div className="fixed inset-0 z-40 bg-gray-950 flex flex-col items-center justify-center gap-4 text-white">
+      <div className="fixed inset-0 z-40 bg-[#f9f9f6] flex flex-col items-center justify-center gap-4 text-[#343831]">
         <p className="font-title text-2xl">Yeni kitap oluşturma yetkisi sadece adminlerde.</p>
-        <Link href={exitHref} className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg font-text">
+        <Link href={exitHref} className="px-4 py-2 bg-[#eef0e9] border border-[#dce1d4] rounded-lg font-text">
           Geri Dön
         </Link>
       </div>
@@ -558,54 +558,54 @@ function CreateBookGate({
   };
 
   return (
-    <div className="fixed inset-0 z-40 bg-gray-950 text-white flex flex-col items-center justify-center p-4">
+    <div className="fixed inset-0 z-40 bg-[#f9f9f6] text-[#343831] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-lg space-y-4">
-        <h2 className="text-2xl font-title font-bold text-white">Yeni Kitap</h2>
-        <p className="text-sm text-gray-400 font-text">
+        <h2 className="text-2xl font-title font-bold text-[#343831]">Yeni Kitap</h2>
+        <p className="text-sm text-[#8b9681] font-text">
           Önce bir kitap oluştur, kaydettiğin anda yazma stüdyosuna geçeceksin.
         </p>
         <div>
-          <label className="block text-sm text-gray-300 mb-1 font-text">Evren *</label>
+          <label className="block text-sm text-[#5c6653] mb-1 font-text">Evren *</label>
           <select
             value={universeId}
             onChange={(e) => setUniverseId(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+            className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
           >
             <option value="">Evren seçin</option>
             {universes?.map((u) => (
-              <option key={u._id} value={u._id} className="bg-gray-900">{u.name}</option>
+              <option key={u._id} value={u._id} className="bg-[#f9f9f6]">{u.name}</option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block text-sm text-gray-300 mb-1 font-text">Başlık *</label>
+          <label className="block text-sm text-[#5c6653] mb-1 font-text">Başlık *</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none"
+            className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-300 mb-1 font-text">Açıklama</label>
+          <label className="block text-sm text-[#5c6653] mb-1 font-text">Açıklama</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none resize-none"
+            className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none resize-none"
           />
         </div>
         <ImageUpload sessionToken={auth.sessionToken} onUpload={setCoverStorageId} label="Kapak (opsiyonel)" />
-        {error && <p className="text-red-400 text-sm font-text">{error}</p>}
+        {error && <p className="text-[#996a60] text-sm font-text">{error}</p>}
         <div className="flex gap-3">
           <button
             onClick={handleCreate}
             disabled={saving}
-            className="flex-1 px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-50 font-text"
+            className="flex-1 px-6 py-3 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] font-semibold hover:bg-[#cfd9c5] transition-colors disabled:opacity-50 font-text"
           >
             {saving ? "Oluşturuluyor..." : "Kitabı Oluştur ve Yazmaya Başla →"}
           </button>
-          <Link href={exitHref} className="px-6 py-3 bg-transparent border border-white/20 rounded-lg text-gray-400 hover:text-white transition-colors font-text">
+          <Link href={exitHref} className="px-6 py-3 bg-transparent border border-[#e5e7dd] rounded-lg text-[#8b9681] hover:text-[#20261c] transition-colors font-text">
             İptal
           </Link>
         </div>
@@ -828,17 +828,17 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
 
   if (book === undefined) {
     return (
-      <div className="fixed inset-0 z-40 bg-gray-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+      <div className="fixed inset-0 z-40 bg-[#f9f9f6] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" />
       </div>
     );
   }
 
   if (book === null) {
     return (
-      <div className="fixed inset-0 z-40 bg-gray-950 flex flex-col items-center justify-center gap-4 text-white">
+      <div className="fixed inset-0 z-40 bg-[#f9f9f6] flex flex-col items-center justify-center gap-4 text-[#343831]">
         <p className="font-title text-2xl">Kitap bulunamadı.</p>
-        <Link href={exitHref} className="px-4 py-2 bg-white/20 border border-white/30 rounded-lg font-text">
+        <Link href={exitHref} className="px-4 py-2 bg-[#eef0e9] border border-[#dce1d4] rounded-lg font-text">
           Geri Dön
         </Link>
       </div>
@@ -848,17 +848,17 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
   const activeTab = openTabs.find((t) => tabKey(t) === activeKey);
 
   return (
-    <div className="fixed inset-0 z-40 bg-gray-950 text-white flex flex-col">
-      <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-white/10 bg-black/40 flex-shrink-0">
+    <div className="fixed inset-0 z-40 bg-[#f9f9f6] text-[#343831] flex flex-col">
+      <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-[#e5e7dd] bg-[#f6f7f2] flex-shrink-0">
         <div className="min-w-0">
           <p className="font-title font-bold truncate">{book.title}</p>
-          <p className="text-xs text-gray-500 font-text truncate">
+          <p className="text-xs text-[#96998e] font-text truncate">
             {book.universe?.name} · Sıradaki bölüm: #{nextOrder + 1}
           </p>
         </div>
         <Link
           href={exitHref}
-          className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm font-text hover:bg-white/20 transition-colors flex-shrink-0"
+          className="px-3 py-1.5 bg-white border border-[#e5e7dd] rounded-lg text-sm font-text hover:bg-[#dfe6d9] transition-colors flex-shrink-0"
         >
           Çık
         </Link>
@@ -866,15 +866,15 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
 
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[260px_1fr_280px]">
         {/* Left: Lore entries */}
-        <div className="hidden lg:flex flex-col border-r border-white/10 overflow-y-auto p-4 custom-scrollbar">
+        <div className="hidden lg:flex flex-col border-r border-[#e5e7dd] overflow-y-auto p-4 custom-scrollbar">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-gray-300 font-title uppercase">
+            <h2 className="text-sm font-bold text-[#5c6653] font-title uppercase">
               Lore Girdileri
             </h2>
             <button
               type="button"
               onClick={() => openTab({ kind: "newLore" })}
-              className="text-xs px-2 py-1 bg-white/10 border border-white/20 rounded text-white hover:bg-white/20 transition-colors font-text flex-shrink-0"
+              className="text-xs px-2 py-1 bg-white border border-[#e5e7dd] rounded text-[#343831] hover:bg-[#dfe6d9] transition-colors font-text flex-shrink-0"
             >
               + Ekle
             </button>
@@ -884,7 +884,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
             value={entrySearch}
             onChange={(e) => setEntrySearch(e.target.value)}
             placeholder="Ara..."
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none mb-2 font-text"
+            className="w-full bg-white border border-[#e5e7dd] rounded-lg px-3 py-1.5 text-sm text-[#343831] placeholder-[#a8ad9d] focus:outline-none mb-2 font-text"
           />
           <div className="flex flex-wrap gap-1 mb-3">
             {(["all", "character", "city", "item", "story", "other", "location", "faction"] as const).map((t) => (
@@ -894,8 +894,8 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
                 onClick={() => setEntryTypeFilter(t)}
                 className={`px-2 py-0.5 rounded text-xs font-text transition-colors ${
                   entryTypeFilter === t
-                    ? "bg-blue-600 text-white"
-                    : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
+                    ? "bg-[#3f5e4b] text-[#343831]"
+                    : "bg-[#f6f7f2] text-[#8b9681] border border-[#e5e7dd] hover:bg-[#f4f7f0]"
                 }`}
               >
                 {t === "all" ? "Tümü" : TYPE_LABEL[t]}
@@ -903,7 +903,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
             ))}
           </div>
           {filteredEntries.length === 0 ? (
-            <p className="text-xs text-gray-600 font-text">Sonuç yok.</p>
+            <p className="text-xs text-[#7a856f] font-text">Sonuç yok.</p>
           ) : (
             <div className="space-y-1">
               {filteredEntries.map((e) => {
@@ -916,14 +916,14 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
                     onClick={() => openTab({ kind: "lore", id: entryId, title: e.name })}
                     className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm font-text text-left transition-colors ${
                       activeKey === key
-                        ? "bg-white/20 text-white"
-                        : "text-gray-300 hover:bg-white/10 hover:text-white"
+                        ? "bg-[#eef0e9] text-[#343831]"
+                        : "text-[#5c6653] hover:bg-[#f4f7f0] hover:text-[#20261c]"
                     }`}
                   >
                     {e.imageUrl ? (
                       <img src={e.imageUrl} alt="" className="w-7 h-7 rounded object-cover flex-shrink-0" />
                     ) : (
-                      <span className="w-7 h-7 rounded bg-white/10 flex items-center justify-center text-sm flex-shrink-0">
+                      <span className="w-7 h-7 rounded bg-white flex items-center justify-center text-sm flex-shrink-0">
                         {TYPE_EMOJI[e.type as LoreType]}
                       </span>
                     )}
@@ -937,7 +937,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
 
         {/* Center: Tabs + Editor / Preview */}
         <div className="flex flex-col min-h-0">
-          <div className="flex items-center gap-1 border-b border-white/10 px-2 pt-2 overflow-x-auto flex-shrink-0 custom-scrollbar">
+          <div className="flex items-center gap-1 border-b border-[#e5e7dd] px-2 pt-2 overflow-x-auto flex-shrink-0 custom-scrollbar">
             {openTabs.map((tab) => {
               const key = tabKey(tab);
               const label =
@@ -977,12 +977,12 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
                     dragKey === key ? "opacity-40" : ""
                   } ${
                     dragOverKey === key && dragKey !== key
-                      ? "border-white/60"
+                      ? "border-[#c3cdb5]"
                       : "border-transparent"
                   } ${
                     activeKey === key
-                      ? "bg-white/10 text-white"
-                      : "text-gray-500 hover:text-gray-300"
+                      ? "bg-white text-[#343831]"
+                      : "text-[#96998e] hover:text-[#343831]"
                   }`}
                 >
                   <span className="truncate max-w-[140px]">{label}</span>
@@ -993,7 +993,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
                         e.stopPropagation();
                         closeTab(key);
                       }}
-                      className="text-gray-500 hover:text-white leading-none"
+                      className="text-[#96998e] hover:text-[#20261c] leading-none"
                     >
                       ✕
                     </button>
@@ -1011,7 +1011,7 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Bölüm başlığı..."
-                  className="w-full bg-transparent border-b border-white/20 px-1 py-2 text-2xl font-title text-white placeholder-gray-600 focus:outline-none focus:border-white/50"
+                  className="w-full bg-transparent border-b border-[#e5e7dd] px-1 py-2 text-2xl font-title text-[#343831] placeholder-[#a8ad9d] focus:outline-none focus:border-[#779884]"
                 />
 
                 <LangToggle lang={contentLang} onChange={setContentLang} />
@@ -1034,15 +1034,15 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
                   />
                 )}
 
-                {error && <p className="text-red-400 text-sm font-text">{error}</p>}
+                {error && <p className="text-[#996a60] text-sm font-text">{error}</p>}
                 {savedMessage && (
-                  <p className="text-green-400 text-sm font-text">✅ {savedMessage}</p>
+                  <p className="text-[#4b644b] text-sm font-text">✅ {savedMessage}</p>
                 )}
 
                 <button
                   onClick={handleSaveAndContinue}
                   disabled={saving}
-                  className="w-full px-6 py-3 bg-white/20 border border-white/30 rounded-lg text-white font-semibold hover:bg-white/30 transition-colors disabled:opacity-50 font-text"
+                  className="w-full px-6 py-3 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] font-semibold hover:bg-[#cfd9c5] transition-colors disabled:opacity-50 font-text"
                 >
                   {saving ? "Kaydediliyor..." : "Bölümü Kaydet ve Yeni Bölüme Geç →"}
                 </button>
@@ -1070,9 +1070,9 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
         </div>
 
         {/* Right: Previous chapters + notes */}
-        <div className="hidden lg:flex flex-col border-l border-white/10 overflow-y-auto p-4 gap-6 custom-scrollbar">
+        <div className="hidden lg:flex flex-col border-l border-[#e5e7dd] overflow-y-auto p-4 gap-6 custom-scrollbar">
           <div>
-            <h2 className="text-sm font-bold text-gray-300 font-title uppercase mb-3">
+            <h2 className="text-sm font-bold text-[#5c6653] font-title uppercase mb-3">
               Önceki Bölümler
             </h2>
             <input
@@ -1080,10 +1080,10 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
               value={chapterSearch}
               onChange={(e) => setChapterSearch(e.target.value)}
               placeholder="Ara..."
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none mb-2 font-text"
+              className="w-full bg-white border border-[#e5e7dd] rounded-lg px-3 py-1.5 text-sm text-[#343831] placeholder-[#a8ad9d] focus:outline-none mb-2 font-text"
             />
             {filteredChapters.length === 0 ? (
-              <p className="text-xs text-gray-600 font-text">Sonuç yok.</p>
+              <p className="text-xs text-[#7a856f] font-text">Sonuç yok.</p>
             ) : (
               <div className="space-y-1">
                 {filteredChapters.map((c) => {
@@ -1097,8 +1097,8 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
                       }
                       className={`w-full block px-2 py-1.5 rounded text-sm font-text text-left transition-colors truncate ${
                         activeKey === key
-                          ? "bg-white/20 text-white"
-                          : "text-gray-300 hover:bg-white/10 hover:text-white"
+                          ? "bg-[#eef0e9] text-[#343831]"
+                          : "text-[#5c6653] hover:bg-[#f4f7f0] hover:text-[#20261c]"
                       }`}
                     >
                       #{c.order + 1} {c.title}
@@ -1110,17 +1110,17 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
           </div>
 
           <div className="flex-1 min-h-0 flex flex-col">
-            <h2 className="text-sm font-bold text-gray-300 font-title uppercase mb-3">
+            <h2 className="text-sm font-bold text-[#5c6653] font-title uppercase mb-3">
               Notlarım
             </h2>
             <div className="space-y-2 mb-3">
               <select
                 value={noteType}
                 onChange={(e) => setNoteType(e.target.value as NoteType)}
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none font-text"
+                className="w-full bg-white border border-[#e5e7dd] rounded-lg px-2 py-1.5 text-xs text-[#343831] focus:outline-none font-text"
               >
                 {NOTE_TYPES.map((t) => (
-                  <option key={t.value} value={t.value} className="bg-gray-900">
+                  <option key={t.value} value={t.value} className="bg-[#f9f9f6]">
                     {t.label}
                   </option>
                 ))}
@@ -1130,39 +1130,39 @@ export function ChapterStudio({ bookId: bookIdProp, auth, exitHref, initialChapt
                 onChange={(e) => setNoteContent(e.target.value)}
                 placeholder="Not yaz..."
                 rows={2}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-gray-200 placeholder-gray-600 focus:outline-none focus:border-white/30 resize-none font-text"
+                className="w-full bg-[#f6f7f2] border border-[#e5e7dd] rounded-lg px-2 py-1.5 text-xs text-[#46503d] placeholder-[#a8ad9d] focus:outline-none focus:border-[#a1b39a] resize-none font-text"
               />
               <button
                 type="button"
                 onClick={handleAddNote}
                 disabled={noteBusy || !noteContent.trim()}
-                className="w-full px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-xs text-white hover:bg-white/20 transition-colors disabled:opacity-50 font-text"
+                className="w-full px-3 py-1.5 bg-white border border-[#e5e7dd] rounded-lg text-xs text-[#343831] hover:bg-[#dfe6d9] transition-colors disabled:opacity-50 font-text"
               >
                 + Not Ekle
               </button>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto space-y-2 custom-scrollbar">
               {(notesList ?? []).length === 0 ? (
-                <p className="text-xs text-gray-600 font-text">Henüz not yok.</p>
+                <p className="text-xs text-[#7a856f] font-text">Henüz not yok.</p>
               ) : (
                 notesList!.map((n) => {
                   const meta = NOTE_TYPES.find((t) => t.value === n.type)!;
                   return (
-                    <div key={n._id} className="relative bg-white/5 border border-white/10 rounded-lg p-2.5 pl-4">
+                    <div key={n._id} className="relative bg-[#f6f7f2] border border-[#e5e7dd] rounded-lg p-2.5 pl-4">
                       <span className={`absolute top-2.5 left-1.5 w-2 h-2 rounded-full ${meta.dot}`} />
                       <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className="text-[10px] uppercase tracking-wide text-gray-500 font-text">
+                        <span className="text-[10px] uppercase tracking-wide text-[#96998e] font-text">
                           {meta.label}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleRemoveNote(n._id)}
-                          className="text-gray-600 hover:text-red-400 transition-colors text-xs flex-shrink-0"
+                          className="text-[#7a856f] hover:text-[#8a5147] transition-colors text-xs flex-shrink-0"
                         >
                           ✕
                         </button>
                       </div>
-                      <p className="text-xs text-gray-300 font-text whitespace-pre-wrap">{n.content}</p>
+                      <p className="text-xs text-[#5c6653] font-text whitespace-pre-wrap">{n.content}</p>
                     </div>
                   );
                 })

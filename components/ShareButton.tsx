@@ -20,15 +20,15 @@ export default function ShareButton() {
       onClick={handleCopy}
       className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 cursor-pointer ${
         copied
-          ? "bg-green-500/20 backdrop-blur-md border border-green-500/50 text-green-400 hover:bg-green-500/30"
-          : "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-blue-600 hover:border-blue-500 hover:shadow-[0_0_15px_rgba(37,99,235,0.5)]"
+          ? "bg-[#e9eee4] backdrop-blur-md border border-[#b7cbb0] text-[#3f5e4b] hover:bg-[#dbe4d2]"
+          : "bg-white backdrop-blur-md border border-[#dce1d4] text-[#343831] hover:bg-[#3f5e4b] hover:border-[#3f5e4b] hover:text-white"
       }`}
       aria-live="polite"
     >
       {copied ? (
         <>
           <svg
-            className="w-5 h-5 text-green-400"
+            className="w-5 h-5 text-[#3f5e4b]"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

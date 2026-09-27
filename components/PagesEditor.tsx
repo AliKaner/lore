@@ -6,11 +6,12 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Typography from "@tiptap/extension-typography";
 import { TextStyleKit } from "@tiptap/extension-text-style";
 import { TableKit } from "@tiptap/extension-table";
-import Image from "@tiptap/extension-image";
+import { ResizableImage } from "./tiptap/ResizableImage";
 import { useMutation, storedToken } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Editor } from "@tiptap/react";
 
 export interface WritingDocument { id: string; title: string; content: string; revision: number; plainText?: string }
 type Snapshot = { title: string; content: string; plainText: string };
@@ -64,17 +65,49 @@ export function PagesEditor({ doc, readOnly, save }: { doc: WritingDocument; rea
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void flush(), 700);
   }, [flush, key, readOnly]);
+  const editorRef = useRef<Editor | null>(null);
+  const uploadImageAt = useCallback(async (file: File, pos?: number) => {
+    if (file.size > 5 * 1024 * 1024) { setStatus("Görsel en fazla 5 MB olabilir."); return; }
+    const ed = editorRef.current;
+    if (!ed) return;
+    try {
+      const url = await uploadUrl({ sessionToken: storedToken() });
+      const response = await fetch(url, { method: "POST", headers: { "Content-Type": file.type }, body: file });
+      if (!response.ok) throw new Error();
+      const { storageId } = (await response.json()) as { storageId: Id<"_storage"> };
+      const src = await imageUrl({ storageId });
+      if (!src) return;
+      const chain = ed.chain().focus();
+      if (pos !== undefined) chain.insertContentAt(pos, { type: "image", attrs: { src, alt: file.name } });
+      else chain.setImage({ src, alt: file.name });
+      chain.run();
+    } catch { setStatus("Görsel yüklenemedi."); }
+  }, [uploadUrl, imageUrl]);
+  const uploadImageAtRef = useRef(uploadImageAt); uploadImageAtRef.current = uploadImageAt;
+
   const editor = useEditor({
-    extensions: [StarterKit, TextStyleKit, TableKit.configure({ table: { resizable: true } }), Image, TextAlign.configure({ types: ["heading", "paragraph"] }), Placeholder.configure({ placeholder: "Aklından geçen ilk cümleyi yaz…" }), Typography],
+    extensions: [StarterKit, TextStyleKit, TableKit.configure({ table: { resizable: true } }), ResizableImage, TextAlign.configure({ types: ["heading", "paragraph"] }), Placeholder.configure({ placeholder: "Aklından geçen ilk cümleyi yaz…" }), Typography],
     content: initialContent(doc), immediatelyRender: false, editable: !readOnly,
     autofocus: !readOnly && !doc.content && !doc.plainText ? "start" : false,
-    editorProps: { attributes: { "aria-label": "Belge metni", spellcheck: "true" } },
+    editorProps: {
+      attributes: { "aria-label": "Belge metni", spellcheck: "true" },
+      handleDrop: (view, event, _slice, moved) => {
+        if (moved) return false;
+        const file = event.dataTransfer?.files?.[0];
+        if (!file || !file.type.startsWith("image/")) return false;
+        event.preventDefault();
+        const coords = view.posAtCoords({ left: event.clientX, top: event.clientY });
+        void uploadImageAtRef.current(file, coords?.pos ?? view.state.selection.from);
+        return true;
+      },
+    },
     onUpdate: ({ editor }) => {
       const plainText = editor.getText(); setWords(plainText.trim().split(/\s+/).filter(Boolean).length);
       change({ ...current.current, content: JSON.stringify(editor.getJSON()), plainText });
     },
     onCreate: ({ editor }) => { current.current.plainText = editor.getText(); setWords(editor.getText().trim().split(/\s+/).filter(Boolean).length); },
   });
+  useEffect(() => { editorRef.current = editor; }, [editor]);
   useEffect(() => {
     setOnline(navigator.onLine);
     if (!readOnly) { try { const local = localStorage.getItem(key); if (local) setRecovery(JSON.parse(local)); } catch {} }
@@ -100,7 +133,7 @@ export function PagesEditor({ doc, readOnly, save }: { doc: WritingDocument; rea
       <input type="color" aria-label="Metin rengi" title="Metin rengi" onChange={e => editor.chain().focus().setColor(e.target.value).run()}/>
       <button onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>Tablo</button>
       <button onClick={() => imageInput.current?.click()}>Görsel</button>
-      <input ref={imageInput} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={async e => { const file = e.target.files?.[0]; if (!file) return; if (file.size > 5 * 1024 * 1024) { setStatus("Görsel en fazla 5 MB olabilir."); return; } try { const url = await uploadUrl({ sessionToken: storedToken() }); const response = await fetch(url, { method: "POST", headers: { "Content-Type": file.type }, body: file }); if (!response.ok) throw new Error(); const { storageId } = await response.json() as { storageId: Id<"_storage"> }; const src = await imageUrl({ storageId }); if (src) editor.chain().focus().setImage({ src, alt: file.name }).run(); } catch { setStatus("Görsel yüklenemedi."); } e.target.value = ""; }}/>
+      <input ref={imageInput} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={async e => { const file = e.target.files?.[0]; if (file) await uploadImageAt(file); e.target.value = ""; }}/>
       <details><summary>Tablo düzeni</summary><div className="find-panel"><button onClick={() => editor.chain().focus().addRowAfter().run()}>Satır ekle</button><button onClick={() => editor.chain().focus().addColumnAfter().run()}>Sütun ekle</button><button onClick={() => editor.chain().focus().deleteRow().run()}>Satırı sil</button><button onClick={() => editor.chain().focus().deleteColumn().run()}>Sütunu sil</button><button onClick={() => editor.chain().focus().deleteTable().run()}>Tabloyu kaldır</button></div></details>
       <details><summary>Bul / Değiştir</summary><div className="find-panel"><input placeholder="Bul" aria-label="Bul" value={search} onChange={e => setSearch(e.target.value)}/><input placeholder="Yerine" aria-label="Yerine" value={replace} onChange={e => setReplace(e.target.value)}/><button disabled={!search} onClick={() => { let found = false; editor.state.doc.descendants((node, pos) => { if (found || !node.isText || !node.text) return; const offset = node.text.toLocaleLowerCase("tr").indexOf(search.toLocaleLowerCase("tr")); if (offset >= 0) { found = true; editor.chain().focus().setTextSelection({ from: pos + offset, to: pos + offset + search.length }).run(); } }); }}>Bul</button><button disabled={!search || editor.state.selection.empty} onClick={() => editor.chain().focus().insertContent({ type: "text", text: replace || " " }).run()}>Seçimi değiştir</button></div></details>
     </div>}

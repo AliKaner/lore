@@ -10,6 +10,7 @@
 
 import type * as access from "../access.js";
 import type * as admin from "../admin.js";
+import type * as blogSync from "../blogSync.js";
 import type * as boardGames from "../boardGames.js";
 import type * as bookNotes from "../bookNotes.js";
 import type * as books from "../books.js";
@@ -21,6 +22,7 @@ import type * as comments from "../comments.js";
 import type * as fileStorage from "../fileStorage.js";
 import type * as graph from "../graph.js";
 import type * as invitations from "../invitations.js";
+import type * as lib_tiptapMarkdown from "../lib/tiptapMarkdown.js";
 import type * as likes from "../likes.js";
 import type * as links from "../links.js";
 import type * as loreEntries from "../loreEntries.js";
@@ -40,6 +42,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   access: typeof access;
   admin: typeof admin;
+  blogSync: typeof blogSync;
   boardGames: typeof boardGames;
   bookNotes: typeof bookNotes;
   books: typeof books;
@@ -51,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   fileStorage: typeof fileStorage;
   graph: typeof graph;
   invitations: typeof invitations;
+  "lib/tiptapMarkdown": typeof lib_tiptapMarkdown;
   likes: typeof likes;
   links: typeof links;
   loreEntries: typeof loreEntries;

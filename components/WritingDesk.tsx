@@ -17,7 +17,7 @@ import AdminChapters from "@/app/admin/chapters/page";
 
 type Selection = { kind: "book"; id: Id<"books"> } | { kind: "document"; id: Id<"documents"> };
 type Panel = null | "library" | "world" | "invites";
-type Shelf = "all" | "book" | "sketch" | "poem" | "journal";
+type Shelf = "all" | "book" | "sketch" | "poem" | "journal" | "blog";
 
 export function WritingDesk() {
   const [token, setToken] = useState("");
@@ -43,7 +43,7 @@ export function WritingDesk() {
     try { localStorage.setItem("lore-last-document", JSON.stringify(selection)); } catch {}
   }
 
-  async function create(kind: "book" | "sketch" | "poem" | "journal") {
+  async function create(kind: "book" | "sketch" | "poem" | "journal" | "blog") {
     setBusy(true);
     setError("");
     try {
@@ -164,7 +164,7 @@ function LibraryPanel({
   documents: any[] | undefined;
   owner: boolean;
   busy: boolean;
-  onCreate: (kind: "book" | "sketch" | "poem" | "journal") => void;
+  onCreate: (kind: "book" | "sketch" | "poem" | "journal" | "blog") => void;
   onOpen: (selection: Selection) => void;
 }) {
   const [shelf, setShelf] = useState<Shelf>("all");
@@ -175,6 +175,7 @@ function LibraryPanel({
     ["sketch", "✎", "Eskizler"],
     ["poem", "❧", "Şiirler"],
     ["journal", "🖼", "Günlükler"],
+    ["blog", "◈", "Blog"],
   ];
   const q = search.toLocaleLowerCase("tr");
 
@@ -197,6 +198,7 @@ function LibraryPanel({
           <button disabled={busy} onClick={() => onCreate("sketch")}><span className="create-icon">✎</span><strong>Boş sayfa</strong><small>Plan yapmadan, sadece yaz</small><span className="create-arrow">＋</span></button>
           <button disabled={busy} onClick={() => onCreate("poem")}><span className="create-icon">❧</span><strong>Yeni şiir</strong><small>Kelimelere biraz nefes ver</small><span className="create-arrow">＋</span></button>
           <button disabled={busy} onClick={() => onCreate("journal")}><span className="create-icon">🖼</span><strong>Yeni günlük</strong><small>Görsel ve serbest metinle bir sayfa</small><span className="create-arrow">＋</span></button>
+          <button disabled={busy} onClick={() => onCreate("blog")}><span className="create-icon">◈</span><strong>Yeni blog yazısı</strong><small>Yazıp doğrudan sitene yayınla</small><span className="create-arrow">＋</span></button>
         </div>
       )}
 
@@ -219,7 +221,7 @@ function LibraryPanel({
           {documents.filter((d) => (shelf === "all" || d.kind === shelf) && d.title.toLocaleLowerCase("tr").includes(q)).map((doc) => (
             <button className="document-card" key={doc._id} onClick={() => onOpen({ kind: "document", id: doc._id })}>
               <div className={`note-cover ${doc.kind}`}>
-                <span>{doc.kind === "poem" ? "ŞİİR DEFTERİ" : doc.kind === "journal" ? "GÜNLÜK" : "ESKİZ DEFTERİ"}</span>
+                <span>{doc.kind === "poem" ? "ŞİİR DEFTERİ" : doc.kind === "journal" ? "GÜNLÜK" : doc.kind === "blog" ? "BLOG YAZISI" : "ESKİZ DEFTERİ"}</span>
                 <strong>{doc.title}</strong>
                 {doc.kind !== "journal" && <div className="paper-lines" />}
                 <i>{doc.shared ? "Davetlilerle paylaşıldı" : "Yalnızca sen"}</i>
@@ -286,15 +288,64 @@ function DocumentPane({ id, owner, onNavigate }: { id: Id<"documents">; owner: b
               }}
             /> Davetliler okuyabilsin
           </label>
-          <span>{error || (doc.kind === "poem" ? "Şiir · Yeni dize için Shift + Enter" : doc.kind === "journal" ? "Günlük · Görselleri sürükle, metni istediğin yere koy" : "Eskiz · Kendine ait bir boş sayfa")}</span>
+          <span>{error || (doc.kind === "poem" ? "Şiir · Yeni dize için Shift + Enter" : doc.kind === "journal" ? "Günlük · Görselleri sürükle, metni istediğin yere koy" : doc.kind === "blog" ? "Blog yazısı · Yazıp doğrudan sitene gönder" : "Eskiz · Kendine ait bir boş sayfa")}</span>
         </div>
       )}
+      {owner && doc.kind === "blog" && <BlogBar doc={doc} id={id} />}
       {doc.kind === "journal" ? (
         <JournalEditor doc={{ id, ...doc }} readOnly={!owner} save={({ title, content, revision }) => save({ id, title, content, revision })} />
       ) : (
         <PagesEditor doc={{ id, ...doc }} readOnly={!owner} onNavigate={onNavigate} save={({ title, content, revision, links }) => save({ id, title, content, revision, links: links as Id<"documents">[] })} />
       )}
     </>
+  );
+}
+
+function trTranslit(text: string) {
+  return text.toLocaleLowerCase("tr").replace(/ı/g, "i").replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s").replace(/ö/g, "o").replace(/ç/g, "c");
+}
+// Full normalize (collapses repeats, trims edges) — used to derive the default slug from a title, and on blur.
+function slugify(title: string) {
+  return trTranslit(title).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+// Light live filter while actively typing in the slug field — doesn't trim a
+// trailing "-" mid-keystroke, or it'd be impossible to type a second word.
+function slugifyLive(text: string) {
+  return trTranslit(text).replace(/[^a-z0-9-]+/g, "-").replace(/-{2,}/g, "-");
+}
+
+function BlogBar({ doc, id }: { doc: any; id: Id<"documents"> }) {
+  const publish = useAction(api.blogSync.publish);
+  const [slug, setSlug] = useState(doc.blogSlug || slugify(doc.title));
+  const [published, setPublished] = useState(doc.blogPublished ?? false);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState("");
+  const isNew = !doc.blogPostId;
+  return (
+    <div className="blog-bar">
+      <label>slug<input value={slug} onChange={(e) => setSlug(slugifyLive(e.target.value))} onBlur={(e) => setSlug(slugify(e.target.value))} placeholder="yazi-basligi" /></label>
+      <label className="blog-bar-check"><input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} /> Yayında</label>
+      <button
+        className="primary"
+        disabled={busy || !slug.trim()}
+        onClick={async () => {
+          setBusy(true);
+          setStatus("");
+          try {
+            await publish({ accessToken: storedToken(), id, title: doc.title, slug: slug.trim(), published });
+            setStatus(isNew ? "Blogda yayınlandı." : "Blog güncellendi.");
+          } catch (err: any) {
+            setStatus(err?.message || "Blog'a gönderilemedi.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        {busy ? "Gönderiliyor…" : isNew ? "Blog'a yayınla" : "Blog'u güncelle"}
+      </button>
+      {doc.blogSlug && <span className="blog-bar-path">/posts/{doc.blogSlug}</span>}
+      {status && <span className="blog-bar-status">{status}</span>}
+    </div>
   );
 }
 

@@ -1,5 +1,5 @@
 import { customQuery, customMutation } from "convex-helpers/server/customFunctions";
-import { query, mutation, QueryCtx } from "./_generated/server";
+import { query, mutation, internalQuery, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { hashPassword } from "./writerAuthLib";
 
@@ -25,5 +25,13 @@ export const ownerMutation = customMutation(mutation, {
   input: async (ctx, { accessToken }) => {
     if (await access(ctx, accessToken) !== "owner") throw new Error("Yalnızca sahibi düzenleyebilir.");
     return { ctx: {}, args: {} };
+  },
+});
+
+/** For actions, which can't touch ctx.db directly — call via ctx.runQuery before doing anything privileged. */
+export const checkOwner = internalQuery({
+  args: { accessToken: v.optional(v.string()) },
+  handler: async (ctx, { accessToken }) => {
+    if (await access(ctx, accessToken) !== "owner") throw new Error("Yalnızca sahibi düzenleyebilir.");
   },
 });

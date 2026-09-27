@@ -1,7 +1,8 @@
 import { privateQuery, ownerMutation } from "./access";
+import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
-const kind = v.union(v.literal("sketch"), v.literal("poem"), v.literal("journal"));
+const kind = v.union(v.literal("sketch"), v.literal("poem"), v.literal("journal"), v.literal("blog"));
 export const imageUrl = ownerMutation({
   args: { storageId: v.id("_storage") },
   handler: async (ctx, { storageId }) => ctx.storage.getUrl(storageId),
@@ -23,7 +24,7 @@ export const get = privateQuery({
 });
 export const create = ownerMutation({
   args: { kind },
-  handler: async (ctx, { kind }) => ctx.db.insert("documents", { kind, title: kind === "poem" ? "Adsız şiir" : kind === "journal" ? "Yeni günlük" : "Yeni eskiz", content: "", updatedAt: Date.now(), revision: 0, shared: false }),
+  handler: async (ctx, { kind }) => ctx.db.insert("documents", { kind, title: kind === "poem" ? "Adsız şiir" : kind === "journal" ? "Yeni günlük" : kind === "blog" ? "Yeni blog yazısı" : "Yeni eskiz", content: "", updatedAt: Date.now(), revision: 0, shared: false }),
 });
 export const save = ownerMutation({
   args: { id: v.id("documents"), title: v.string(), content: v.string(), revision: v.number(), links: v.optional(v.array(v.id("documents"))) },
@@ -33,6 +34,22 @@ export const save = ownerMutation({
     if (data.content.length > 500000 || data.title.length > 300) throw new Error("Belge çok uzun. Yeni bir belgeye devam edin.");
     await ctx.db.patch(id, { ...data, revision: revision + 1, updatedAt: Date.now() });
     return revision + 1;
+  },
+});
+export const getInternal = internalQuery({
+  args: { id: v.id("documents") },
+  handler: async (ctx, { id }) => ctx.db.get(id),
+});
+export const markBlogSynced = internalMutation({
+  args: {
+    id: v.id("documents"),
+    blogPostId: v.string(),
+    blogSlug: v.string(),
+    blogPublished: v.boolean(),
+    blogPublishedAt: v.number(),
+  },
+  handler: async (ctx, { id, ...fields }) => {
+    await ctx.db.patch(id, { ...fields, blogSyncedAt: Date.now() });
   },
 });
 export const backlinks = privateQuery({

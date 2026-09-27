@@ -4,7 +4,20 @@ import { v } from "convex/values";
 export default defineSchema({
   invitations: defineTable({ name: v.string(), tokenHash: v.string(), expiresAt: v.number(), revoked: v.boolean(), usedAt: v.optional(v.number()) }).index("by_tokenHash", ["tokenHash"]),
   readerSessions: defineTable({ tokenHash: v.string(), inviteId: v.id("invitations"), expiresAt: v.number() }).index("by_tokenHash", ["tokenHash"]),
-  documents: defineTable({ title: v.string(), kind: v.union(v.literal("sketch"), v.literal("poem"), v.literal("journal")), content: v.string(), updatedAt: v.number(), revision: v.number(), shared: v.boolean(), links: v.optional(v.array(v.id("documents"))) }).index("by_updatedAt", ["updatedAt"]),
+  documents: defineTable({
+    title: v.string(),
+    kind: v.union(v.literal("sketch"), v.literal("poem"), v.literal("journal"), v.literal("blog")),
+    content: v.string(),
+    updatedAt: v.number(),
+    revision: v.number(),
+    shared: v.boolean(),
+    links: v.optional(v.array(v.id("documents"))),
+    blogSlug: v.optional(v.string()),
+    blogPostId: v.optional(v.string()),
+    blogPublished: v.optional(v.boolean()),
+    blogPublishedAt: v.optional(v.number()),
+    blogSyncedAt: v.optional(v.number()),
+  }).index("by_updatedAt", ["updatedAt"]),
 
   universes: defineTable({
     name: v.string(),

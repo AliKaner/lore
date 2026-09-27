@@ -14,6 +14,14 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Editor, JSONContent } from "@tiptap/react";
 
+const PAPER_PRESETS = [
+  { key: "", label: "Koyu", swatch: "#241733" },
+  { key: "cream", label: "Krem", swatch: "#f3ecd8" },
+  { key: "white", label: "Beyaz", swatch: "#faf9f6" },
+  { key: "sepia", label: "Sepya", swatch: "#e8d9b5" },
+  { key: "lined", label: "Çizgili", swatch: "#f3ecd8" },
+  { key: "grid", label: "Kareli", swatch: "#faf9f6" },
+];
 export interface WritingDocument { id: string; title: string; content: string; revision: number; plainText?: string }
 type Snapshot = { title: string; content: string; plainText: string; links: string[] };
 function initialContent(doc: WritingDocument) {
@@ -37,6 +45,17 @@ export function PagesEditor({ doc, readOnly, onNavigate, save }: { doc: WritingD
   const [font, setFont] = useState("Georgia");
   const [size, setSize] = useState(19);
   const [lineHeight, setLineHeight] = useState(1.8);
+  const [paper, setPaper] = useState("");
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const speechSupported = typeof window !== "undefined" && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+  useEffect(() => {
+    try { const saved = localStorage.getItem("lore-paper-preset"); if (saved) setPaper(saved); } catch {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("lore-paper-preset", paper); } catch {}
+  }, [paper]);
+  useEffect(() => () => { recognitionRef.current?.stop(); }, []);
   const uploadUrl = useMutation(api.fileStorage.generateUploadUrl);
   const imageUrl = useMutation(api.notebook.imageUrl);
   const imageInput = useRef<HTMLInputElement>(null);
@@ -140,6 +159,28 @@ export function PagesEditor({ doc, readOnly, onNavigate, save }: { doc: WritingD
     onCreate: ({ editor }) => { current.current.plainText = editor.getText(); setWords(editor.getText().trim().split(/\s+/).filter(Boolean).length); },
   });
   useEffect(() => { editorRef.current = editor; }, [editor]);
+  const toggleListening = useCallback(() => {
+    if (listening) { recognitionRef.current?.stop(); return; }
+    const Ctor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!Ctor) { setStatus("Bu tarayıcı sesle yazmayı desteklemiyor."); return; }
+    const recognition = new Ctor();
+    recognition.lang = "tr-TR";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.onresult = (event: any) => {
+      let finalText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) finalText += result[0].transcript;
+      }
+      if (finalText.trim()) editorRef.current?.chain().focus().insertContent(finalText.trim() + " ").run();
+    };
+    recognition.onerror = () => { setStatus("Sesle yazma hatası — mikrofon izni gerekebilir."); setListening(false); };
+    recognition.onend = () => setListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setListening(true);
+  }, [listening]);
   useEffect(() => {
     setOnline(navigator.onLine);
     if (!readOnly) { try { const local = localStorage.getItem(key); if (local) setRecovery(JSON.parse(local)); } catch {} }
@@ -166,10 +207,16 @@ export function PagesEditor({ doc, readOnly, onNavigate, save }: { doc: WritingD
       <button onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>Tablo</button>
       <button onClick={() => imageInput.current?.click()}>Görsel</button>
       <input ref={imageInput} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={async e => { const file = e.target.files?.[0]; if (file) await uploadImageAt(file); e.target.value = ""; }}/>
+      {speechSupported && <button title="Türkçe sesle yaz" className={listening ? "active" : ""} onClick={toggleListening}>{listening ? "⏺ Dinliyor…" : "🎤 Sesle yaz"}</button>}
+      <span className="paper-picker" aria-label="Kağıt">
+        {PAPER_PRESETS.map((p) => (
+          <button key={p.key} type="button" title={p.label} className={paper === p.key ? "active" : ""} style={{ background: p.swatch }} onClick={() => setPaper(p.key)} />
+        ))}
+      </span>
       <details><summary>Tablo düzeni</summary><div className="find-panel"><button onClick={() => editor.chain().focus().addRowAfter().run()}>Satır ekle</button><button onClick={() => editor.chain().focus().addColumnAfter().run()}>Sütun ekle</button><button onClick={() => editor.chain().focus().deleteRow().run()}>Satırı sil</button><button onClick={() => editor.chain().focus().deleteColumn().run()}>Sütunu sil</button><button onClick={() => editor.chain().focus().deleteTable().run()}>Tabloyu kaldır</button></div></details>
       <details><summary>Bul / Değiştir</summary><div className="find-panel"><input placeholder="Bul" aria-label="Bul" value={search} onChange={e => setSearch(e.target.value)}/><input placeholder="Yerine" aria-label="Yerine" value={replace} onChange={e => setReplace(e.target.value)}/><button disabled={!search} onClick={() => { let found = false; editor.state.doc.descendants((node, pos) => { if (found || !node.isText || !node.text) return; const offset = node.text.toLocaleLowerCase("tr").indexOf(search.toLocaleLowerCase("tr")); if (offset >= 0) { found = true; editor.chain().focus().setTextSelection({ from: pos + offset, to: pos + offset + search.length }).run(); } }); }}>Bul</button><button disabled={!search || editor.state.selection.empty} onClick={() => editor.chain().focus().insertContent({ type: "text", text: replace || " " }).run()}>Seçimi değiştir</button></div></details>
     </div>}
-    <div className="paper-scroll"><article className="writing-paper"><input className="document-title" aria-label="Belge başlığı" value={title} readOnly={readOnly} onChange={e => { setTitle(e.target.value); change({ ...current.current, title: e.target.value }); }}/><EditorContent editor={editor}/>
+    <div className="paper-scroll"><article className={`writing-paper ${paper ? `paper-${paper}` : ""}`}><input className="document-title" aria-label="Belge başlığı" value={title} readOnly={readOnly} onChange={e => { setTitle(e.target.value); change({ ...current.current, title: e.target.value }); }}/><EditorContent editor={editor}/>
       {!!backlinks?.length && <div className="backlinks-bar"><span className="eyebrow">BUNA BAĞLANAN YAZILAR</span><div className="backlinks-list">{backlinks.map((b: any) => <button key={b._id} onClick={() => onNavigate?.(b._id)}>{b.title}</button>)}</div></div>}
     </article></div>
     <footer className="editor-footer"><span>{words.toLocaleString("tr")} kelime · {Math.max(1, Math.ceil(words / 250))} tahmini sayfa</span>{!readOnly && <><label>Hedef <input type="number" aria-label="Kelime hedefi" min="1" value={goal} onChange={e => setGoal(Math.max(1, Number(e.target.value)))}/></label><progress value={words} max={goal}/><button onClick={() => void flush()}>Şimdi kaydet</button></>}<span>Türkçe · {readOnly ? "Okuma" : "Yazma"}</span></footer>

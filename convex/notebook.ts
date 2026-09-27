@@ -26,13 +26,22 @@ export const create = ownerMutation({
   handler: async (ctx, { kind }) => ctx.db.insert("documents", { kind, title: kind === "poem" ? "Adsız şiir" : kind === "journal" ? "Yeni günlük" : "Yeni eskiz", content: "", updatedAt: Date.now(), revision: 0, shared: false }),
 });
 export const save = ownerMutation({
-  args: { id: v.id("documents"), title: v.string(), content: v.string(), revision: v.number() },
+  args: { id: v.id("documents"), title: v.string(), content: v.string(), revision: v.number(), links: v.optional(v.array(v.id("documents"))) },
   handler: async (ctx, { id, revision, ...data }) => {
     const doc = await ctx.db.get(id);
     if (!doc || doc.revision !== revision) throw new Error("Başka bir sekmede değişti. Yerel kopyanızı indirin ve sayfayı yenileyin.");
     if (data.content.length > 500000 || data.title.length > 300) throw new Error("Belge çok uzun. Yeni bir belgeye devam edin.");
     await ctx.db.patch(id, { ...data, revision: revision + 1, updatedAt: Date.now() });
     return revision + 1;
+  },
+});
+export const backlinks = privateQuery({
+  args: { id: v.id("documents") },
+  handler: async (ctx, { id }) => {
+    const docs = await ctx.db.query("documents").withIndex("by_updatedAt").order("desc").take(500);
+    return docs
+      .filter((d) => (ctx.role === "owner" || d.shared) && (d.links ?? []).includes(id))
+      .map(({ content, ...d }) => d);
   },
 });
 export const share = ownerMutation({

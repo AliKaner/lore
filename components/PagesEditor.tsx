@@ -7,19 +7,29 @@ import Typography from "@tiptap/extension-typography";
 import { TextStyleKit } from "@tiptap/extension-text-style";
 import { TableKit } from "@tiptap/extension-table";
 import { ResizableImage } from "./tiptap/ResizableImage";
-import { useMutation, storedToken } from "@/hooks/privateConvex";
+import { WikiLink } from "./tiptap/WikiLink";
+import { useMutation, useQuery, storedToken } from "@/hooks/privateConvex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { Editor } from "@tiptap/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Editor, JSONContent } from "@tiptap/react";
 
 export interface WritingDocument { id: string; title: string; content: string; revision: number; plainText?: string }
-type Snapshot = { title: string; content: string; plainText: string };
+type Snapshot = { title: string; content: string; plainText: string; links: string[] };
 function initialContent(doc: WritingDocument) {
   if (doc.content) { try { return JSON.parse(doc.content); } catch { /* Legacy plain text. */ } }
   return { type: "doc", content: (doc.plainText || doc.content || "").split("\n").map(text => ({ type: "paragraph", ...(text ? { content: [{ type: "text", text }] } : {}) })) };
 }
-export function PagesEditor({ doc, readOnly, save }: { doc: WritingDocument; readOnly: boolean; save: (value: Snapshot & { revision: number }) => Promise<number> }) {
+function extractWikiLinkIds(json: JSONContent): string[] {
+  const ids = new Set<string>();
+  const walk = (node: JSONContent) => {
+    if (node.type === "wikiLink" && typeof node.attrs?.id === "string") ids.add(node.attrs.id);
+    node.content?.forEach(walk);
+  };
+  walk(json);
+  return [...ids];
+}
+export function PagesEditor({ doc, readOnly, onNavigate, save }: { doc: WritingDocument; readOnly: boolean; onNavigate?: (id: string) => void; save: (value: Snapshot & { revision: number }) => Promise<number> }) {
   const [title, setTitle] = useState(doc.title);
   const [status, setStatus] = useState("Kaydedildi");
   const [online, setOnline] = useState(true);
@@ -36,7 +46,8 @@ export function PagesEditor({ doc, readOnly, save }: { doc: WritingDocument; rea
   const [search, setSearch] = useState("");
   const [replace, setReplace] = useState("");
   const revision = useRef(doc.revision);
-  const current = useRef<Snapshot>({ title: doc.title, content: JSON.stringify(initialContent(doc)), plainText: doc.plainText || "" });
+  const startContent = initialContent(doc);
+  const current = useRef<Snapshot>({ title: doc.title, content: JSON.stringify(startContent), plainText: doc.plainText || "", links: extractWikiLinkIds(startContent) });
   const saved = useRef(current.current);
   const busy = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -85,8 +96,25 @@ export function PagesEditor({ doc, readOnly, save }: { doc: WritingDocument; rea
   }, [uploadUrl, imageUrl]);
   const uploadImageAtRef = useRef(uploadImageAt); uploadImageAtRef.current = uploadImageAt;
 
+  const documents = useQuery(api.notebook.list, {});
+  const linkTargets = useMemo(
+    () => (documents ?? []).filter((d: any) => d._id !== doc.id).map((d: any) => ({ id: d._id, title: d.title })),
+    [documents, doc.id]
+  );
+  const linkTargetsRef = useRef(linkTargets); linkTargetsRef.current = linkTargets;
+  const onNavigateRef = useRef(onNavigate); onNavigateRef.current = onNavigate;
+  const backlinks = useQuery(api.notebook.backlinks, { id: doc.id as Id<"documents"> });
+
+  const wikiLinkExtension = useMemo(
+    () => WikiLink.configure({
+      getDocuments: () => linkTargetsRef.current,
+      onNavigate: (id: string) => onNavigateRef.current?.(id),
+    }),
+    []
+  );
+
   const editor = useEditor({
-    extensions: [StarterKit, TextStyleKit, TableKit.configure({ table: { resizable: true } }), ResizableImage, TextAlign.configure({ types: ["heading", "paragraph"] }), Placeholder.configure({ placeholder: "Aklından geçen ilk cümleyi yaz…" }), Typography],
+    extensions: [StarterKit, TextStyleKit, TableKit.configure({ table: { resizable: true } }), ResizableImage, wikiLinkExtension, TextAlign.configure({ types: ["heading", "paragraph"] }), Placeholder.configure({ placeholder: "Aklından geçen ilk cümleyi yaz… ( [[ ile başka bir yazına bağlan )" }), Typography],
     content: initialContent(doc), immediatelyRender: false, editable: !readOnly,
     autofocus: !readOnly && !doc.content && !doc.plainText ? "start" : false,
     editorProps: {
@@ -102,8 +130,9 @@ export function PagesEditor({ doc, readOnly, save }: { doc: WritingDocument; rea
       },
     },
     onUpdate: ({ editor }) => {
+      const json = editor.getJSON();
       const plainText = editor.getText(); setWords(plainText.trim().split(/\s+/).filter(Boolean).length);
-      change({ ...current.current, content: JSON.stringify(editor.getJSON()), plainText });
+      change({ ...current.current, content: JSON.stringify(json), plainText, links: extractWikiLinkIds(json) });
     },
     onCreate: ({ editor }) => { current.current.plainText = editor.getText(); setWords(editor.getText().trim().split(/\s+/).filter(Boolean).length); },
   });
@@ -137,7 +166,9 @@ export function PagesEditor({ doc, readOnly, save }: { doc: WritingDocument; rea
       <details><summary>Tablo düzeni</summary><div className="find-panel"><button onClick={() => editor.chain().focus().addRowAfter().run()}>Satır ekle</button><button onClick={() => editor.chain().focus().addColumnAfter().run()}>Sütun ekle</button><button onClick={() => editor.chain().focus().deleteRow().run()}>Satırı sil</button><button onClick={() => editor.chain().focus().deleteColumn().run()}>Sütunu sil</button><button onClick={() => editor.chain().focus().deleteTable().run()}>Tabloyu kaldır</button></div></details>
       <details><summary>Bul / Değiştir</summary><div className="find-panel"><input placeholder="Bul" aria-label="Bul" value={search} onChange={e => setSearch(e.target.value)}/><input placeholder="Yerine" aria-label="Yerine" value={replace} onChange={e => setReplace(e.target.value)}/><button disabled={!search} onClick={() => { let found = false; editor.state.doc.descendants((node, pos) => { if (found || !node.isText || !node.text) return; const offset = node.text.toLocaleLowerCase("tr").indexOf(search.toLocaleLowerCase("tr")); if (offset >= 0) { found = true; editor.chain().focus().setTextSelection({ from: pos + offset, to: pos + offset + search.length }).run(); } }); }}>Bul</button><button disabled={!search || editor.state.selection.empty} onClick={() => editor.chain().focus().insertContent({ type: "text", text: replace || " " }).run()}>Seçimi değiştir</button></div></details>
     </div>}
-    <div className="paper-scroll"><article className="writing-paper"><input className="document-title" aria-label="Belge başlığı" value={title} readOnly={readOnly} onChange={e => { setTitle(e.target.value); change({ ...current.current, title: e.target.value }); }}/><EditorContent editor={editor}/></article></div>
+    <div className="paper-scroll"><article className="writing-paper"><input className="document-title" aria-label="Belge başlığı" value={title} readOnly={readOnly} onChange={e => { setTitle(e.target.value); change({ ...current.current, title: e.target.value }); }}/><EditorContent editor={editor}/>
+      {!!backlinks?.length && <div className="backlinks-bar"><span className="eyebrow">BUNA BAĞLANAN YAZILAR</span><div className="backlinks-list">{backlinks.map((b: any) => <button key={b._id} onClick={() => onNavigate?.(b._id)}>{b.title}</button>)}</div></div>}
+    </article></div>
     <footer className="editor-footer"><span>{words.toLocaleString("tr")} kelime · {Math.max(1, Math.ceil(words / 250))} tahmini sayfa</span>{!readOnly && <><label>Hedef <input type="number" aria-label="Kelime hedefi" min="1" value={goal} onChange={e => setGoal(Math.max(1, Number(e.target.value)))}/></label><progress value={words} max={goal}/><button onClick={() => void flush()}>Şimdi kaydet</button></>}<span>Türkçe · {readOnly ? "Okuma" : "Yazma"}</span></footer>
   </section>;
 }

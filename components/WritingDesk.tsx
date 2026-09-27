@@ -100,7 +100,7 @@ export function WritingDesk() {
         </header>
         {error && <div className="desk-error" role="alert">{error}</div>}
         {selected?.kind === "document" ? (
-          <DocumentPane key={selected.id} id={selected.id} owner={owner} />
+          <DocumentPane key={selected.id} id={selected.id} owner={owner} onNavigate={(docId) => open({ kind: "document", id: docId as Id<"documents"> })} />
         ) : selected?.kind === "book" ? (
           <BookPane key={selected.id} id={selected.id} owner={owner} token={token} />
         ) : (
@@ -266,7 +266,7 @@ function WorldPanel() {
   );
 }
 
-function DocumentPane({ id, owner }: { id: Id<"documents">; owner: boolean }) {
+function DocumentPane({ id, owner, onNavigate }: { id: Id<"documents">; owner: boolean; onNavigate: (id: string) => void }) {
   const doc = useQuery(api.notebook.get, { id });
   const save = useMutation(api.notebook.save);
   const share = useMutation(api.notebook.share);
@@ -292,7 +292,7 @@ function DocumentPane({ id, owner }: { id: Id<"documents">; owner: boolean }) {
       {doc.kind === "journal" ? (
         <JournalEditor doc={{ id, ...doc }} readOnly={!owner} save={({ title, content, revision }) => save({ id, title, content, revision })} />
       ) : (
-        <PagesEditor doc={{ id, ...doc }} readOnly={!owner} save={({ title, content, revision }) => save({ id, title, content, revision })} />
+        <PagesEditor doc={{ id, ...doc }} readOnly={!owner} onNavigate={onNavigate} save={({ title, content, revision, links }) => save({ id, title, content, revision, links: links as Id<"documents">[] })} />
       )}
     </>
   );
@@ -450,7 +450,7 @@ function ChapterPane({ id, owner }: { id: Id<"chapters">; owner: boolean }) {
     <PagesEditor
       doc={{ id, title: chapter.title, content: chapter.editorJson || "", plainText: chapter.contentTr, revision: chapter.revision ?? 0 }}
       readOnly={!owner}
-      save={(value) => save({ id, ...value })}
+      save={({ title, content, plainText, revision }) => save({ id, title, content, plainText, revision })}
     />
   );
 }

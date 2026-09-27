@@ -34,21 +34,21 @@ export default function LoreContent({
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <label className="text-sm text-[#5c6653] font-text">Language</label>
+        <label className="text-sm text-[var(--ink-soft)] font-text">Language</label>
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value as "tr" | "en")}
-          className="bg-transparent border border-[#dce1d4] text-[#343831] rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#779884]/40 cursor-pointer"
+          className="bg-transparent border border-[var(--border-strong)] text-[var(--ink)] rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/40 cursor-pointer"
         >
-          <option value="tr" className="bg-[#f9f9f6]">
+          <option value="tr" className="bg-[var(--surface)]">
             Türkçe
           </option>
-          <option value="en" className="bg-[#f9f9f6]">
+          <option value="en" className="bg-[var(--surface)]">
             English
           </option>
         </select>
       </div>
-      <div className="text-[#5c6653] leading-relaxed font-text text-lg">
+      <div className="text-[var(--ink-soft)] leading-relaxed font-text text-lg">
         {renderRichText(text, entries ?? [])}
       </div>
     </div>

@@ -40,10 +40,10 @@ export default function ChapterClient({ params }: { params: Promise<{ bookId: st
 
   if (chapter === undefined || book === undefined) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#f6f7f1] via-[#f2f4ec] to-[#eef1e6]">
+      <div className="min-h-screen bg-gradient-to-br from-[var(--bg-2)] via-[var(--bg)] to-[var(--bg-3)]">
         <Header />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="w-8 h-8 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[var(--border-strong)] border-t-[var(--accent)] rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -51,12 +51,12 @@ export default function ChapterClient({ params }: { params: Promise<{ bookId: st
 
   if (chapter === null || book === null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#f6f7f1] via-[#f2f4ec] to-[#eef1e6]">
+      <div className="min-h-screen bg-gradient-to-br from-[var(--bg-2)] via-[var(--bg)] to-[var(--bg-3)]">
         <Header />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="text-center text-[#343831]">
+          <div className="text-center text-[var(--ink)]">
             <h1 className="text-4xl font-bold mb-4 font-title">{t("chapter.notFound")}</h1>
-            <Link href={`/book/${bookId}`} className="text-[#4b6a56] hover:text-[#35533f]">{t("chapter.backToBook")}</Link>
+            <Link href={`/book/${bookId}`} className="text-[var(--accent-text)] hover:text-[var(--accent-text-hover)]">{t("chapter.backToBook")}</Link>
           </div>
         </div>
       </div>
@@ -73,10 +73,10 @@ export default function ChapterClient({ params }: { params: Promise<{ bookId: st
   const readingTime = Math.ceil(wordCount / 80);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f6f7f1] via-[#f2f4ec] to-[#eef1e6] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--bg-2)] via-[var(--bg)] to-[var(--bg-3)] flex flex-col">
       <Header />
       <div className="max-w-4xl mx-auto px-4 py-16 flex-1 w-full">
-        <Link href={`/book/${bookId}`} className="inline-flex items-center text-[#4b6a56] hover:text-[#35533f] mb-8 transition-colors">
+        <Link href={`/book/${bookId}`} className="inline-flex items-center text-[var(--accent-text)] hover:text-[var(--accent-text-hover)] mb-8 transition-colors">
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -84,30 +84,30 @@ export default function ChapterClient({ params }: { params: Promise<{ bookId: st
         </Link>
 
         {chapter.status === "pending" && (
-          <div className="mb-8 px-4 py-3 bg-[#f8f3e4] border border-[#e3d3a6] rounded-lg text-[#8c7332] text-sm font-text">
+          <div className="mb-8 px-4 py-3 bg-[var(--warning-soft)] border border-[var(--warning-border)] rounded-lg text-[var(--warning-text)] text-sm font-text">
             {t("chapter.pendingBanner")}
           </div>
         )}
 
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#343831] mb-4 font-title">{chapter.title}</h1>
-          <p className="text-xl text-[#8b9681] font-text mb-2">{book.title}</p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-[#5c6653] font-text mt-3 bg-[#f6f7f2] border border-[#e5e7dd] py-2 px-5 rounded-full max-w-fit mx-auto shadow-inner">
+          <h1 className="text-4xl md:text-5xl font-bold text-[var(--ink)] mb-4 font-title">{chapter.title}</h1>
+          <p className="text-xl text-[var(--muted)] font-text mb-2">{book.title}</p>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-[var(--ink-soft)] font-text mt-3 bg-[var(--surface-3)] border border-[var(--border)] py-2 px-5 rounded-full max-w-fit mx-auto shadow-inner">
             <span>👁️ {t("chapter.views", { count: chapter.views ?? 0 })}</span>
-            <span className="text-[#c9a557]">•</span>
+            <span className="text-[var(--warning-text)]">•</span>
             <span>📖 {t("chapter.words", { count: wordCount.toLocaleString("tr-TR") })}</span>
-            <span className="text-[#c9a557]">•</span>
+            <span className="text-[var(--warning-text)]">•</span>
             <span>⏱️ {t("chapter.readingTime", { count: readingTime })}</span>
             {currentIndex >= 0 && (
               <>
-                <span className="text-[#c9a557]">•</span>
+                <span className="text-[var(--warning-text)]">•</span>
                 <span>{t("chapter.chapterOf", { current: currentIndex + 1, total: allChapters.length })}</span>
               </>
             )}
           </div>
         </div>
 
-        <div className="bg-white backdrop-blur-md border border-[#e5e7dd] rounded-lg p-8 mb-8">
+        <div className="bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] rounded-lg p-8 mb-8">
           <LoreContent
             content={{ tr: chapter.contentTr, en: chapter.contentEn }}
             lang={lang}
@@ -119,14 +119,14 @@ export default function ChapterClient({ params }: { params: Promise<{ bookId: st
         <div className="flex justify-between items-center mb-12">
           <div>
             {prevChapter ? (
-              <Link href={`/book/${bookId}/${prevChapter._id}`} className="px-6 py-3 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] hover:bg-[#cfd9c5] transition-all">
+              <Link href={`/book/${bookId}/${prevChapter._id}`} className="px-6 py-3 bg-[var(--surface-2)] border border-[var(--border-strong)] rounded-lg text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-all">
                 {t("chapter.prev")}
               </Link>
             ) : <div />}
           </div>
           <div>
             {nextChapter ? (
-              <Link href={`/book/${bookId}/${nextChapter._id}`} className="px-6 py-3 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-[#343831] hover:bg-[#cfd9c5] transition-all">
+              <Link href={`/book/${bookId}/${nextChapter._id}`} className="px-6 py-3 bg-[var(--surface-2)] border border-[var(--border-strong)] rounded-lg text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-all">
                 {t("chapter.next")}
               </Link>
             ) : <div />}
@@ -134,20 +134,20 @@ export default function ChapterClient({ params }: { params: Promise<{ bookId: st
         </div>
 
         {allChapters.length > 0 && (
-          <div className="mt-8 pt-8 border-t border-[#e5e7dd]">
-            <h3 className="text-2xl font-bold text-[#343831] mb-6 font-title text-center">{t("chapter.allChapters")}</h3>
+          <div className="mt-8 pt-8 border-t border-[var(--border)]">
+            <h3 className="text-2xl font-bold text-[var(--ink)] mb-6 font-title text-center">{t("chapter.allChapters")}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {allChapters.map((ch, index) => (
                 <Link
                   key={ch._id}
                   href={`/book/${bookId}/${ch._id}`}
-                  className={`group bg-[#f6f7f2] border rounded-lg p-4 hover:bg-[#f4f7f0] hover:border-[#c3cdb5] transition-all ${ch._id === chapterId ? "border-[#3f5e4b] bg-[#eef3ec]" : "border-[#e5e7dd]"}`}
+                  className={`group bg-[var(--surface-3)] border rounded-lg p-4 hover:bg-[var(--surface-hover)] hover:border-[var(--border-strong)] transition-all ${ch._id === chapterId ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--border)]"}`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-[#8b9681] font-text">{t("chapter.chapterLabel", { n: index + 1 })}</span>
-                    {ch._id === chapterId && <span className="text-xs text-[#4b6a56] font-text">{t("chapter.current")}</span>}
+                    <span className="text-sm text-[var(--muted)] font-text">{t("chapter.chapterLabel", { n: index + 1 })}</span>
+                    {ch._id === chapterId && <span className="text-xs text-[var(--accent-text)] font-text">{t("chapter.current")}</span>}
                   </div>
-                  <h4 className="text-base font-semibold text-[#343831] group-hover:text-[#35533f] transition-colors font-title">{ch.title}</h4>
+                  <h4 className="text-base font-semibold text-[var(--ink)] group-hover:text-[var(--accent-text-hover)] transition-colors font-title">{ch.title}</h4>
                 </Link>
               ))}
             </div>

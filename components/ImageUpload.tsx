@@ -52,9 +52,9 @@ export function ImageUpload({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm text-[#5c6653]">{label}</label>
+      <label className="block text-sm text-[var(--ink-soft)]">{label}</label>
       {displayUrl && (
-        <div className="relative w-32 h-32 rounded overflow-hidden border border-[#e5e7dd]">
+        <div className="relative w-32 h-32 rounded overflow-hidden border border-[var(--border)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={displayUrl}
@@ -68,10 +68,10 @@ export function ImageUpload({
         accept="image/*"
         onChange={handleFileChange}
         disabled={uploading}
-        className="block w-full text-sm text-[#5c6653] file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[#eef0e9] file:text-[#343831] hover:file:bg-[#dfe6d9] cursor-pointer"
+        className="block w-full text-sm text-[var(--ink-soft)] file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[var(--surface-2)] file:text-[var(--ink)] hover:file:bg-[var(--surface-hover)] cursor-pointer"
       />
       {uploading && (
-        <p className="text-xs text-[#4b6a56]">Uploading...</p>
+        <p className="text-xs text-[var(--accent-text)]">Uploading...</p>
       )}
     </div>
   );

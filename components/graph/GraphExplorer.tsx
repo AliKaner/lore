@@ -49,7 +49,7 @@ export function GraphExplorer({ onClose, className = "" }: GraphExplorerProps) {
         <select
           value={universeId}
           onChange={(e) => handleUniverseChange(e.target.value)}
-          className="bg-white border border-[#e5e7dd] rounded-lg px-3 py-2 text-[#343831] text-sm focus:outline-none"
+          className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--ink)] text-sm focus:outline-none"
         >
           <option value="">Evren seçin</option>
           {universes?.map((u) => (
@@ -61,21 +61,21 @@ export function GraphExplorer({ onClose, className = "" }: GraphExplorerProps) {
         {onClose && (
           <button
             onClick={onClose}
-            className="px-3 py-2 bg-[#eef0e9] border border-[#dce1d4] rounded-lg text-sm text-[#343831] hover:bg-[#dfe6d9] transition-colors font-text"
+            className="px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-strong)] rounded-lg text-sm text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors font-text"
           >
             Kapat (Esc)
           </button>
         )}
       </div>
 
-      <div className="flex-1 min-h-0 bg-[#f6f7f2] border border-[#e5e7dd] rounded-xl overflow-hidden">
+      <div className="flex-1 min-h-0 bg-[var(--surface-3)] border border-[var(--border)] rounded-xl overflow-hidden">
         {!universeId ? (
-          <div className="w-full h-full flex items-center justify-center text-[#96998e] font-text">
+          <div className="w-full h-full flex items-center justify-center text-[var(--muted-3)] font-text">
             Devam etmek için bir evren seç.
           </div>
         ) : graph === undefined ? (
           <div className="w-full h-full flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-[#dce1d4] border-t-[#3f5e4b] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[var(--border-strong)] border-t-[var(--accent)] rounded-full animate-spin" />
           </div>
         ) : (
           <GraphView

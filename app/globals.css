@@ -1,13 +1,58 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #343831;
-  --paper: #f9f9f6;
+  /* Dark purple + gold + turquoise — the app's one palette. Change the theme by editing these. */
+  --bg: #1a1022;
+  --bg-2: #150c1c;
+  --bg-3: #100815;
+  --surface: #241733;
+  --surface-2: #2e1e3f;
+  --surface-3: #382649;
+  --surface-hover: #3d2a52;
+
+  --border: #4a3358;
+  --border-strong: #6b4a7d;
+
+  --ink: #f3ead9;
+  --ink-soft: #e0cfe8;
+  --muted: #c2a8d4;
+  --muted-2: #a68bb8;
+  --muted-3: #8a7099;
+  --muted-4: #6e5a7c;
+
+  /* gold — primary accent */
+  --accent: #d4af37;
+  --accent-hover: #e8c766;
+  --accent-text: #e8c766;
+  --accent-text-hover: #f3d98a;
+  --accent-soft: #3a2f1c;
+  --accent-soft-hover: #4a3d24;
+  --accent-ink: #241733;
+
+  /* turquoise — secondary accent */
+  --accent2: #16a893;
+  --accent2-text: #4fd6c2;
+  --accent2-soft: #163d38;
+  --accent2-soft-hover: #1e4d47;
+
+  /* coral — danger */
+  --danger: #e08a7a;
+  --danger-border: #6b3a34;
+  --danger-soft: #3d2420;
+  --danger-soft-hover: #4a2b26;
+
+  /* warm amber — warning */
+  --warning-text: #e0a85c;
+  --warning-border: #6b5730;
+  --warning-soft: #3d3320;
+
+  /* legacy aliases kept for anything still referencing them directly */
+  --paper: var(--surface);
 }
 
 body {
   color: var(--ink);
-  background: var(--paper);
+  background: var(--bg);
 }
 
 /* Font Classes — unified with the desk theme (app/desk.css) */

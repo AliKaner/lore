@@ -21,7 +21,7 @@ export const CleanTextarea = React.forwardRef<HTMLTextAreaElement, CleanTextarea
         rows={rows}
         className={
           className ||
-          "w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-2 text-[#343831] focus:outline-none resize-y font-text"
+          "w-full bg-[var(--surface)] border border-[var(--border)] rounded-lg px-4 py-2 text-[var(--ink)] focus:outline-none resize-y font-text"
         }
       />
     );

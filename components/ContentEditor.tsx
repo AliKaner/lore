@@ -89,10 +89,10 @@ function FormatToolbar({
   };
 
   const btnClass =
-    "px-2 py-1 rounded text-xs font-text text-[#5c6653] hover:text-[#20261c] hover:bg-[#f4f7f0] transition-colors flex-shrink-0";
+    "px-2 py-1 rounded text-xs font-text text-[var(--ink-soft)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors flex-shrink-0";
 
   return (
-    <div className="flex flex-wrap items-center gap-1 mb-1.5 p-1.5 bg-[#f6f7f2] border border-[#e5e7dd] rounded-lg">
+    <div className="flex flex-wrap items-center gap-1 mb-1.5 p-1.5 bg-[var(--surface-3)] border border-[var(--border)] rounded-lg">
       <button type="button" className={`${btnClass} font-bold`} title="Kalın" onClick={() => wrapSelection({ before: "**", after: "**", placeholder: "kalın metin" })}>
         B
       </button>
@@ -102,7 +102,7 @@ function FormatToolbar({
       <button type="button" className={`${btnClass} font-mono`} title="Kod" onClick={() => wrapSelection({ before: "`", after: "`", placeholder: "kod" })}>
         {"</>"}
       </button>
-      <span className="w-px h-4 bg-white mx-0.5" />
+      <span className="w-px h-4 bg-[var(--surface)] mx-0.5" />
       <button type="button" className={btnClass} title="Başlık" onClick={() => prefixLines({ prefix: "## ", placeholder: "Başlık" })}>
         H
       </button>
@@ -118,7 +118,7 @@ function FormatToolbar({
       <button type="button" className={btnClass} title="Bağlantı" onClick={() => wrapSelection({ before: "[", after: "](https://)", placeholder: "bağlantı metni" })}>
         🔗
       </button>
-      <span className="w-px h-4 bg-white mx-0.5" />
+      <span className="w-px h-4 bg-[var(--surface)] mx-0.5" />
 
       <div className="relative">
         <button
@@ -133,7 +133,7 @@ function FormatToolbar({
           🎨 Renk
         </button>
         {colorOpen && (
-          <div className="absolute z-10 top-full left-0 mt-1 p-2 bg-[#f9f9f6] border border-[#e5e7dd] rounded-lg shadow-xl w-48">
+          <div className="absolute z-10 top-full left-0 mt-1 p-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg shadow-xl w-48">
             <div className="grid grid-cols-8 gap-1 mb-2">
               {RICH_TEXT_COLORS.map((c) => (
                 <button
@@ -141,7 +141,7 @@ function FormatToolbar({
                   type="button"
                   title={c.label}
                   onClick={() => applyColor(c.name)}
-                  className="w-5 h-5 rounded-full border border-[#e5e7dd] hover:scale-110 transition-transform"
+                  className="w-5 h-5 rounded-full border border-[var(--border)] hover:scale-110 transition-transform"
                   style={{ backgroundColor: c.hex }}
                 />
               ))}
@@ -152,13 +152,13 @@ function FormatToolbar({
                 value={customHex}
                 onChange={(e) => setCustomHex(e.target.value)}
                 placeholder="#RRGGBB"
-                className="w-20 bg-white border border-[#e5e7dd] rounded px-1.5 py-0.5 text-xs text-[#343831] font-mono focus:outline-none"
+                className="w-20 bg-[var(--surface)] border border-[var(--border)] rounded px-1.5 py-0.5 text-xs text-[var(--ink)] font-mono focus:outline-none"
               />
               <button
                 type="button"
                 disabled={!HEX_PATTERN.test(customHex)}
                 onClick={() => applyColor(customHex)}
-                className="text-xs px-2 py-0.5 bg-white border border-[#e5e7dd] rounded text-[#343831] hover:bg-[#dfe6d9] disabled:opacity-30 transition-colors"
+                className="text-xs px-2 py-0.5 bg-[var(--surface)] border border-[var(--border)] rounded text-[var(--ink)] hover:bg-[var(--surface-hover)] disabled:opacity-30 transition-colors"
               >
                 Uygula
               </button>
@@ -180,13 +180,13 @@ function FormatToolbar({
           🔤 Font
         </button>
         {fontOpen && (
-          <div className="absolute z-10 top-full left-0 mt-1 p-1 bg-[#f9f9f6] border border-[#e5e7dd] rounded-lg shadow-xl w-36">
+          <div className="absolute z-10 top-full left-0 mt-1 p-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg shadow-xl w-36">
             {RICH_TEXT_FONTS.map((f) => (
               <button
                 key={f.name}
                 type="button"
                 onClick={() => applyFont(f.name)}
-                className="w-full text-left px-2 py-1 rounded text-xs text-[#46503d] hover:bg-[#f4f7f0] transition-colors"
+                className="w-full text-left px-2 py-1 rounded text-xs text-[var(--ink-soft)] hover:bg-[var(--surface-hover)] transition-colors"
               >
                 {f.label}
               </button>
@@ -251,20 +251,20 @@ export function ContentEditor({
   return (
     <div>
       {draftAvailable && (
-        <div className="flex items-center justify-between gap-3 mb-2 px-3 py-2 bg-[#eef3ec] border border-[#a9c2ab] rounded-lg text-sm font-text">
-          <span className="text-[#4b6a56]">Kaydedilmiş bir taslak bulundu.</span>
+        <div className="flex items-center justify-between gap-3 mb-2 px-3 py-2 bg-[var(--accent-soft)] border border-[var(--accent)] rounded-lg text-sm font-text">
+          <span className="text-[var(--accent-text)]">Kaydedilmiş bir taslak bulundu.</span>
           <div className="flex gap-2 flex-shrink-0">
             <button
               type="button"
               onClick={restoreDraft}
-              className="px-3 py-1 bg-[#3f5e4b]/40 border border-[#3f5e4b]/40 rounded text-[#343831] hover:bg-[#3f5e4b]/60 transition-colors"
+              className="px-3 py-1 bg-[var(--accent)]/40 border border-[var(--accent)]/40 rounded text-[var(--accent-ink)] hover:bg-[var(--accent)]/60 transition-colors"
             >
               Geri Yükle
             </button>
             <button
               type="button"
               onClick={discardDraft}
-              className="px-3 py-1 text-[#8b9681] hover:text-[#20261c] transition-colors"
+              className="px-3 py-1 text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
             >
               Yok Say
             </button>
@@ -273,15 +273,15 @@ export function ContentEditor({
       )}
 
       {fullscreen ? (
-        <div className="fixed inset-0 z-50 bg-[#f9f9f6] backdrop-blur-sm p-4 md:p-10 flex flex-col">
+        <div className="fixed inset-0 z-50 bg-[var(--surface)] backdrop-blur-sm p-4 md:p-10 flex flex-col">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-[#8b9681] font-text">
+            <span className="text-sm text-[var(--muted)] font-text">
               {wordCount.toLocaleString("tr-TR")} kelime · ~{readingTime} dk okuma
             </span>
             <button
               type="button"
               onClick={() => setFullscreen(false)}
-              className="px-4 py-1.5 bg-white border border-[#e5e7dd] rounded-lg text-[#343831] hover:bg-[#dfe6d9] transition-colors text-sm font-text"
+              className="px-4 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors text-sm font-text"
             >
               Küçült (Esc)
             </button>
@@ -294,7 +294,7 @@ export function ContentEditor({
               onChange={onChange}
               placeholder={placeholder}
               rows={28}
-              className="w-full h-full bg-[#f6f7f2] border border-[#e5e7dd] rounded-lg px-6 py-5 text-[#343831] focus:outline-none focus:border-[#a1b39a] resize-none font-text leading-relaxed text-lg"
+              className="w-full h-full bg-[var(--surface-3)] border border-[var(--border)] rounded-lg px-6 py-5 text-[var(--ink)] focus:outline-none focus:border-[var(--border-strong)] resize-none font-text leading-relaxed text-lg"
             />
           </div>
         </div>
@@ -307,16 +307,16 @@ export function ContentEditor({
             onChange={onChange}
             placeholder={placeholder}
             rows={rows}
-            className="w-full bg-white border border-[#e5e7dd] rounded-lg px-4 py-3 text-[#343831] focus:outline-none focus:border-[#a1b39a] resize-y font-text leading-relaxed"
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-lg px-4 py-3 text-[var(--ink)] focus:outline-none focus:border-[var(--border-strong)] resize-y font-text leading-relaxed"
           />
-          <div className="flex items-center justify-between mt-1.5 text-xs text-[#96998e] font-text">
+          <div className="flex items-center justify-between mt-1.5 text-xs text-[var(--muted-3)] font-text">
             <span>
               {wordCount.toLocaleString("tr-TR")} kelime · ~{readingTime} dk okuma
             </span>
             <button
               type="button"
               onClick={() => setFullscreen(true)}
-              className="text-[#8b9681] hover:text-[#20261c] transition-colors"
+              className="text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
             >
               Tam Ekran
             </button>

@@ -2,9 +2,9 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <footer className="relative z-10 border-t border-[#e5e7dd] bg-[#f6f7f2] backdrop-blur-md mt-16">
+    <footer className="relative z-10 border-t border-[var(--border)] bg-[var(--surface-3)] backdrop-blur-md mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p className="text-sm text-[#8b9681] font-text">
+        <p className="text-sm text-[var(--muted)] font-text">
           &copy; {new Date().getFullYear()} Booktions
         </p>
         <div className="flex items-center gap-4 text-sm font-text">
@@ -12,7 +12,7 @@ export default function Footer() {
             href="https://alikaner.com"
             target="_blank"
             rel="noreferrer"
-            className="text-[#8b9681] hover:text-[#20261c] transition-colors"
+            className="text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
           >
             alikaner.com
           </a>
@@ -20,7 +20,7 @@ export default function Footer() {
             href="https://github.com/AliKaner"
             target="_blank"
             rel="noreferrer"
-            className="text-[#8b9681] hover:text-[#20261c] transition-colors"
+            className="text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
           >
             GitHub
           </a>
@@ -28,7 +28,7 @@ export default function Footer() {
             href="https://www.linkedin.com/in/alikaner/"
             target="_blank"
             rel="noreferrer"
-            className="text-[#8b9681] hover:text-[#20261c] transition-colors"
+            className="text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
           >
             LinkedIn
           </a>

@@ -18,9 +18,9 @@ export interface GraphEdgeData {
 }
 
 export const NODE_STYLE: Record<GraphNodeType, { emoji: string; color: string; ring: string }> = {
-  chapter: { emoji: "📖", color: "bg-[#e7eef7] border-[#a9c2de] text-[#2f4d73]", ring: "ring-[#a9c2de]" },
-  character: { emoji: "👤", color: "bg-[#e9eee4] border-[#b7cbb0] text-[#3f5e4b]", ring: "ring-[#b7cbb0]" },
-  location: { emoji: "🏰", color: "bg-[#f8f1de] border-[#e3d3a6] text-[#8c7332]", ring: "ring-[#e3d3a6]" },
-  lore: { emoji: "✨", color: "bg-[#efe9f3] border-[#d4c3dc] text-[#6b4d78]", ring: "ring-[#d4c3dc]" },
-  faction: { emoji: "🛡️", color: "bg-[#f7ece9] border-[#e6cfc7] text-[#996a60]", ring: "ring-[#e6cfc7]" },
+  chapter: { emoji: "📖", color: "bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--accent-text)]", ring: "ring-[var(--accent)]" },
+  character: { emoji: "👤", color: "bg-[var(--accent2-soft)] border-[var(--accent2)] text-[var(--accent2-text)]", ring: "ring-[var(--accent2)]" },
+  location: { emoji: "🏰", color: "bg-[var(--danger-soft)] border-[var(--danger-border)] text-[var(--danger)]", ring: "ring-[var(--danger)]" },
+  lore: { emoji: "✨", color: "bg-[#2a1a40] border-[#7d5aa3] text-[#c4a8e0]", ring: "ring-[#7d5aa3]" },
+  faction: { emoji: "🛡️", color: "bg-[var(--warning-soft)] border-[var(--warning-border)] text-[var(--warning-text)]", ring: "ring-[var(--warning-border)]" },
 };

@@ -75,11 +75,11 @@ export function GraphView({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="absolute top-3 left-3 z-10 flex gap-1 bg-white/90 backdrop-blur-md border border-[#e5e7dd] rounded-lg p-1 shadow-sm">
+      <div className="absolute top-3 left-3 z-10 flex gap-1 bg-[var(--surface)]/95 backdrop-blur-md border border-[var(--border)] rounded-lg p-1 shadow-sm">
         <button
           onClick={() => setMode("tree")}
           className={`px-3 py-1.5 rounded-md text-xs font-title font-semibold transition-colors ${
-            mode === "tree" ? "bg-[#3f5e4b] text-white" : "text-[#8b9681] hover:text-[#343831]"
+            mode === "tree" ? "bg-[var(--accent)] text-[var(--accent-ink)]" : "text-[var(--muted)] hover:text-[var(--ink)]"
           }`}
         >
           🌳 Git-Tree
@@ -87,7 +87,7 @@ export function GraphView({
         <button
           onClick={() => setMode("web")}
           className={`px-3 py-1.5 rounded-md text-xs font-title font-semibold transition-colors ${
-            mode === "web" ? "bg-[#3f5e4b] text-white" : "text-[#8b9681] hover:text-[#343831]"
+            mode === "web" ? "bg-[var(--accent)] text-[var(--accent-ink)]" : "text-[var(--muted)] hover:text-[var(--ink)]"
           }`}
         >
           🕸️ Web
@@ -105,12 +105,12 @@ export function GraphView({
         fitView
         proOptions={{ hideAttribution: true }}
       >
-        <Background color="#34383120" gap={24} />
-        <Controls className="!bg-white/90 !border-[#e5e7dd]" />
+        <Background color="#f3ead920" gap={24} />
+        <Controls className="!bg-[var(--surface)]/95 !border-[var(--border)]" />
         <MiniMap
-          className="!bg-white/90"
-          maskColor="rgba(249,249,246,0.6)"
-          nodeColor={() => "#34383166"}
+          className="!bg-[var(--surface)]/95"
+          maskColor="rgba(16,8,21,0.7)"
+          nodeColor={() => "#f3ead966"}
         />
       </ReactFlow>
     </div>

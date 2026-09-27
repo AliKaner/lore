@@ -6,11 +6,11 @@ export default function AdminGraphPage() {
   return (
     <div className="flex flex-col h-[85vh]">
       <div className="mb-4 flex-shrink-0">
-        <h1 className="text-3xl font-bold text-[#343831] font-title">Graph</h1>
-        <p className="text-[#8b9681] text-sm font-text mt-1">
+        <h1 className="text-3xl font-bold text-[var(--ink)] font-title">Graph</h1>
+        <p className="text-[var(--muted)] text-sm font-text mt-1">
           Bir evren seç — bölüm/karakter/lore ağını gösterir. Bir düğüme tıklayınca ilgili
           düzenleyiciye gider. Her yerden{" "}
-          <kbd className="px-1.5 py-0.5 bg-[#eef0e9] border border-[#dce1d4] rounded text-xs">
+          <kbd className="px-1.5 py-0.5 bg-[var(--surface-2)] border border-[var(--border-strong)] rounded text-xs">
             Ctrl/Cmd+G
           </kbd>{" "}
           ile de açabilirsin.

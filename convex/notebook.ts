@@ -1,7 +1,7 @@
 import { privateQuery, ownerMutation } from "./access";
 import { v } from "convex/values";
 
-const kind = v.union(v.literal("sketch"), v.literal("poem"));
+const kind = v.union(v.literal("sketch"), v.literal("poem"), v.literal("journal"));
 export const imageUrl = ownerMutation({
   args: { storageId: v.id("_storage") },
   handler: async (ctx, { storageId }) => ctx.storage.getUrl(storageId),
@@ -23,7 +23,7 @@ export const get = privateQuery({
 });
 export const create = ownerMutation({
   args: { kind },
-  handler: async (ctx, { kind }) => ctx.db.insert("documents", { kind, title: kind === "poem" ? "Adsız şiir" : "Yeni eskiz", content: "", updatedAt: Date.now(), revision: 0, shared: false }),
+  handler: async (ctx, { kind }) => ctx.db.insert("documents", { kind, title: kind === "poem" ? "Adsız şiir" : kind === "journal" ? "Yeni günlük" : "Yeni eskiz", content: "", updatedAt: Date.now(), revision: 0, shared: false }),
 });
 export const save = ownerMutation({
   args: { id: v.id("documents"), title: v.string(), content: v.string(), revision: v.number() },

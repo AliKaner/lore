@@ -5,6 +5,7 @@ import { useAction, useMutation, useQuery, storedToken } from "@/hooks/privateCo
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { PagesEditor } from "./PagesEditor";
+import { JournalEditor } from "./JournalEditor";
 import { DeskOverlay } from "./DeskOverlay";
 import { ResizablePanel } from "./ResizablePanel";
 import { GraphExplorer } from "./graph/GraphExplorer";
@@ -16,7 +17,7 @@ import AdminChapters from "@/app/admin/chapters/page";
 
 type Selection = { kind: "book"; id: Id<"books"> } | { kind: "document"; id: Id<"documents"> };
 type Panel = null | "library" | "world" | "invites";
-type Shelf = "all" | "book" | "sketch" | "poem";
+type Shelf = "all" | "book" | "sketch" | "poem" | "journal";
 
 export function WritingDesk() {
   const [token, setToken] = useState("");
@@ -42,7 +43,7 @@ export function WritingDesk() {
     try { localStorage.setItem("lore-last-document", JSON.stringify(selection)); } catch {}
   }
 
-  async function create(kind: "book" | "sketch" | "poem") {
+  async function create(kind: "book" | "sketch" | "poem" | "journal") {
     setBusy(true);
     setError("");
     try {
@@ -163,7 +164,7 @@ function LibraryPanel({
   documents: any[] | undefined;
   owner: boolean;
   busy: boolean;
-  onCreate: (kind: "book" | "sketch" | "poem") => void;
+  onCreate: (kind: "book" | "sketch" | "poem" | "journal") => void;
   onOpen: (selection: Selection) => void;
 }) {
   const [shelf, setShelf] = useState<Shelf>("all");
@@ -173,6 +174,7 @@ function LibraryPanel({
     ["book", "▤", "Kitaplar"],
     ["sketch", "✎", "Eskizler"],
     ["poem", "❧", "Şiirler"],
+    ["journal", "🖼", "Günlükler"],
   ];
   const q = search.toLocaleLowerCase("tr");
 
@@ -194,6 +196,7 @@ function LibraryPanel({
           <button disabled={busy} onClick={() => onCreate("book")}><span className="create-icon">▤</span><strong>Yeni kitap</strong><small>Bir sonraki hikâyene başla</small><span className="create-arrow">＋</span></button>
           <button disabled={busy} onClick={() => onCreate("sketch")}><span className="create-icon">✎</span><strong>Boş sayfa</strong><small>Plan yapmadan, sadece yaz</small><span className="create-arrow">＋</span></button>
           <button disabled={busy} onClick={() => onCreate("poem")}><span className="create-icon">❧</span><strong>Yeni şiir</strong><small>Kelimelere biraz nefes ver</small><span className="create-arrow">＋</span></button>
+          <button disabled={busy} onClick={() => onCreate("journal")}><span className="create-icon">🖼</span><strong>Yeni günlük</strong><small>Görsel ve serbest metinle bir sayfa</small><span className="create-arrow">＋</span></button>
         </div>
       )}
 
@@ -216,9 +219,9 @@ function LibraryPanel({
           {documents.filter((d) => (shelf === "all" || d.kind === shelf) && d.title.toLocaleLowerCase("tr").includes(q)).map((doc) => (
             <button className="document-card" key={doc._id} onClick={() => onOpen({ kind: "document", id: doc._id })}>
               <div className={`note-cover ${doc.kind}`}>
-                <span>{doc.kind === "poem" ? "ŞİİR DEFTERİ" : "ESKİZ DEFTERİ"}</span>
+                <span>{doc.kind === "poem" ? "ŞİİR DEFTERİ" : doc.kind === "journal" ? "GÜNLÜK" : "ESKİZ DEFTERİ"}</span>
                 <strong>{doc.title}</strong>
-                <div className="paper-lines" />
+                {doc.kind !== "journal" && <div className="paper-lines" />}
                 <i>{doc.shared ? "Davetlilerle paylaşıldı" : "Yalnızca sen"}</i>
               </div>
               <h3>{doc.title}</h3>
@@ -283,10 +286,14 @@ function DocumentPane({ id, owner }: { id: Id<"documents">; owner: boolean }) {
               }}
             /> Davetliler okuyabilsin
           </label>
-          <span>{error || (doc.kind === "poem" ? "Şiir · Yeni dize için Shift + Enter" : "Eskiz · Kendine ait bir boş sayfa")}</span>
+          <span>{error || (doc.kind === "poem" ? "Şiir · Yeni dize için Shift + Enter" : doc.kind === "journal" ? "Günlük · Görselleri sürükle, metni istediğin yere koy" : "Eskiz · Kendine ait bir boş sayfa")}</span>
         </div>
       )}
-      <PagesEditor doc={{ id, ...doc }} readOnly={!owner} save={({ title, content, revision }) => save({ id, title, content, revision })} />
+      {doc.kind === "journal" ? (
+        <JournalEditor doc={{ id, ...doc }} readOnly={!owner} save={({ title, content, revision }) => save({ id, title, content, revision })} />
+      ) : (
+        <PagesEditor doc={{ id, ...doc }} readOnly={!owner} save={({ title, content, revision }) => save({ id, title, content, revision })} />
+      )}
     </>
   );
 }

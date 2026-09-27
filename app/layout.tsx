@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cinzel, Lora } from "next/font/google";
+import { Cinzel, Lora, Playfair_Display, Caveat, Dancing_Script, Special_Elite, Courier_Prime, Kalam } from "next/font/google";
 import "./globals.css";
 import "./desk.css";
 import { Providers } from "./providers";
@@ -17,6 +17,13 @@ const lora = Lora({
   style: ["normal", "italic"],
   variable: "--font-lora",
 });
+
+const playfair = Playfair_Display({ subsets: ["latin"], weight: ["400", "600", "700", "900"], variable: "--font-playfair" });
+const caveat = Caveat({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-caveat" });
+const dancingScript = Dancing_Script({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-dancing" });
+const specialElite = Special_Elite({ subsets: ["latin"], weight: ["400"], variable: "--font-typewriter" });
+const courierPrime = Courier_Prime({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono-journal" });
+const kalam = Kalam({ subsets: ["latin"], weight: ["300", "400", "700"], variable: "--font-kalam" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -67,7 +74,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr">
-      <body className={`${cinzel.variable} ${lora.variable}`}>
+      <body className={`${cinzel.variable} ${lora.variable} ${playfair.variable} ${caveat.variable} ${dancingScript.variable} ${specialElite.variable} ${courierPrime.variable} ${kalam.variable}`}>
         <Providers>{children}</Providers>
       </body>
     </html>

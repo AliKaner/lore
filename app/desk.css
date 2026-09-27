@@ -44,7 +44,7 @@
 .document-card:hover .book-cover { transform:rotateY(-22deg) translateX(3px) translateY(-6px); box-shadow:-18px 14px 34px rgba(0,0,0,.5), 0 6px 16px rgba(0,0,0,.35); }
 .document-card:hover .book-cover::after { opacity:.9; }
 .cover-1 { background:var(--accent-soft); }.cover-2 { background:var(--surface-3); }.cover-3 { background:#3a2350; }
-.book-cover>span,.note-cover>span { font-size:8px; letter-spacing:2px; opacity:.7; }.book-cover strong { font:27px var(--font-cinzel), Georgia,serif; word-break:break-word; }.book-cover i,.note-cover i { font:10px var(--font-lora), Georgia,serif; opacity:.7; }.note-cover { background:var(--surface); border:1px solid var(--border); }.note-cover.poem { background:var(--accent-soft); border-color:var(--warning-border); }.note-cover strong { font:italic 25px var(--font-cinzel), Georgia,serif; }.paper-lines { height:40px; opacity:.4; background:repeating-linear-gradient(transparent,transparent 12px,var(--border) 13px,transparent 14px); }.document-card h3 { font-size:12px; margin:14px 0 6px; font-weight:500; color:var(--ink); }.document-card>small { font-size:10px; color:var(--muted-3); }
+.book-cover>span,.note-cover>span { font-size:8px; letter-spacing:2px; opacity:.7; }.book-cover strong { font:27px var(--font-cinzel), Georgia,serif; word-break:break-word; }.book-cover i,.note-cover i { font:10px var(--font-lora), Georgia,serif; opacity:.7; }.note-cover { background:var(--surface); border:1px solid var(--border); }.note-cover.poem { background:var(--accent-soft); border-color:var(--warning-border); }.note-cover.journal { background:linear-gradient(135deg,var(--accent2-soft),var(--surface-3)); border-color:var(--accent2); }.note-cover strong { font:italic 25px var(--font-cinzel), Georgia,serif; }.paper-lines { height:40px; opacity:.4; background:repeating-linear-gradient(transparent,transparent 12px,var(--border) 13px,transparent 14px); }.document-card h3 { font-size:12px; margin:14px 0 6px; font-weight:500; color:var(--ink); }.document-card>small { font-size:10px; color:var(--muted-3); }
 .empty-library { padding:70px 30px; text-align:center; color:var(--muted); width:100%; }.empty-library h2 { font:25px var(--font-cinzel), Georgia; margin-bottom:12px; color:var(--ink); }.desk-loading { padding:50px; text-align:center; min-height:200px; color:var(--muted); }.desk-error,.recovery { padding:16px; background:var(--warning-soft); color:var(--warning-text); }.recovery button { padding:6px; text-decoration:underline; }
 .book-workspace { display:flex; height:calc(100dvh - 72px); }.chapter-sidebar { height:100%; overflow-y:auto; border-right:1px solid var(--border); padding:22px 14px; background:var(--surface-3); }.chapter-sidebar>input { width:100%; font:20px var(--font-cinzel), Georgia; margin-bottom:12px; background:transparent; color:var(--ink); border:0; }.chapter-sidebar>.eyebrow { display:block; padding:8px; }.chapter-sidebar>button { width:100%; text-align:left; padding:11px 8px; border-radius:5px; margin:3px 0; display:flex; gap:9px; font-size:11px; color:var(--muted); align-items:flex-start; }.chapter-sidebar>button small { color:var(--muted-3); flex-shrink:0; }.chapter-btn-text { display:flex; flex-direction:column; gap:2px; min-width:0; }.chapter-btn-text em { font-style:normal; font-size:10px; color:var(--muted-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.chapter-sidebar .active { background:var(--surface-hover); color:var(--ink); }.chapter-sidebar .active .chapter-btn-text em { color:var(--muted); }.chapter-sidebar>a { display:block; font-size:10px; color:var(--accent-text); margin:25px 8px; line-height:1.8; }
 
@@ -119,5 +119,37 @@
 .legacy-tools,.world-tab-content>div { color:var(--ink); }
 .legacy-tools .font-title,.world-tab-content .font-title { font-family:var(--font-cinzel), Georgia,serif; }
 .legacy-tools .font-text,.world-tab-content .font-text { font-family:var(--font-lora), Georgia,serif; }
+
+/* Journal — freeform pages with draggable text/image blocks and a page-flip transition. */
+.journal-editor .paper-scroll { display:flex; flex-direction:column; }
+.journal-editor .document-title { max-width:790px; margin:0 auto 18px; }
+.journal-scroll { align-items:center; }
+.journal-stage { flex:1; display:flex; align-items:flex-start; justify-content:center; perspective:2000px; padding-bottom:40px; }
+.journal-page { position:relative; background:var(--surface); border:1px solid var(--border); box-shadow:0 12px 40px rgba(0,0,0,.4); border-radius:4px; overflow:hidden; transform-style:preserve-3d; }
+@keyframes journal-flip-out { from { transform:rotateY(0deg); opacity:1; } to { transform:rotateY(calc(-90deg * var(--flip-sign,1))); opacity:.5; } }
+@keyframes journal-flip-in { from { transform:rotateY(calc(90deg * var(--flip-sign,1))); opacity:.5; } to { transform:rotateY(0deg); opacity:1; } }
+.journal-flip-out { animation:journal-flip-out .22s ease-in forwards; }
+.journal-flip-in { animation:journal-flip-in .22s ease-out forwards; }
+.journal-empty-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:60px; color:var(--muted-3); font-size:13px; pointer-events:none; }
+.journal-block { position:absolute; }
+.journal-block.text { border:1px dashed transparent; border-radius:4px; }
+.journal-block.text:hover,.journal-block.text.selected { border-color:var(--border-strong); }
+.journal-block.text.selected { border-color:var(--accent); }
+.journal-block-text { width:100%; height:100%; outline:none; overflow:auto; padding:4px; cursor:text; white-space:pre-wrap; word-break:break-word; }
+.journal-block.image { border-radius:4px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,.35); }
+.journal-block.image img { width:100%; height:100%; object-fit:cover; display:block; }
+.journal-block.image:hover,.journal-block.image.selected { outline:2px solid var(--accent); outline-offset:2px; }
+.journal-block-handle { position:absolute; top:-11px; left:-11px; width:20px; height:20px; border-radius:50%; background:var(--accent); color:var(--accent-ink); display:none; align-items:center; justify-content:center; font-size:11px; cursor:grab; z-index:3; user-select:none; }
+.journal-block:hover .journal-block-handle,.journal-block.selected .journal-block-handle { display:flex; }
+.journal-block-resize { position:absolute; bottom:-6px; right:-6px; width:14px; height:14px; border-radius:3px; background:var(--accent); display:none; cursor:nwse-resize; z-index:3; }
+.journal-block:hover .journal-block-resize,.journal-block.selected .journal-block-resize { display:block; }
+.journal-block-toolbar { flex-wrap:wrap; }
+.journal-block-toolbar select,.journal-block-toolbar input[type=number] { background:var(--surface-2); color:var(--ink); border:1px solid var(--border); border-radius:4px; padding:4px 6px; }
+.journal-footer { justify-content:center; }
+.journal-pagenav { display:flex; align-items:center; gap:14px; }
+.journal-pagenav button { color:var(--muted); }
+.journal-pagenav button:hover:not(:disabled) { color:var(--ink); }
+.journal-pagenav button:disabled { opacity:.35; cursor:not-allowed; }
+.journal-pagenav span { color:var(--muted-3); font-size:11px; }
 
 .writing-paper { font-family:var(--font-lora), Georgia,serif; font-size:19px; line-height:1.8; }.tiptap table { border-collapse:collapse; table-layout:fixed; width:100%; margin:1em 0; }.tiptap th,.tiptap td { border:1px solid var(--border); padding:8px 12px; min-width:70px; vertical-align:top; position:relative; }.tiptap th { background:var(--surface-2); font-weight:bold; }.tiptap .selectedCell:after { background:rgba(212,175,55,.15); content:""; position:absolute; inset:0; pointer-events:none; }.tiptap img { max-width:100%; height:auto; margin:15px 0; border-radius:4px; }.format-bar input[type=color] { width:24px; height:24px; cursor:pointer; }.tiptap .tableWrapper { overflow-x:auto; }.tiptap .column-resize-handle { position:absolute; right:-2px; top:0; bottom:-2px; width:4px; background:var(--accent); }

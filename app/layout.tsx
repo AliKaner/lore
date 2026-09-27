@@ -1,8 +1,22 @@
 import type { Metadata } from "next";
+import { Cinzel, Lora } from "next/font/google";
 import "./globals.css";
 import "./desk.css";
 import { Providers } from "./providers";
 import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "./constants/site";
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "900"],
+  variable: "--font-cinzel",
+});
+
+const lora = Lora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-lora",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -53,7 +67,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr">
-      <body>
+      <body className={`${cinzel.variable} ${lora.variable}`}>
         <Providers>{children}</Providers>
       </body>
     </html>

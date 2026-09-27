@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { PagesEditor } from "./PagesEditor";
 import { DeskOverlay } from "./DeskOverlay";
+import { ResizablePanel } from "./ResizablePanel";
 import { GraphExplorer } from "./graph/GraphExplorer";
 import AdminEntries from "@/app/admin/entries/page";
 import AdminUniverses from "@/app/admin/universes/page";
@@ -290,6 +291,8 @@ function DocumentPane({ id, owner }: { id: Id<"documents">; owner: boolean }) {
   );
 }
 
+type SidePanel = "notlar" | "karakterler";
+
 function BookPane({ id, owner, token }: { id: Id<"books">; owner: boolean; token: string }) {
   const book = useQuery(api.books.getById, { id });
   const chapters = useQuery(api.chapters.listByBook, { bookId: id });
@@ -298,42 +301,69 @@ function BookPane({ id, owner, token }: { id: Id<"books">; owner: boolean; token
   const [chapterId, setChapterId] = useState<Id<"chapters"> | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [openPanels, setOpenPanels] = useState<Set<SidePanel>>(new Set());
   const current = chapterId || chapters?.[0]?._id;
+  const togglePanel = (p: SidePanel) => setOpenPanels((prev) => { const next = new Set(prev); next.has(p) ? next.delete(p) : next.add(p); return next; });
   if (book === undefined || chapters === undefined) return <p className="desk-loading">Kitap açılıyor…</p>;
   if (!book) return <p className="desk-loading">Kitap bulunamadı.</p>;
   return (
     <div className="book-workspace">
-      <aside className="chapter-sidebar">
-        <input
-          key={book.title}
-          aria-label="Kitap başlığı"
-          defaultValue={book.title}
-          readOnly={!owner}
-          onBlur={async (e) => {
-            if (e.target.value === book.title || !owner) return;
-            try { await rename({ id, title: e.target.value || "Adsız kitap", sessionToken: token }); } catch { setError("Kitap adı kaydedilemedi."); }
-          }}
-        />
-        <span className="eyebrow">BÖLÜMLER</span>
-        {chapters.map((chapter, index) => (
-          <button className={current === chapter._id ? "active" : ""} key={chapter._id} onClick={() => setChapterId(chapter._id)}>
-            <small>{String(index + 1).padStart(2, "0")}</small>{chapter.title}
-          </button>
-        ))}
-        {owner && (
-          <button
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              try { setChapterId(await create({ bookId: id })); } catch { setError("Bölüm oluşturulamadı."); } finally { setBusy(false); }
+      <ResizablePanel id={`chapters-${id}`} defaultWidth={210} minWidth={160} maxWidth={360}>
+        <aside className="chapter-sidebar">
+          <input
+            key={book.title}
+            aria-label="Kitap başlığı"
+            defaultValue={book.title}
+            readOnly={!owner}
+            onBlur={async (e) => {
+              if (e.target.value === book.title || !owner) return;
+              try { await rename({ id, title: e.target.value || "Adsız kitap", sessionToken: token }); } catch { setError("Kitap adı kaydedilemedi."); }
             }}
-          >
-            ＋ Bölüm ekle
-          </button>
-        )}
-        {owner && <Link href={`/admin/books/${id}/write`}>Karakterler, notlar ve dallanmalar ↗</Link>}
-        {error && <p role="alert">{error}</p>}
-      </aside>
+          />
+          <div className="panel-toggle-strip">
+            <button className={openPanels.has("karakterler") ? "active" : ""} onClick={() => togglePanel("karakterler")} title="Karakterler paneli">♟ Karakterler</button>
+            <button className={openPanels.has("notlar") ? "active" : ""} onClick={() => togglePanel("notlar")} title="Notlar paneli">✎ Notlar</button>
+          </div>
+          <span className="eyebrow">BÖLÜMLER</span>
+          {chapters.map((chapter, index) => {
+            const preview = (chapter.contentTr || "").trim().slice(0, 60);
+            return (
+              <button className={current === chapter._id ? "active" : ""} key={chapter._id} onClick={() => setChapterId(chapter._id)}>
+                <small>{String(index + 1).padStart(2, "0")}</small>
+                <span className="chapter-btn-text">
+                  {chapter.title}
+                  {preview && <em>{preview}{chapter.contentTr.length > 60 ? "…" : ""}</em>}
+                </span>
+              </button>
+            );
+          })}
+          {owner && (
+            <button
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                try { setChapterId(await create({ bookId: id })); } catch { setError("Bölüm oluşturulamadı."); } finally { setBusy(false); }
+              }}
+            >
+              ＋ Bölüm ekle
+            </button>
+          )}
+          {owner && <Link href={`/admin/books/${id}/write`}>Gelişmiş stüdyo (dallanmalar) ↗</Link>}
+          {error && <p role="alert">{error}</p>}
+        </aside>
+      </ResizablePanel>
+
+      {openPanels.has("karakterler") && (
+        <ResizablePanel id="karakterler" defaultWidth={240} minWidth={180} maxWidth={420}>
+          <CharactersPanel universeId={book.universeId} onClose={() => togglePanel("karakterler")} />
+        </ResizablePanel>
+      )}
+      {openPanels.has("notlar") && (
+        <ResizablePanel id="notlar" defaultWidth={260} minWidth={200} maxWidth={440}>
+          <NotesPanel bookId={id} token={token} owner={owner} onClose={() => togglePanel("notlar")} />
+        </ResizablePanel>
+      )}
+
       {current ? (
         <ChapterPane key={current} id={current} owner={owner} />
       ) : (
@@ -343,6 +373,64 @@ function BookPane({ id, owner, token }: { id: Id<"books">; owner: boolean; token
         </div>
       )}
     </div>
+  );
+}
+
+function CharactersPanel({ universeId, onClose }: { universeId: Id<"universes">; onClose: () => void }) {
+  const entries = useQuery(api.loreEntries.listByUniverse, { universeId });
+  return (
+    <aside className="side-panel">
+      <div className="side-panel-head"><span className="eyebrow">KARAKTERLER</span><button onClick={onClose} aria-label="Kapat">✕</button></div>
+      <div className="side-panel-body">
+        {entries === undefined ? <p className="desk-loading">Yükleniyor…</p> : entries.length === 0 ? <p className="side-panel-empty">Bu evrende henüz girdi yok.</p> : entries.map((e) => (
+          <div className="side-panel-item" key={e._id}>
+            {e.imageUrl ? <img src={e.imageUrl} alt={e.name} /> : <span className="side-panel-item-fallback">{e.type === "character" ? "👤" : "✦"}</span>}
+            <div><strong>{e.name}</strong><small>{e.type}</small></div>
+          </div>
+        ))}
+      </div>
+    </aside>
+  );
+}
+
+function NotesPanel({ bookId, token, owner, onClose }: { bookId: Id<"books">; token: string; owner: boolean; onClose: () => void }) {
+  const notes = useQuery(api.bookNotes.list, { bookId, sessionToken: token });
+  const add = useMutation(api.bookNotes.add);
+  const remove = useMutation(api.bookNotes.remove);
+  const [type, setType] = useState<"fikir" | "hatirlatma" | "karakter" | "tutarsizlik" | "genel">("fikir");
+  const [content, setContent] = useState("");
+  const [busy, setBusy] = useState(false);
+  const submit = async () => {
+    if (!content.trim()) return;
+    setBusy(true);
+    try { await add({ bookId, type, content: content.trim(), sessionToken: token }); setContent(""); } catch {} finally { setBusy(false); }
+  };
+  return (
+    <aside className="side-panel">
+      <div className="side-panel-head"><span className="eyebrow">NOTLAR</span><button onClick={onClose} aria-label="Kapat">✕</button></div>
+      <div className="side-panel-body">
+        {owner && (
+          <div className="note-composer">
+            <select value={type} onChange={(e) => setType(e.target.value as typeof type)}>
+              <option value="fikir">Fikir</option>
+              <option value="hatirlatma">Hatırlatma</option>
+              <option value="karakter">Karakter</option>
+              <option value="tutarsizlik">Tutarsızlık</option>
+              <option value="genel">Genel</option>
+            </select>
+            <textarea rows={3} value={content} onChange={(e) => setContent(e.target.value)} placeholder="Not ekle…" />
+            <button className="primary" disabled={busy || !content.trim()} onClick={submit}>Ekle</button>
+          </div>
+        )}
+        {notes === undefined ? <p className="desk-loading">Yükleniyor…</p> : notes.length === 0 ? <p className="side-panel-empty">Henüz not yok.</p> : notes.map((n) => (
+          <div className="note-item" key={n._id}>
+            <span className="note-type">{n.type}</span>
+            <p>{n.content}</p>
+            {owner && <button onClick={() => remove({ id: n._id, sessionToken: token })} aria-label="Sil">✕</button>}
+          </div>
+        ))}
+      </div>
+    </aside>
   );
 }
 

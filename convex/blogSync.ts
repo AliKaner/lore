@@ -3,7 +3,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { ConvexHttpClient } from "convex/browser";
 import { anyApi } from "convex/server";
-import { tiptapJsonToMarkdown } from "./lib/tiptapMarkdown";
+import { tiptapJsonToMarkdown } from "../lib/tiptapMarkdown";
 
 /**
  * Publishes/updates a lore document as a post on the separate personal-site

@@ -1,4 +1,4 @@
-/** Minimal Tiptap JSON -> Markdown serializer, covering the node/mark set PagesEditor actually uses. */
+/** Minimal Tiptap JSON -> Markdown serializer, covering the node/mark set PagesEditor actually uses. Framework-agnostic — used from both Convex (blogSync) and the client (BlogBar's .md export). */
 
 interface TNode {
   type?: string;

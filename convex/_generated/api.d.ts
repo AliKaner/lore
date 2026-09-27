@@ -22,7 +22,6 @@ import type * as comments from "../comments.js";
 import type * as fileStorage from "../fileStorage.js";
 import type * as graph from "../graph.js";
 import type * as invitations from "../invitations.js";
-import type * as lib_tiptapMarkdown from "../lib/tiptapMarkdown.js";
 import type * as likes from "../likes.js";
 import type * as links from "../links.js";
 import type * as loreEntries from "../loreEntries.js";
@@ -54,7 +53,6 @@ declare const fullApi: ApiFromModules<{
   fileStorage: typeof fileStorage;
   graph: typeof graph;
   invitations: typeof invitations;
-  "lib/tiptapMarkdown": typeof lib_tiptapMarkdown;
   likes: typeof likes;
   links: typeof links;
   loreEntries: typeof loreEntries;

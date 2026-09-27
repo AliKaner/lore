@@ -9,6 +9,7 @@ import { JournalEditor } from "./JournalEditor";
 import { DeskOverlay } from "./DeskOverlay";
 import { ResizablePanel } from "./ResizablePanel";
 import { GraphExplorer } from "./graph/GraphExplorer";
+import { tiptapJsonToMarkdown } from "@/lib/tiptapMarkdown";
 import AdminEntries from "@/app/admin/entries/page";
 import AdminUniverses from "@/app/admin/universes/page";
 import AdminCategories from "@/app/admin/categories/page";
@@ -314,6 +315,13 @@ function slugifyLive(text: string) {
   return trTranslit(text).replace(/[^a-z0-9-]+/g, "-").replace(/-{2,}/g, "-");
 }
 
+function yamlQuote(value: string) {
+  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+function isoDate(ts: number) {
+  return new Date(ts).toISOString().slice(0, 10);
+}
+
 function BlogBar({ doc, id }: { doc: any; id: Id<"documents"> }) {
   const publish = useAction(api.blogSync.publish);
   const [slug, setSlug] = useState(doc.blogSlug || slugify(doc.title));
@@ -321,6 +329,27 @@ function BlogBar({ doc, id }: { doc: any; id: Id<"documents"> }) {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const isNew = !doc.blogPostId;
+  const exportMarkdown = () => {
+    const body = tiptapJsonToMarkdown(doc.content || "");
+    const publishedAt = isoDate(doc.blogPublishedAt ?? Date.now());
+    const frontmatter = [
+      "---",
+      `title: ${yamlQuote(doc.title)}`,
+      `slug: ${slug.trim()}`,
+      `publishedAt: ${publishedAt}`,
+      `published: ${published}`,
+      "---",
+      "",
+      body,
+      "",
+    ].join("\n");
+    const url = URL.createObjectURL(new Blob([frontmatter], { type: "text/markdown;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slug.trim() || "yazi"}.md`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
   return (
     <div className="blog-bar">
       <label>slug<input value={slug} onChange={(e) => setSlug(slugifyLive(e.target.value))} onBlur={(e) => setSlug(slugify(e.target.value))} placeholder="yazi-basligi" /></label>
@@ -343,6 +372,7 @@ function BlogBar({ doc, id }: { doc: any; id: Id<"documents"> }) {
       >
         {busy ? "Gönderiliyor…" : isNew ? "Blog'a yayınla" : "Blog'u güncelle"}
       </button>
+      <button disabled={!slug.trim()} onClick={exportMarkdown} title="title/slug/publishedAt/published frontmatter'lı .md dosyası indir">.md indir</button>
       {doc.blogSlug && <span className="blog-bar-path">/posts/{doc.blogSlug}</span>}
       {status && <span className="blog-bar-status">{status}</span>}
     </div>

@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f3e7;
+  --surface: #fcfaf3;
+  --foreground: #0f1939;
+  --foreground-hover: #26428b;
+  --muted: #535b78;
+  --border: #e4dcc6;
+  --border-hover: #cfc4a6;
+  --accent: #26428b;
+  --accent-hover: #1c3370;
+  --accent-soft: #e3e8f6;
+  --accent-contrast: #f6f3e7;
+  --sapphire: #516ac8;
+  --sapphire-soft: #e6eaf7;
+  --caramel: #e3af64;
+  --caramel-soft: #faebd7;
+  --ink: #0f1939;
+  --on-ink: #f6f3e7;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-foreground-hover: var(--foreground-hover);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-sapphire: var(--sapphire);
+  --color-sapphire-soft: var(--sapphire-soft);
+  --color-caramel: var(--caramel);
+  --color-caramel-soft: var(--caramel-soft);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-display: var(--font-display);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f1939;
+    --surface: #172248;
+    --foreground: #f6f3e7;
+    --foreground-hover: #ffffff;
+    --muted: #a9b1cf;
+    --border: #26325e;
+    --border-hover: #34427a;
+    --accent: #e3af64;
+    --accent-hover: #ebc285;
+    --accent-soft: #3a3020;
+    --accent-contrast: #0f1939;
+    --sapphire: #8fa2e6;
+    --sapphire-soft: #1c2a5a;
+    --caramel: #e3af64;
+    --caramel-soft: #2e2718;
+    --ink: #0a1029;
+    --on-ink: #f6f3e7;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-serif), Georgia, serif;
+  text-wrap: balance;
+}
+
+.brand {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.title-input {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.title-input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.glow-night {
+  background:
+    radial-gradient(60% 80% at 8% 0%, rgba(227, 175, 100, 0.55) 0%, rgba(227, 175, 100, 0) 60%),
+    radial-gradient(70% 90% at 35% 30%, rgba(81, 106, 200, 0.55) 0%, rgba(81, 106, 200, 0) 70%),
+    #0f1939;
+}

@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { writingKindValidator } from "./writingKinds";
 
 export default defineSchema({
   users: defineTable({
@@ -15,6 +16,7 @@ export default defineSchema({
     description: v.optional(v.string()),
     coverStorageId: v.optional(v.id("_storage")),
     ownerId: v.id("users"),
+    kind: v.optional(writingKindValidator),
     visibility: v.union(v.literal("public"), v.literal("private")),
     rootChapterId: v.optional(v.id("chapters")),
     likeCount: v.number(),
@@ -22,7 +24,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_owner", ["ownerId"])
-    .index("by_visibility", ["visibility"]),
+    .index("by_visibility", ["visibility"])
+    .index("by_visibility_and_kind", ["visibility", "kind"]),
 
   chapters: defineTable({
     bookId: v.id("books"),

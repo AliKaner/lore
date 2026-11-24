@@ -10,6 +10,7 @@ import BookTitleEditor from "@/components/BookTitleEditor";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
 import { buttonLink } from "@/lib/ui";
+import { kindConfig } from "@/lib/writingKinds";
 
 export default function NewRootChapterPage({
   params,
@@ -32,7 +33,7 @@ export default function NewRootChapterPage({
         </div>
       ) : me === null ? (
         <div className="mt-4">
-          <SignInPrompt message="İlk bölümü yazmaya başlamak için giriş yapman gerekiyor." />
+          <SignInPrompt message="Yazmaya başlamak için giriş yapman gerekiyor." />
         </div>
       ) : book === null ? (
         <p className="text-muted text-sm mt-4">Kitap bulunamadı.</p>
@@ -41,8 +42,8 @@ export default function NewRootChapterPage({
           <div className="mt-4">
             <BookTitleEditor book={book} />
           </div>
-          <h2 className="font-medium mb-3">İlk bölümü yaz</h2>
-          <ChapterForm bookId={bookId} />
+          <h2 className="font-medium mb-3">{kindConfig(book).firstUnitCta}</h2>
+          <ChapterForm bookId={bookId} kind={book.kind} />
         </>
       )}
     </main>

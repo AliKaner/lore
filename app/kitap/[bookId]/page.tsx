@@ -16,6 +16,7 @@ import ReportButton from "@/components/ReportButton";
 import Loading from "@/components/Loading";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonPrimary } from "@/lib/ui";
+import { kindConfig } from "@/lib/writingKinds";
 
 export default function BookPage({
   params,
@@ -39,7 +40,7 @@ export default function BookPage({
     );
   }
   if (book === null) {
-    return <main className="mx-auto max-w-3xl px-4 py-10">Kitap bulunamadı.</main>;
+    return <main className="mx-auto max-w-3xl px-4 py-10">Bulunamadı.</main>;
   }
 
   async function handleCoverUpload(storageId: Id<"_storage">) {
@@ -51,9 +52,13 @@ export default function BookPage({
   }
 
   const isOwner = me?._id === book.ownerId;
+  const cfg = kindConfig(book);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-sapphire">
+        {cfg.label}
+      </p>
       <div className="flex gap-4 mb-4">
         <BookCover
           storageId={book.coverStorageId}
@@ -101,15 +106,13 @@ export default function BookPage({
         </Link>
       ) : isOwner ? (
         <Link href={`/kitap/${bookId}/yaz`} className={`${buttonPrimary} mb-6`}>
-          İlk bölümü yaz
+          {cfg.firstUnitCta}
         </Link>
       ) : (
-        <p className="text-muted mb-6 text-sm">
-          Bu kitabın henüz bir bölümü yok.
-        </p>
+        <p className="text-muted mb-6 text-sm">Henüz bir şey yazılmamış.</p>
       )}
 
-      <h2 className="font-medium mb-2">Hikaye haritası</h2>
+      <h2 className="font-medium mb-2">{cfg.mapLabel}</h2>
       {chapters === undefined ? (
         <Loading />
       ) : (

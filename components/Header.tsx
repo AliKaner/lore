@@ -7,16 +7,13 @@ import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "@/convex/_generated/api";
 import { levelInfo } from "@/lib/levels";
-import NewBookButton from "@/components/NewBookButton";
 import Wordmark from "@/components/Wordmark";
 
 function NavLinks() {
   return (
     <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
       <Link href="/kesfet">Keşfet</Link>
-      <NewBookButton className="text-muted hover:text-foreground">
-        Yeni kitap
-      </NewBookButton>
+      <Link href="/yaz">Yeni yazı</Link>
       <Link href="/karakterler">Karakterler</Link>
       <Link href="/mekanlar">Mekanlar</Link>
       <Link href="/kutuphanem">Kütüphanem</Link>

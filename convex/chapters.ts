@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { requireUserId } from "./users";
+import { isOpenToBranches } from "./writingKinds";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 
@@ -11,6 +12,9 @@ async function assertCanBranch(
   parentChapterId: Id<"chapters"> | undefined,
 ) {
   if (book.ownerId === userId) return;
+  if (!isOpenToBranches(book)) {
+    throw new Error("Bu yazıya yalnızca yazarı ekleme yapabilir.");
+  }
   if (book.visibility !== "public") {
     throw new Error("Bu kitaba dal ekleyemezsin.");
   }

@@ -2,11 +2,13 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { requireUserId } from "./users";
+import { writingKindValidator } from "./writingKinds";
 
 export const create = mutation({
   args: {
     title: v.string(),
     description: v.optional(v.string()),
+    kind: v.optional(writingKindValidator),
     visibility: v.union(v.literal("public"), v.literal("private")),
   },
   handler: async (ctx, args) => {
@@ -15,6 +17,7 @@ export const create = mutation({
       title: args.title,
       description: args.description,
       ownerId: userId,
+      kind: args.kind ?? "book",
       visibility: args.visibility,
       likeCount: 0,
       shareCount: 0,
@@ -36,8 +39,21 @@ export const get = query({
 });
 
 export const listPublic = query({
-  args: { paginationOpts: paginationOptsValidator },
+  args: {
+    paginationOpts: paginationOptsValidator,
+    kind: v.optional(writingKindValidator),
+  },
   handler: async (ctx, args) => {
+    const { kind } = args;
+    if (kind !== undefined) {
+      return await ctx.db
+        .query("books")
+        .withIndex("by_visibility_and_kind", (q) =>
+          q.eq("visibility", "public").eq("kind", kind),
+        )
+        .order("desc")
+        .paginate(args.paginationOpts);
+    }
     return await ctx.db
       .query("books")
       .withIndex("by_visibility", (q) => q.eq("visibility", "public"))

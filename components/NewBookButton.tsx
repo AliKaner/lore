@@ -4,14 +4,18 @@ import { type ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import type { WritingKind } from "@/convex/writingKinds";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
+import { KINDS } from "@/lib/writingKinds";
 
 export default function NewBookButton({
   className,
   children,
+  kind = "book",
 }: {
   className?: string;
   children: ReactNode;
+  kind?: WritingKind;
 }) {
   const me = useQuery(api.users.me);
   const createBook = useMutation(api.books.create);
@@ -28,7 +32,8 @@ export default function NewBookButton({
     setCreating(true);
     try {
       const bookId = await createBook({
-        title: "Başlıksız hikaye",
+        title: KINDS[kind].untitled,
+        kind,
         visibility: "private",
       });
       router.push(`/kitap/${bookId}/yaz`);

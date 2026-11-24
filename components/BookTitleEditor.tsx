@@ -6,15 +6,17 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { pillInactive } from "@/lib/ui";
+import { kindConfig } from "@/lib/writingKinds";
 
 export default function BookTitleEditor({ book }: { book: Doc<"books"> }) {
+  const untitled = kindConfig(book).untitled;
   const updateBook = useMutation(api.books.update);
   const showToast = useToast();
   const [title, setTitle] = useState(book.title);
   const [description, setDescription] = useState(book.description ?? "");
 
   async function saveTitle() {
-    const trimmed = title.trim() || "Başlıksız hikaye";
+    const trimmed = title.trim() || untitled;
     setTitle(trimmed);
     if (trimmed === book.title) return;
     try {
@@ -38,7 +40,7 @@ export default function BookTitleEditor({ book }: { book: Doc<"books"> }) {
     try {
       await updateBook({ bookId: book._id, visibility: next });
       showToast(
-        next === "public" ? "Kitap herkese açıldı." : "Kitap gizli yapıldı.",
+        next === "public" ? "Herkese açıldı." : "Gizli yapıldı.",
         "success",
       );
     } catch (err) {
@@ -52,7 +54,7 @@ export default function BookTitleEditor({ book }: { book: Doc<"books"> }) {
         value={title}
         onChange={(event) => setTitle(event.target.value)}
         onBlur={() => void saveTitle()}
-        placeholder="Başlıksız hikaye"
+        placeholder={untitled}
         className="title-input w-full border-none bg-transparent p-0 text-2xl font-semibold focus:outline-none"
       />
       <textarea

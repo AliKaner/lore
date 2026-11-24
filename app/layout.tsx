@@ -1,39 +1,35 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
-import { Instrument_Sans, Instrument_Serif, Newsreader } from "next/font/google";
+import { EB_Garamond, Literata } from "next/font/google";
 import { ConvexAuthNextjsServerProvider } from "@/lib/convexAuth";
 import Header from "@/components/Header";
 import ToastProvider from "@/components/Toaster";
 import "./globals.css";
 
-const display = Instrument_Serif({
-  subsets: ["latin", "latin-ext"],
-  weight: "400",
-  style: ["normal", "italic"],
-  variable: "--font-display",
-});
-const serif = Newsreader({
+const garamond = EB_Garamond({
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
-  variable: "--font-serif",
+  variable: "--font-garamond",
 });
-const sans = Instrument_Sans({
+const literata = Literata({
   subsets: ["latin", "latin-ext"],
-  variable: "--font-sans",
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-literata",
 });
 
 export const metadata: Metadata = {
-  title: "Booktion — Her bölüm, yeni bir hikâyenin başlangıcı",
+  title: "Booktion — Her yazıya kendi masası",
   description:
-    "Kitabını bölüm bölüm yaz; okurların sevdikleri bir bölümden kendi dallarını açsın. Hikâye haritası, karakter ve mekân paketleri, yorumlar — hepsi tek yerde.",
+    "Romanını, köşe yazını, röportajını ya da günlüğünü yaz; her tür kendi şablonuyla gelir. Kurmacada okurların hikâyeni dallandırır.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="tr"
-      className={`${display.variable} ${serif.variable} ${sans.variable} h-full`}
+      className={`${garamond.variable} ${literata.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">
         <Suspense>

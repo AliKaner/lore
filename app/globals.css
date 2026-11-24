@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f3e7;
+  --background: #f4f6fb;
   --surface: #fcfaf3;
   --foreground: #0f1939;
   --foreground-hover: #26428b;
@@ -38,9 +38,9 @@
   --color-caramel-soft: var(--caramel-soft);
   --color-ink: var(--ink);
   --color-on-ink: var(--on-ink);
-  --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
-  --font-display: var(--font-display);
+  --font-sans: var(--font-literata);
+  --font-serif: var(--font-literata);
+  --font-display: var(--font-garamond);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -68,22 +68,22 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-literata), Georgia, "Times New Roman", serif;
 }
 
 h1, h2, h3 {
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: var(--font-garamond), Garamond, Georgia, serif;
   text-wrap: balance;
 }
 
 .brand {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-family: var(--font-garamond), Garamond, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.005em;
 }
 
 .title-input {
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: var(--font-garamond), Garamond, Georgia, serif;
 }
 
 .title-input::placeholder {

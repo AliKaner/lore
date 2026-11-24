@@ -1,6 +1,9 @@
-# Ürün Vizyonu
+# Ürün Vizyonu — Booktion
 
-Git'in dallanma (branch) ve ağaç yapısını, kitap yazarlığına uyarlayan bir platform.
+Ürünün adı **Booktion**. Git'in dallanma (branch) ve ağaç yapısını, kitap
+yazarlığına uyarlayan; ama artık yalnızca kitap yazarlarına değil, her tür
+yazara (köşe yazarı, muhabir, deneme yazarı, şair, günlük/journal tutan)
+kendi türüne özel bir yazma deneyimi sunan bir platform.
 Kullanıcıya "git", "branch", "commit" gibi terimler hiç gösterilmeyecek — yapı
 arka planda git mantığıyla çalışacak ama yazar/okuyucu bunu normal bir
 "bölüm", "dal", "alternatif hikaye" gibi günlük dille görecek.
@@ -12,22 +15,26 @@ sosyal bir deneyim** sunmak.
 
 Dört alanda üçer seçenek karşılaştırıldı (bkz. yayınlanmış mockup); seçilenler:
 
-- **Görsel stil → Elyazması.** Sıcak kağıt tonu zemin (`#f6efe1`), mürekkep-
-  ahşap metin, Fraunces serif başlıklar + Inter gövde metni, derin mor-ahududu
-  (`#6b3f68`) vurgu rengi. "Taş tonu/sade" seçeneği bırakıldı — ürün bir kitap
-  platformu olduğu için elyazması kimliği daha güçlü. Tüm renkler `app/globals.css`
-  içinde `--background/--surface/--foreground/--muted/--border/--accent` token'ları
-  olarak tanımlı, `lib/ui.ts` bunları kullanıyor; karanlık mod da var.
+- **Görsel stil → Booktion kimliği.** (Eski "Elyazması" stilinin yerini aldı.)
+  Palet kullanıcının verdiği referanstan: Rapture's Light `#F6F3E7`, Milk Tooth
+  `#FAEBD7`, Caramel Essence `#E3AF64`, Sapphire Dust `#516AC8`, Blue Oblivion
+  `#26428B`, Cosmic Odyssey `#0F1939`. Sayfa zemini soğuk porselen `#F4F6FB`;
+  birincil buton Blue Oblivion, metin Cosmic Odyssey, vurgular Caramel.
+  Fontlar kitap fontları: başlıklar ve logo **EB Garamond**, gövde ve okuma
+  metni **Literata** (ekran için tasarlanmış kitap fontu). Logo şimdilik
+  EB Garamond ile "Booktion" + karamel bir eşkenar dörtgen nokta
+  (`components/Wordmark.tsx`). Token'lar `app/globals.css` içinde; karanlık mod
+  lacivert zemin + karamel vurgu.
 - **Bölüm ağacı → Düğüm grafiği.** `ChapterTree.tsx` artık iç içe liste değil,
   gerçek bir git-ağacı gibi kutular ve bağlantı eğrileriyle çiziliyor (basit bir
   "leaf'e sıra ver, üst düğüm çocuklarının ortalaması" yerleşim algoritması).
   Ürünün "dallanma" vaadini en net gösteren seçenek. Çok dallı kitaplarda
   yatay scroll gerekiyor — bilerek kabul edildi.
-- **Yazma akışı → Anında Yaz.** "Yeni kitap" artık ayrı bir form sayfası değil;
-  tıklanınca (`components/NewBookButton.tsx`) direkt "Başlıksız hikaye" / gizli
-  bir kitap oluşturuyor ve editöre düşürüyor. Başlık, açıklama ve görünürlük
-  (`components/BookTitleEditor.tsx`) editörün üstünde satır içi düzenleniyor —
-  istendiğinde, zorunlu bir ilk adım olarak değil. `/kitap/yeni` sayfası kaldırıldı.
+- **Yazma akışı → Tür seç, anında yaz.** "Yeni yazı" (`/yaz`) önce yazı türünü
+  sorar; bir türe tıklanınca (`components/NewBookButton.tsx`) form olmadan
+  o türün "Başlıksız …" gizli yazısı oluşur ve editöre düşülür. Başlık,
+  açıklama ve görünürlük (`components/BookTitleEditor.tsx`) editörün üstünde
+  satır içi düzenlenir — zorunlu bir ilk adım olarak değil.
 - **Keşfet düzeni → değişmedi.** Kapak rafı ve kategorili akış, kitapların
   çoğunun henüz kapağı olmaması nedeniyle şu an için zayıf kalıyordu; dikey
   liste kalmaya devam ediyor.
@@ -46,6 +53,35 @@ Dört alanda üçer seçenek karşılaştırıldı (bkz. yayınlanmış mockup);
       bölüm sayfasındaki "ana hat yap" butonunu kullanıyor
 - [x] Var olan bir bölümü düzenleme — `/duzenle` ekranı, sadece yazarı girebiliyor
 - [ ] Bölüm sıralamasını sürükle-bırakla değiştirme
+
+### Yazı Türleri
+
+Her yazının bir türü var (`books.kind`, `convex/writingKinds.ts`); arayüzdeki
+etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
+
+- [x] 8 tür: Kitap, Öykü, Şiir, Deneme, Köşe yazısı, Röportaj, Journal, Günlük
+- [x] Türe özel yazma deneyimi: köşe yazısı "Spot:" satırıyla, röportaj
+      "Konuk / S / C" şablonuyla, journal üç soruyla açılır; günlük ve journal
+      sayfaları başlığını bugünün tarihinden alır
+- [x] Türe göre dil: "Bölüm / Şiir / Yazı / Röportaj / Sayfa", "Hikâye
+      haritası / Şiirler ve nazireler / Yazılar / Sayfalar"
+- [x] Dal kuralı backend'de: kitap, öykü ve şiir okurlara açık (şiirde dal =
+      **nazire**); deneme, köşe yazısı, röportaj, journal ve günlükte yalnızca
+      yazar ekleme yapabilir
+- [x] Keşfet sayfasında türe göre filtre (`by_visibility_and_kind` index'i)
+- [x] Eski kayıtlar için backfill: `npx convex run migrations:backfillBookKinds`
+      (türü olmayan kitapları "book" yapar; deploy'dan sonra bir kez çalıştırılmalı)
+
+### Landing Page
+
+- [x] `/` artık tanıtım sayfası (giriş yapmış kullanıcı `/kesfet`'e
+      yönlenir). Rakip araştırmasına göre (Ulysses, Novlr, bibisco, Sudowrite,
+      Novelcrafter, Dabble, Reedsy, Wattpad, Substack): gerçek ürün arayüzü
+      gösteren hero, yazı türleri ızgarası, Ulysses tarzı "… için" kullanım
+      blokları (köşe yazarı/muhabir, günlük/journal), kurmaca/dallanma bölümü,
+      okurlar, fiyatlar (Premium "Yakında"), SSS
+- [ ] Gerçek kullanıcı yorumları ve sayılar (henüz yok — uydurulmadı)
+- [ ] Premium içeriği ve fiyatı netleşecek (sayfadaki Premium maddeleri öneri)
 
 ### Paketlenebilir Varlıklar
 
@@ -88,9 +124,22 @@ Dört alanda üçer seçenek karşılaştırıldı (bkz. yayınlanmış mockup);
 
 - [ ] Sosyal medya entegrasyonu / dışarı paylaşım tarafı netleştirilecek
 
+## Version 2
+
+Şimdilik kodlanmayacak; v2'de ele alınacak:
+
+- [ ] **Kapak tasarım aracı** — kitaplar için platform içinde kapak tasarlama
+- [ ] **Kolay editörlük bölümleri** — kitaplar için editör/redaktör iş akışı
+      (düzeltme önerileri, editör notları, onay)
+- [ ] **Kolay basım** — kitabı baskıya hazır hale getirme ve basım siparişi
+- [ ] **Reklam / tanıtım** — yazarların kitaplarını platformda öne çıkarması
+- [ ] **Okurlarla söyleşi** — yazar ile okurların canlı ya da yazılı soru-cevap
+      buluşmaları
+
 ## Test Altyapısı
 
-- [x] `convex/*.test.ts` — `convex-test` + Vitest ile 36 test: kitap/bölüm
+- [x] `convex/*.test.ts` — `convex-test` + Vitest ile 42 test (yazı türleri,
+      tür filtresi, köşe yazısı/şiir dal kuralları ve backfill dahil): kitap/bölüm
       yetkilendirme (dallanma kuralı, taslak görünürlüğü, düzenleme/ana hat/
       gizleme), karakter/mekan paketleme, like/yorum/favori/paylaşım, okuma
       ilerlemesi + seviye hesaplama, moderasyon. Passkey girişi gerçek bir

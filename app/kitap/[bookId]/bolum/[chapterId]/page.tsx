@@ -13,6 +13,8 @@ import ReportButton from "@/components/ReportButton";
 import Loading from "@/components/Loading";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonLink, pillInactive } from "@/lib/ui";
+import { isOpenToBranches } from "@/convex/writingKinds";
+import { kindConfig } from "@/lib/writingKinds";
 
 export default function ChapterPage({
   params,
@@ -51,6 +53,12 @@ export default function ChapterPage({
   const canBranch = me !== null && me !== undefined;
   const isAuthor = me?._id === chapter.authorId;
   const isBookOwner = me?._id === book?.ownerId;
+  const cfg = kindConfig(book ?? {});
+  const writeNextLabel = isBookOwner
+    ? cfg.continueCta
+    : book?.visibility === "public" && book && isOpenToBranches(book)
+      ? cfg.branchCta
+      : undefined;
 
   async function handleMarkCanonical(targetChapterId: Id<"chapters">) {
     try {
@@ -63,7 +71,7 @@ export default function ChapterPage({
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <Link href={`/kitap/${bookId}`} className="text-sm text-muted">
-        ← Hikaye haritası
+        ← {cfg.mapLabel}
       </Link>
       <div className="flex flex-wrap items-center justify-between gap-2 mt-2 mb-4">
         <h1 className="text-2xl font-semibold">{chapter.title}</h1>
@@ -90,12 +98,12 @@ export default function ChapterPage({
           targetId={chapterId}
           shareCount={chapter.shareCount}
         />
-        {canBranch && book?.visibility === "public" && (
+        {canBranch && writeNextLabel && (
           <Link
             href={`/kitap/${bookId}/bolum/${chapterId}/yaz`}
             className={pillInactive}
           >
-            ✎ Buradan kendi hikayeni yaz
+            ✎ {writeNextLabel}
           </Link>
         )}
         {canBranch && !isAuthor && (
@@ -109,7 +117,7 @@ export default function ChapterPage({
           <Loading />
         ) : children.length === 0 ? (
           <p className="text-muted text-sm">
-            Bu bölümün henüz bir devamı yok.
+            Henüz bir devamı yok.
           </p>
         ) : (
           <ul className="flex flex-col gap-2">

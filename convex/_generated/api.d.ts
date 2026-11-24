@@ -13,11 +13,13 @@ import type * as books from "../books.js";
 import type * as chapters from "../chapters.js";
 import type * as characters from "../characters.js";
 import type * as files from "../files.js";
+import type * as migrations from "../migrations.js";
 import type * as places from "../places.js";
 import type * as reading from "../reading.js";
 import type * as reports from "../reports.js";
 import type * as social from "../social.js";
 import type * as users from "../users.js";
+import type * as writingKinds from "../writingKinds.js";
 
 import type {
   ApiFromModules,
@@ -31,11 +33,13 @@ declare const fullApi: ApiFromModules<{
   chapters: typeof chapters;
   characters: typeof characters;
   files: typeof files;
+  migrations: typeof migrations;
   places: typeof places;
   reading: typeof reading;
   reports: typeof reports;
   social: typeof social;
   users: typeof users;
+  writingKinds: typeof writingKinds;
 }>;
 
 /**

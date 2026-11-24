@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import Wordmark from "@/components/Wordmark";
+import { KIND_ORDER, KINDS } from "@/lib/writingKinds";
 
 const ctaPrimary =
   "inline-flex h-12 items-center justify-center rounded-sm bg-accent px-6 text-[15px] font-medium text-accent-contrast transition-colors hover:bg-accent-hover";
@@ -264,6 +265,70 @@ function ReaderMock() {
   );
 }
 
+const mockCard =
+  "rounded-lg border border-border bg-surface p-7 shadow-[0_30px_70px_-45px_rgba(15,25,57,0.5)]";
+
+function InterviewMock() {
+  return (
+    <div
+      role="img"
+      aria-label="Röportaj şablonu: en üstte konuk bilgisi, altında soru ve cevaplar"
+      className={mockCard}
+    >
+      <div className="flex items-center justify-between gap-3 text-[11px]">
+        <span className="uppercase tracking-wider text-muted">Röportaj</span>
+        <span className="rounded-full border border-border px-2.5 py-1 text-muted">Taslak</span>
+      </div>
+      <div className="mt-4 font-display text-3xl leading-tight">“Liman şehirleri unutmaz”</div>
+      <div className="mt-5 flex flex-col gap-3 font-serif text-[15px] leading-relaxed text-foreground/90">
+        <p>
+          <strong className="font-semibold">Konuk:</strong> Nermin Ata, fener bekçisi, 64
+        </p>
+        <p>
+          <strong className="font-semibold text-sapphire">S:</strong> Kırk yıl aynı ışığı yakmak nasıl bir şey?
+        </p>
+        <p>
+          <strong className="font-semibold text-accent">C:</strong> Her gece başka bir gemi geçiyor. Işık aynı, deniz hiç aynı değil.
+        </p>
+        <p>
+          <strong className="font-semibold text-sapphire">S:</strong>
+          <span className="ml-1 inline-block h-4 w-px translate-y-0.5 bg-accent" />
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function JournalMock() {
+  return (
+    <div
+      role="img"
+      aria-label="Journal sayfası: başlık olarak bugünün tarihi, üç soru ve yalnızca sen etiketi"
+      className={mockCard}
+    >
+      <div className="flex items-center justify-between gap-3 text-[11px]">
+        <span className="uppercase tracking-wider text-muted">Journal</span>
+        <span className="rounded-full bg-caramel-soft px-2.5 py-1 font-semibold text-foreground">Yalnızca sen</span>
+      </div>
+      <div className="mt-4 font-display text-3xl leading-tight">25 Kasım 2026 Çarşamba</div>
+      <div className="mt-5 flex flex-col gap-4">
+        {[
+          ["Bugün aklımı ne meşgul etti?", "Sabah sisi ve bitmeyen o cümle."],
+          ["Neye minnettarım?", "Annemin telefonu, sıcak çay."],
+          ["Yarın için tek bir niyet", ""],
+        ].map(([prompt, answer]) => (
+          <div key={prompt} className="flex flex-col gap-1">
+            <span className="font-display text-lg text-sapphire">{prompt}</span>
+            <span className="min-h-5 font-serif text-[15px] text-foreground/85">
+              {answer || <span className="inline-block h-4 w-px translate-y-0.5 bg-accent" />}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function FeatureRow({
   label,
   title,
@@ -296,11 +361,15 @@ const faqs = [
   },
   {
     q: "Başkası kitabımdan dal açabilir mi?",
-    a: "Herkese açık kitaplarda, yayınlanmış bir bölümden herkes kendi dalını açabilir — bu Booktion'in kalbi. Ana hattı yalnızca sen belirlersin; uygunsuz bir dalı gizleyebilir, bildirimleri moderasyon ekranından yönetebilirsin.",
+    a: "Herkese açık kitap, öykü ve şiirlerde, yayınlanmış bir bölümden herkes kendi dalını açabilir — bu Booktion'ın kalbi. Ana hattı yalnızca sen belirlersin; uygunsuz bir dalı gizleyebilir, bildirimleri moderasyon ekranından yönetebilirsin.",
   },
   {
-    q: "Taslaklarımı kim görebilir?",
-    a: "Yalnızca sen. Yeni bir kitap gizli başlar; görünürlüğü ne zaman açacağına sen karar verirsin.",
+    q: "Günlüğümü ve taslaklarımı kim görebilir?",
+    a: "Yalnızca sen. Her yeni yazı gizli başlar; görünürlüğü ne zaman açacağına sen karar verirsin.",
+  },
+  {
+    q: "Köşe yazıma ya da röportajıma başkası ekleme yapabilir mi?",
+    a: "Hayır. Okurların dal açabildiği türler yalnızca kurmaca ve şiir: kitap, öykü ve şiir. Deneme, köşe yazısı, röportaj, journal ve günlükte yalnızca yazar yazar; okurlar okur, beğenir ve yorum yapar.",
   },
   {
     q: "Şifre neden yok?",
@@ -317,7 +386,8 @@ export default function Landing() {
             <Wordmark />
           </Link>
           <nav aria-label="Sayfa bölümleri" className="hidden items-center gap-8 text-sm text-muted md:flex">
-            <a href="#yazarlar" className="hover:text-foreground">Yazarlar</a>
+            <a href="#turler" className="hover:text-foreground">Yazı türleri</a>
+            <a href="#kurmaca" className="hover:text-foreground">Kurmaca</a>
             <a href="#okurlar" className="hover:text-foreground">Okurlar</a>
             <a href="#fiyatlar" className="hover:text-foreground">Fiyatlar</a>
             <a href="#sss" className="hover:text-foreground">SSS</a>
@@ -339,38 +409,108 @@ export default function Landing() {
       <main>
         <section className="pb-24 pt-20 sm:pt-28">
           <div className={`${container} flex flex-col items-center text-center`}>
-            <span className={eyebrow}>Dallanan hikâyeler için yazı evi</span>
-            <h1 className="mt-6 max-w-4xl font-display text-[52px] leading-[0.98] font-normal tracking-[-0.015em] sm:text-[84px]">
-              Her bölüm, yeni bir hikâyenin <em className="text-sapphire">başlangıcı.</em>
+            <span className={eyebrow}>Kitaptan günlüğe, her yazar için</span>
+            <h1 className="mt-6 max-w-4xl font-display text-[54px] leading-[0.98] font-normal tracking-[-0.01em] sm:text-[88px]">
+              Her yazıya kendi <em className="text-sapphire">masası.</em>
             </h1>
             <p className="mt-7 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
-              Kitabını bölüm bölüm yaz. Okurların sevdikleri bir bölümden kendi
-              dallarını açsın — hikâye haritası her yolu, hangisinin ana hat
-              olduğunu ise sen belirlersin.
+              Romanını, köşe yazını, röportajını ya da günlüğünü Booktion&apos;da
+              yaz. Her tür kendi şablonuyla, kendi düzeniyle gelir — kurmacada
+              ise okurların hikâyeni dallandırır.
             </p>
             <div className="mt-10 flex flex-wrap justify-center gap-3">
               <Link href="/giris" className={ctaPrimary}>
                 Ücretsiz yazmaya başla
               </Link>
               <Link href="/kesfet" className={ctaSecondary}>
-                Kitaplara göz at
+                Okumaya göz at
               </Link>
             </div>
             <p className="mt-5 text-sm text-muted">
-              Şifre yok, kredi kartı yok · Okumak her zaman ücretsiz
+              Ücretsiz · Şifre yok, kredi kartı yok · Okumak her zaman ücretsiz
             </p>
+            <ul aria-label="Yazı türleri" className="mt-10 flex max-w-3xl flex-wrap justify-center gap-x-2 gap-y-2">
+              {KIND_ORDER.map((kind) => (
+                <li
+                  key={kind}
+                  className="rounded-full border border-border bg-surface/70 px-3.5 py-1.5 font-display text-[17px] text-foreground/85"
+                >
+                  {KINDS[kind].label}
+                </li>
+              ))}
+            </ul>
           </div>
           <div className={`${container} mt-16 sm:mt-20`}>
             <ProductWindow />
           </div>
         </section>
 
-        <section id="yazarlar" className="scroll-mt-6 border-t border-border bg-surface py-24 sm:py-32">
+        <section id="turler" className="scroll-mt-6 border-t border-border py-24 sm:py-32">
+          <div className={`${container} flex flex-col gap-14`}>
+            <div className="flex max-w-3xl flex-col gap-5">
+              <span className={eyebrow}>Yazı türleri</span>
+              <h2 className="font-display text-5xl leading-[1.02] font-normal sm:text-6xl">
+                Sekiz tür, sekiz ayrı masa.
+              </h2>
+              <p className="max-w-2xl text-lg leading-relaxed text-muted">
+                Ne yazacağını seçtiğin an şablon, başlık, kimin görebileceği ve
+                okurların neler yapabileceği ona göre ayarlanır. Ayar menüsü
+                yok — doğrudan yazarsın.
+              </p>
+            </div>
+            <ul className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+              {KIND_ORDER.map((kind) => {
+                const cfg = KINDS[kind];
+                return (
+                  <li key={kind} className="flex flex-col gap-3 bg-surface p-7">
+                    <span className="font-display text-[28px] leading-none">{cfg.label}</span>
+                    <span className="text-[15px] leading-relaxed text-muted">{cfg.pitch}</span>
+                    <ul className="mt-auto flex flex-col gap-1.5 pt-3 text-sm text-foreground/80">
+                      {cfg.traits.map((trait) => (
+                        <li key={trait} className="flex gap-2.5">
+                          <span aria-hidden="true" className="mt-[7px] size-1.5 shrink-0 rotate-45 bg-caramel" />
+                          {trait}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+
+        <section className="border-t border-border bg-surface py-24 sm:py-32">
+          <div className={`${container} flex flex-col gap-24 sm:gap-32`}>
+            <FeatureRow
+              label="Köşe yazarları ve muhabirler için"
+              title={<>Röportajın <em>soru–cevapla</em>, köşe yazın spotla açılır.</>}
+              visual={<InterviewMock />}
+            >
+              Röportaj, konuğu en üstte tanıtan soru–cevap şablonuyla başlar;
+              köşe yazısı bir spot satırıyla. Bütün yazıların tek bir köşede,
+              sırayla durur. Kimse izinsiz ekleme yapamaz — yazının sesi
+              yalnızca senin.
+            </FeatureRow>
+            <FeatureRow
+              label="Günlük ve journal tutanlar için"
+              title="Her gün, kimsenin görmediği bir sayfa."
+              visual={<JournalMock />}
+              flip
+            >
+              Yeni sayfa başlığını bugünün tarihinden alır. Journal üç soruyla
+              açılır: seni ne meşgul etti, neye minnettarsın, yarın için tek bir
+              niyet. İkisi de gizli başlar; paylaşmak tamamen senin kararın.
+            </FeatureRow>
+          </div>
+        </section>
+
+        <section id="kurmaca" className="scroll-mt-6 border-t border-border py-24 sm:py-32">
           <div className={`${container} flex flex-col gap-24 sm:gap-32`}>
             <div className="flex max-w-3xl flex-col gap-5">
-              <span className={eyebrow}>Yazarlar için</span>
+              <span className={eyebrow}>Kitap, öykü ve şiir için</span>
               <h2 className="font-display text-5xl leading-[1.02] font-normal sm:text-6xl">
-                Sen yaz. Hikâyenin nereye dallandığını harita tutar.
+                Kurmacada hikâye dallanır. Haritayı Booktion tutar.
               </h2>
             </div>
             <FeatureRow
@@ -416,7 +556,7 @@ export default function Landing() {
               <ul className="mt-2 flex flex-col gap-5 text-[17px] leading-relaxed text-on-ink/80">
                 <li className="flex gap-3">
                   <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rotate-45 bg-caramel" />
-                  <span><strong className="font-semibold text-on-ink">Bir bölümü sevdin mi?</strong> Devamını sen yaz. Herkese açık kitaplarda kimseden izin beklemezsin.</span>
+                  <span><strong className="font-semibold text-on-ink">Bir bölümü sevdin mi?</strong> Devamını sen yaz; bir şiire nazireyle karşılık ver. Herkese açık kurmacada kimseden izin beklemezsin.</span>
                 </li>
                 <li className="flex gap-3">
                   <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rotate-45 bg-caramel" />
@@ -451,8 +591,9 @@ export default function Landing() {
                 </div>
                 <ul className="flex flex-col gap-3 text-[15px] text-foreground/85">
                   {[
+                    "Sekiz yazı türünün hepsi",
                     "Sınırsız okuma, beğeni ve yorum",
-                    "İstediğin kadar kitap ve bölüm",
+                    "İstediğin kadar yazı ve bölüm",
                     "Herkese açık kitaplardan dal açma",
                     "Karakter ve mekân paketleri",
                   ].map((item) => (
@@ -522,7 +663,7 @@ export default function Landing() {
         <section className="bg-caramel-soft py-24 sm:py-28">
           <div className={`${container} flex flex-col items-center gap-8 text-center`}>
             <h2 className="max-w-3xl font-display text-5xl leading-[1.02] font-normal sm:text-7xl">
-              İlk bölümünü bu akşam yaz.
+              İlk sayfanı bu akşam yaz.
             </h2>
             <Link href="/giris" className={ctaPrimary}>
               Ücretsiz yazmaya başla

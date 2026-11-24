@@ -5,23 +5,32 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
+import type { WritingKind } from "@/convex/writingKinds";
 import { ChapterEditor } from "@/components/Editor";
 import { buttonPrimary, buttonSecondary, inputBase } from "@/lib/ui";
+import { KINDS, todayTitle } from "@/lib/writingKinds";
 
 export default function ChapterForm({
   bookId,
   parentChapterId,
   existingChapter,
+  kind = "book",
 }: {
   bookId: Id<"books">;
   parentChapterId?: Id<"chapters">;
   existingChapter?: Doc<"chapters">;
+  kind?: WritingKind;
 }) {
+  const cfg = KINDS[kind];
   const createChapter = useMutation(api.chapters.create);
   const updateChapter = useMutation(api.chapters.update);
   const router = useRouter();
-  const [title, setTitle] = useState(existingChapter?.title ?? "");
-  const [content, setContent] = useState(existingChapter?.content ?? "");
+  const [title, setTitle] = useState(
+    () => existingChapter?.title ?? (cfg.datedTitle ? todayTitle() : ""),
+  );
+  const [content, setContent] = useState(
+    existingChapter?.content ?? cfg.template ?? "",
+  );
   const [error, setError] = useState<string | null>(null);
   const [pendingStatus, setPendingStatus] = useState<
     "draft" | "published" | null
@@ -62,7 +71,7 @@ export default function ChapterForm({
       <input
         value={title}
         onChange={(event) => setTitle(event.target.value)}
-        placeholder="Bölüm başlığı"
+        placeholder={cfg.unitTitlePlaceholder}
         className={`${inputBase} text-lg`}
       />
       <ChapterEditor content={content} onChange={setContent} />

@@ -14,7 +14,7 @@ const garamond = EB_Garamond({
 });
 const literata = Literata({
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
   variable: "--font-literata",
 });

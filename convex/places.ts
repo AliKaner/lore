@@ -1,6 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { requireUserId } from "./users";
+import { optionalUserId, viewableBook } from "./access";
 
 export const create = mutation({
   args: {
@@ -10,6 +12,12 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
+    if (args.originBookId !== undefined) {
+      const book = await ctx.db.get(args.originBookId);
+      if (!book || book.ownerId !== userId) {
+        throw new Error("Bu kitaba paket ekleyemezsin.");
+      }
+    }
     const placeId = await ctx.db.insert("places", {
       name: args.name,
       description: args.description,
@@ -47,6 +55,8 @@ export const listMine = query({
 export const listForBook = query({
   args: { bookId: v.id("books") },
   handler: async (ctx, args) => {
+    const userId = await optionalUserId(ctx);
+    if ((await viewableBook(ctx, args.bookId, userId)) === null) return [];
     const links = await ctx.db
       .query("bookPlaces")
       .withIndex("by_book", (q) => q.eq("bookId", args.bookId))
@@ -92,6 +102,25 @@ export const update = mutation({
     }
     const { placeId, ...patch } = args;
     await ctx.db.patch(placeId, patch);
+    return null;
+  },
+});
+
+// Deletes a place and takes it out of every writing it was part of.
+export const remove = mutation({
+  args: { placeId: v.id("places") },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const place = await ctx.db.get(args.placeId);
+    if (!place || place.creatorId !== userId) {
+      throw new Error("Bu mekanı silemezsin.");
+    }
+    if (place.imageStorageId) await ctx.storage.delete(place.imageStorageId);
+    await ctx.db.delete(place._id);
+    await ctx.scheduler.runAfter(0, internal.cleanup.purgeTarget, {
+      targetType: "place",
+      targetId: place._id,
+    });
     return null;
   },
 });

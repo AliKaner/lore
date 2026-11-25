@@ -9,6 +9,7 @@ import FavoriteButton from "@/components/FavoriteButton";
 import { useCommunityOpen } from "@/lib/community";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
+import DeleteButton from "@/components/DeleteButton";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import {
   buttonPrimary,
@@ -152,6 +153,13 @@ export default function PlacesPage() {
                       </button>
                     </div>
                   )}
+
+                  <div className="mt-4">
+                    <DeleteButton
+                      target={{ kind: "place", id: place._id }}
+                      label="Mekanı sil"
+                    />
+                  </div>
                 </li>
               ))}
             </ul>

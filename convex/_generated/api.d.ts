@@ -8,10 +8,12 @@
  * @module
  */
 
+import type * as access from "../access.js";
 import type * as auth from "../auth.js";
 import type * as books from "../books.js";
 import type * as chapters from "../chapters.js";
 import type * as characters from "../characters.js";
+import type * as cleanup from "../cleanup.js";
 import type * as files from "../files.js";
 import type * as migrations from "../migrations.js";
 import type * as places from "../places.js";
@@ -28,10 +30,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  access: typeof access;
   auth: typeof auth;
   books: typeof books;
   chapters: typeof chapters;
   characters: typeof characters;
+  cleanup: typeof cleanup;
   files: typeof files;
   migrations: typeof migrations;
   places: typeof places;

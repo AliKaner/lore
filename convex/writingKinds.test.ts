@@ -116,10 +116,20 @@ describe("writing kinds", () => {
     expect(nazireId).toBeDefined();
   });
 
-  test("the community opens once there are 100 books", async () => {
+  test("the community opens once there are 100 started writings", async () => {
     const { t, authApi } = setupTest(modules);
-    const { userId } = await signInAsNewUser(t, authApi);
-    const insertBooks = (count: number) =>
+    const { userId, t: asOwner } = await signInAsNewUser(t, authApi);
+    const anchorBookId = await asOwner.mutation(api.books.create, {
+      title: "Çapa",
+      visibility: "private",
+    });
+    const someChapterId = await asOwner.mutation(api.chapters.create, {
+      bookId: anchorBookId,
+      title: "Bir",
+      content: "{}",
+      status: "draft",
+    });
+    const insertBooks = (count: number, started: boolean) =>
       t.run(async (ctx) => {
         for (let i = 0; i < count; i++) {
           await ctx.db.insert("books", {
@@ -127,6 +137,7 @@ describe("writing kinds", () => {
             ownerId: userId,
             kind: "book",
             visibility: "private",
+            rootChapterId: started ? someChapterId : undefined,
             likeCount: 0,
             shareCount: 0,
             createdAt: i,
@@ -134,11 +145,14 @@ describe("writing kinds", () => {
         }
       });
 
-    await insertBooks(99);
+    // Empty "Başlıksız" writings from the chooser don't count.
+    await insertBooks(150, false);
+    // The anchor book already has a root chapter, so 98 more makes 99.
+    await insertBooks(98, true);
     const before = await t.query(api.books.communityStatus, {});
     expect(before).toMatchObject({ open: false, bookCount: 99 });
 
-    await insertBooks(1);
+    await insertBooks(1, true);
     const after = await t.query(api.books.communityStatus, {});
     expect(after).toMatchObject({ open: true, bookCount: 100 });
   });

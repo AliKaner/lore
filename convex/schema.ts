@@ -25,7 +25,8 @@ export default defineSchema({
   })
     .index("by_owner", ["ownerId"])
     .index("by_visibility", ["visibility"])
-    .index("by_visibility_and_kind", ["visibility", "kind"]),
+    .index("by_visibility_and_kind", ["visibility", "kind"])
+    .index("by_root_chapter", ["rootChapterId"]),
 
   chapters: defineTable({
     bookId: v.id("books"),
@@ -67,14 +68,16 @@ export default defineSchema({
     characterId: v.id("characters"),
   })
     .index("by_book", ["bookId"])
-    .index("by_book_and_character", ["bookId", "characterId"]),
+    .index("by_book_and_character", ["bookId", "characterId"])
+    .index("by_character", ["characterId"]),
 
   bookPlaces: defineTable({
     bookId: v.id("books"),
     placeId: v.id("places"),
   })
     .index("by_book", ["bookId"])
-    .index("by_book_and_place", ["bookId", "placeId"]),
+    .index("by_book_and_place", ["bookId", "placeId"])
+    .index("by_place", ["placeId"]),
 
   likes: defineTable({
     userId: v.id("users"),
@@ -104,7 +107,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_user_and_target", ["userId", "targetType", "targetId"]),
+    .index("by_user_and_target", ["userId", "targetType", "targetId"])
+    .index("by_target", ["targetType", "targetId"]),
 
   shares: defineTable({
     userId: v.id("users"),
@@ -121,7 +125,8 @@ export default defineSchema({
   })
     .index("by_user_and_chapter", ["userId", "chapterId"])
     .index("by_user", ["userId"])
-    .index("by_user_and_book", ["userId", "bookId"]),
+    .index("by_user_and_book", ["userId", "bookId"])
+    .index("by_chapter", ["chapterId"]),
 
   reports: defineTable({
     reporterId: v.id("users"),

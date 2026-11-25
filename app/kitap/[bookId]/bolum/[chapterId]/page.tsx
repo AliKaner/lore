@@ -1,6 +1,12 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { use, useEffect, useMemo, useState } from "react";
+import SpeedReader from "@/components/SpeedReader";
+import { useBookNames } from "@/lib/bookNames";
+import { flowWords, type NameEntry } from "@/lib/editorExtensions";
+import { readPref, writePref } from "@/lib/readingPrefs";
+
+const NO_NAMES: NameEntry[] = [];
 import Link from "next/link";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -11,6 +17,7 @@ import ShareButton from "@/components/ShareButton";
 import CommentSection from "@/components/CommentSection";
 import ReportButton from "@/components/ReportButton";
 import Loading from "@/components/Loading";
+import DeleteButton from "@/components/DeleteButton";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonLink, pillInactive } from "@/lib/ui";
 import { isOpenToBranches } from "@/convex/writingKinds";
@@ -34,6 +41,21 @@ export default function ChapterPage({
   const markCanonical = useMutation(api.chapters.markCanonical);
   const showToast = useToast();
   const communityOpen = useCommunityOpen();
+  const bookNames = useBookNames(bookId);
+  const [bionic, setBionic] = useState(() => readPref("bionic", false));
+  const [showNames, setShowNames] = useState(() => readPref("names", true));
+  const [flowOpen, setFlowOpen] = useState(false);
+  const content = chapter?.content ?? "";
+  const words = useMemo(() => flowWords(content), [content]);
+
+  function chooseBionic(value: boolean) {
+    setBionic(value);
+    writePref("bionic", value);
+  }
+  function chooseNames(value: boolean) {
+    setShowNames(value);
+    writePref("names", value);
+  }
 
   useEffect(() => {
     if (chapter?.status === "published" && me) {
@@ -87,7 +109,70 @@ export default function ChapterPage({
         )}
       </div>
 
-      <ChapterReader content={chapter.content} />
+      <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+        <div
+          role="group"
+          aria-label="Okuma modu"
+          className="inline-flex rounded-full border border-border p-0.5"
+        >
+          {[
+            { value: false, label: "Normal" },
+            { value: true, label: "Biyonik" },
+          ].map((option) => (
+            <button
+              key={option.label}
+              aria-pressed={bionic === option.value}
+              onClick={() => chooseBionic(option.value)}
+              title={
+                option.value
+                  ? "Kelimelerin başı kalın: göz kelimeyi daha hızlı tanır"
+                  : undefined
+              }
+              className={`rounded-full px-3 py-1 transition-colors ${
+                bionic === option.value
+                  ? "bg-accent text-accent-contrast"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              {option.value ? <><b>Biy</b>onik</> : option.label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => setFlowOpen(true)}
+          disabled={words.length === 0}
+          title="Kelimeler tek tek, seçtiğin hızda akar"
+          className={`${pillInactive} disabled:opacity-40`}
+        >
+          ▶ Akış ile oku
+        </button>
+        {bookNames.length > 0 && (
+          <label className="inline-flex cursor-pointer items-center gap-1.5 text-muted">
+            <input
+              type="checkbox"
+              checked={showNames}
+              onChange={(event) => chooseNames(event.target.checked)}
+              className="accent-[var(--caramel)]"
+            />
+            Karakter ve mekanları vurgula
+          </label>
+        )}
+        <span className="ml-auto text-xs text-muted tabular-nums">
+          {words.length.toLocaleString("tr-TR")} kelime · ~
+          {Math.max(1, Math.round(words.length / 220))} dk
+        </span>
+      </div>
+
+      <ChapterReader
+        key={chapterId}
+        content={chapter.content}
+        names={showNames ? bookNames : NO_NAMES}
+        bionic={bionic}
+      />
+
+      {flowOpen && (
+        <SpeedReader words={words} title={chapter.title} onClose={() => setFlowOpen(false)} />
+      )}
 
       <div className="flex flex-wrap items-center gap-2 mt-6">
         {communityOpen && (
@@ -151,6 +236,20 @@ export default function ChapterPage({
       </div>
 
       {communityOpen && <CommentSection targetType="chapter" targetId={chapterId} />}
+
+      {(isAuthor || isBookOwner) && children?.length === 0 && (
+        <div className="mt-12 border-t border-border pt-4">
+          <DeleteButton
+            target={{ kind: "chapter", id: chapterId }}
+            label="Bu bölümü sil"
+            afterDelete={({ parentChapterId }) =>
+              parentChapterId
+                ? `/kitap/${bookId}/bolum/${parentChapterId}`
+                : `/kitap/${bookId}`
+            }
+          />
+        </div>
+      )}
     </main>
   );
 }

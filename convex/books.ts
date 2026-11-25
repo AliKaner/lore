@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
+import { internal } from "./_generated/api";
 import { requireUserId } from "./users";
 import { writingKindValidator } from "./writingKinds";
 
@@ -41,11 +42,16 @@ export const get = query({
 export const COMMUNITY_BOOK_THRESHOLD = 100;
 
 // Browsing and social features stay hidden until the platform has this many
-// books; until then a book is reached only through a shared link.
+// writings; until then a book is reached only through a shared link. Only
+// writings with at least one chapter count — opening the "new writing" chooser
+// creates an empty one, and those shouldn't fill the threshold.
 export const communityStatus = query({
   args: {},
   handler: async (ctx) => {
-    const books = await ctx.db.query("books").take(COMMUNITY_BOOK_THRESHOLD);
+    const books = await ctx.db
+      .query("books")
+      .withIndex("by_root_chapter", (q) => q.gt("rootChapterId", undefined))
+      .take(COMMUNITY_BOOK_THRESHOLD);
     return {
       open: books.length >= COMMUNITY_BOOK_THRESHOLD,
       bookCount: books.length,
@@ -105,6 +111,27 @@ export const update = mutation({
     }
     const { bookId, ...patch } = args;
     await ctx.db.patch(bookId, patch);
+    return null;
+  },
+});
+
+// Deletes a writing with everything in it. Only its owner may, and it cannot
+// be undone.
+export const remove = mutation({
+  args: { bookId: v.id("books") },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const book = await ctx.db.get(args.bookId);
+    if (!book || book.ownerId !== userId) {
+      throw new Error("Bu yazıyı silemezsin.");
+    }
+    if (book.coverStorageId) await ctx.storage.delete(book.coverStorageId);
+    await ctx.db.delete(book._id);
+    await ctx.scheduler.runAfter(0, internal.cleanup.purgeBook, { bookId: book._id });
+    await ctx.scheduler.runAfter(0, internal.cleanup.purgeTarget, {
+      targetType: "book",
+      targetId: book._id,
+    });
     return null;
   },
 });

@@ -14,6 +14,7 @@ import BookTitleEditor from "@/components/BookTitleEditor";
 import ImageUploader from "@/components/ImageUploader";
 import ReportButton from "@/components/ReportButton";
 import Loading from "@/components/Loading";
+import DeleteButton from "@/components/DeleteButton";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonPrimary } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
@@ -167,6 +168,16 @@ export default function BookPage({
               </ul>
             </div>
           )}
+        </div>
+      )}
+
+      {isOwner && (
+        <div className="mt-12 border-t border-border pt-4">
+          <DeleteButton
+            target={{ kind: "book", id: bookId }}
+            label="Bu yazıyı sil"
+            afterDelete={() => "/yazilarim"}
+          />
         </div>
       )}
     </main>

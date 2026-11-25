@@ -52,6 +52,28 @@ Dört alanda üçer seçenek karşılaştırıldı (bkz. yayınlanmış mockup);
 - [x] Bir bölümün "resmi hat" (ana dal) olarak işaretlenmesi — kitap sahibi
       bölüm sayfasındaki "ana hat yap" butonunu kullanıyor
 - [x] Var olan bir bölümü düzenleme — `/duzenle` ekranı, sadece yazarı girebiliyor
+- [x] Otomatik kayıt (`components/ChapterForm.tsx`): yazmaya başlanınca 1,5 sn
+      sonra taslak sunucuya kaydedilir, adres `/duzenle`'ye döner (yenilemek
+      taslağı açar). Kaydedilmemiş metin ayrıca cihazda (localStorage) tutulur;
+      geri gelince "Geri yükle / Yok say" sorulur. Sekmeyi kapatırken uyarı,
+      Ctrl/Cmd+S ile kaydetme. Yayındaki bir metin otomatik değişmez —
+      "Güncelle"ye basılana kadar cihazda bekler.
+- [x] Kelime sayacı editörün altında, kayıt durumunun yanında
+- [x] Editör araç çubuğu: kalın, italik, ara başlık, alıntı, liste
+- [x] **Yazar notları** (`authorNote` işareti, `lib/editorExtensions.ts`): metinde
+      bir yeri seçip not eklenir; editörde fosforlu kalem gibi görünür, altta
+      "Bu bölümdeki notların" listesi (tıklayınca o yere gider). Notlar yalnızca
+      yazara gider — sunucu başkasına dönen metinden siler (`withoutAuthorNotes`)
+- [x] **Karakter ve mekan adlarının vurgulanması**: yazıya dahil edilen
+      karakterler düz karamel, mekanlar noktalı safir altı çizgiyle; üzerine
+      gelince tam ad ve açıklama. Karakterin yalnızca ilk adı da yakalanır
+      ("Selin Aras" → "Selin"). Kitap sahibi metinde bir adı seçip
+      "+ Karakter" / "+ Mekan" ile anında ekleyebilir
+- [x] Silme (`components/DeleteButton.tsx`, iki adımlı onay): yazı (tüm
+      bölümleriyle), bölüm (yalnızca devamı yoksa; ana hatsa sıradaki kardeşe
+      geçer), karakter ve mekan (dahil olduğu yazılardan çıkar). Beğeni, yorum,
+      okuma kaydı, favori ve bağlantılar `convex/cleanup.ts` ile partiler hâlinde
+      temizlenir; kapak/görsel dosyası da silinir
 - [ ] Bölüm sıralamasını sürükle-bırakla değiştirme
 
 ### Yazı Türleri
@@ -74,7 +96,7 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
 
 ### Landing Page
 
-- [x] `/` artık tanıtım sayfası (giriş yapmış kullanıcı `/kesfet`'e
+- [x] `/` artık tanıtım sayfası (giriş yapmış kullanıcı `/yazilarim`'e
       yönlenir). Rakip araştırmasına göre (Ulysses, Novlr, bibisco, Sudowrite,
       Novelcrafter, Dabble, Reedsy, Wattpad, Substack): gerçek ürün arayüzü
       gösteren hero, yazı türleri ızgarası, Ulysses tarzı "… için" kullanım
@@ -98,7 +120,14 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
 > dal açması ve okur seviyeleri görünmüyor; bir yazı yalnızca paylaşılan
 > bağlantıyla (`/kitap/<id>`) okunuyor. Giriş yapan kullanıcı "Yazılarım"
 > (`/yazilarim`) sayfasına düşüyor. 100'e ulaşınca hepsi kendiliğinden açılıyor.
-> Gizleme yalnızca arayüzde; backend fonksiyonları aynı.
+> Gizleme yalnızca arayüzde; backend fonksiyonları aynı. Eşiğe yalnızca en az
+> bir bölümü olan yazılar sayılır (`by_root_chapter` index'i) — tür seçince
+> açılan boş "Başlıksız" yazılar sayılmaz.
+>
+> **Gizlilik:** Gizli bir yazının bölümleri, ağacı, karakter/mekan listesi ve
+> yorumları yalnızca sahibine görünür (`convex/access.ts`); bölüm id'sini
+> bilmek yetmez. Yazı sonradan gizliye çekilirse dal yazarı yalnızca kendi
+> bölümünü görmeye devam eder.
 
 - [x] Public kitaplar — herkes bölümleri okuyabiliyor
 - [x] Fan-fiction / dallanma — herhangi bir kullanıcı, public bir kitabın
@@ -115,6 +144,14 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
       gizleme (taslağa düşürme)
 
 ### Okuyucu Tarafı
+
+- [x] **Okuma modu** (bölüm sayfası): Normal / **Biyonik** (kelimelerin ilk
+      yarısı kalın) ve **Akış** — `components/SpeedReader.tsx`, kelimeler
+      ekranın ortasında tek tek akar (RSVP), odak harfi karamel; 100–900
+      kelime/dk, noktalamada ve paragraf sonunda nefes payı. Klavye: boşluk,
+      ← →, ↑ ↓, Esc. Karakter/mekan vurgusu açılıp kapanabilir; tercihler
+      cihazda hatırlanır (`lib/readingPrefs.ts`). Kelime sayısı ve tahmini
+      okuma süresi gösterilir
 
 - [x] Okunan kitaplar listesi / kişisel kitaplık
 - [x] Kitaplık seviyesi — okudukça XP kazanıp seviye atlama
@@ -146,7 +183,8 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
 
 ## Test Altyapısı
 
-- [x] `convex/*.test.ts` — `convex-test` + Vitest ile 42 test (yazı türleri,
+- [x] `convex/*.test.ts` — `convex-test` + Vitest ile 53 test (gizli yazı erişimi, silme/temizlik
+      ve yazar notlarının okurdan gizlenmesi dahil) (yazı türleri,
       tür filtresi, köşe yazısı/şiir dal kuralları ve backfill dahil): kitap/bölüm
       yetkilendirme (dallanma kuralı, taslak görünürlüğü, düzenleme/ana hat/
       gizleme), karakter/mekan paketleme, like/yorum/favori/paylaşım, okuma

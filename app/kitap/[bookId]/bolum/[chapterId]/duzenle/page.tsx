@@ -8,6 +8,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import ChapterForm from "@/components/ChapterForm";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
+import DeleteButton from "@/components/DeleteButton";
 import { buttonLink } from "@/lib/ui";
 
 export default function EditChapterPage({
@@ -17,6 +18,7 @@ export default function EditChapterPage({
 }) {
   const { bookId, chapterId } = use(params);
   const chapter = useQuery(api.chapters.get, { chapterId });
+  const book = useQuery(api.books.get, { bookId });
   const me = useQuery(api.users.me);
 
   const backLink = (
@@ -25,7 +27,7 @@ export default function EditChapterPage({
     </Link>
   );
 
-  if (chapter === undefined || me === undefined) {
+  if (chapter === undefined || me === undefined || book === undefined) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
         {backLink}
@@ -61,8 +63,26 @@ export default function EditChapterPage({
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       {backLink}
-      <h1 className="text-2xl font-semibold mt-2 mb-6">Bölümü düzenle</h1>
-      <ChapterForm bookId={bookId} existingChapter={chapter} />
+      <h1 className="text-2xl font-semibold mt-2 mb-6">
+        {chapter.status === "draft" ? "Taslak" : "Düzenle"}
+      </h1>
+      <ChapterForm
+        key={chapter._id}
+        bookId={bookId}
+        existingChapter={chapter}
+        kind={book?.kind}
+      />
+      <div className="mt-10 border-t border-border pt-4">
+        <DeleteButton
+          target={{ kind: "chapter", id: chapter._id }}
+          label="Bu bölümü sil"
+          afterDelete={({ parentChapterId }) =>
+            parentChapterId
+              ? `/kitap/${bookId}/bolum/${parentChapterId}`
+              : `/kitap/${bookId}`
+          }
+        />
+      </div>
     </main>
   );
 }

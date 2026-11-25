@@ -2,6 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { levelForXp, requireUserId } from "./users";
 import type { Id } from "./_generated/dataModel";
+import { canViewChapter } from "./access";
 
 const XP_PER_CHAPTER = 10;
 
@@ -10,7 +11,9 @@ export const markChapterRead = mutation({
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const chapter = await ctx.db.get(args.chapterId);
-    if (!chapter) throw new Error("Bölüm bulunamadı.");
+    if (!chapter || !(await canViewChapter(ctx, chapter, userId))) {
+      throw new Error("Bölüm bulunamadı.");
+    }
 
     const existing = await ctx.db
       .query("chapterReads")

@@ -1,9 +1,40 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { requireUserId } from "./users";
 import { isOpenToBranches } from "./writingKinds";
+import { canViewChapter, optionalUserId, viewableBook } from "./access";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
+
+type RichNode = { marks?: { type: string }[]; content?: RichNode[] };
+
+function stripNotes(node: RichNode) {
+  if (node.marks) {
+    node.marks = node.marks.filter((mark) => mark.type !== "authorNote");
+    if (node.marks.length === 0) delete node.marks;
+  }
+  node.content?.forEach(stripNotes);
+}
+
+// Author notes are the writer's private margin: they stay in the stored text
+// but are removed before anyone else receives it.
+export function withoutAuthorNotes(content: string): string {
+  if (!content.includes('"authorNote"')) return content;
+  try {
+    const doc = JSON.parse(content) as RichNode;
+    stripNotes(doc);
+    return JSON.stringify(doc);
+  } catch {
+    return content;
+  }
+}
+
+function forViewer(chapter: Doc<"chapters">, viewerId: Id<"users"> | null) {
+  return chapter.authorId === viewerId
+    ? chapter
+    : { ...chapter, content: withoutAuthorNotes(chapter.content) };
+}
 
 async function assertCanBranch(
   ctx: MutationCtx,
@@ -75,17 +106,16 @@ export const get = query({
   handler: async (ctx, args) => {
     const chapter = await ctx.db.get(args.chapterId);
     if (!chapter) return null;
-    if (chapter.status === "published") return chapter;
-    const userId = await requireUserId(ctx).catch(() => null);
-    if (userId !== chapter.authorId) return null;
-    return chapter;
+    const userId = await optionalUserId(ctx);
+    return (await canViewChapter(ctx, chapter, userId)) ? forViewer(chapter, userId) : null;
   },
 });
 
 export const listChildren = query({
   args: { bookId: v.id("books"), parentChapterId: v.optional(v.id("chapters")) },
   handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx).catch(() => null);
+    const userId = await optionalUserId(ctx);
+    if ((await viewableBook(ctx, args.bookId, userId)) === null) return [];
     const children = await ctx.db
       .query("chapters")
       .withIndex("by_book_and_parent", (q) =>
@@ -93,23 +123,24 @@ export const listChildren = query({
       )
       .order("asc")
       .take(200);
-    return children.filter(
-      (c) => c.status === "published" || c.authorId === userId,
-    );
+    return children
+      .filter((c) => c.status === "published" || c.authorId === userId)
+      .map((c) => forViewer(c, userId));
   },
 });
 
 export const getTree = query({
   args: { bookId: v.id("books") },
   handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx).catch(() => null);
+    const userId = await optionalUserId(ctx);
+    if ((await viewableBook(ctx, args.bookId, userId)) === null) return [];
     const chapters = await ctx.db
       .query("chapters")
       .withIndex("by_book", (q) => q.eq("bookId", args.bookId))
       .take(500);
-    return chapters.filter(
-      (c) => c.status === "published" || c.authorId === userId,
-    );
+    return chapters
+      .filter((c) => c.status === "published" || c.authorId === userId)
+      .map((c) => forViewer(c, userId));
   },
 });
 
@@ -156,6 +187,52 @@ export const hideBranch = mutation({
     }
     await ctx.db.patch(args.chapterId, { status: "draft" });
     return null;
+  },
+});
+
+// Deletes one chapter. Its author or the book's owner may do it, but only for
+// a chapter nothing continues from — deleting the middle of a story would
+// orphan every branch below it.
+export const remove = mutation({
+  args: { chapterId: v.id("chapters") },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const chapter = await ctx.db.get(args.chapterId);
+    if (!chapter) throw new Error("Bölüm bulunamadı.");
+    const book = await ctx.db.get(chapter.bookId);
+    if (chapter.authorId !== userId && book?.ownerId !== userId) {
+      throw new Error("Bu bölümü silemezsin.");
+    }
+    const child = await ctx.db
+      .query("chapters")
+      .withIndex("by_book_and_parent", (q) =>
+        q.eq("bookId", chapter.bookId).eq("parentChapterId", chapter._id),
+      )
+      .first();
+    if (child !== null) {
+      throw new Error("Bu bölümün devamı var; önce devamındaki bölümleri sil.");
+    }
+
+    await ctx.db.delete(chapter._id);
+
+    if (book && book.rootChapterId === chapter._id) {
+      await ctx.db.patch(book._id, { rootChapterId: undefined });
+    }
+    if (chapter.isCanonical) {
+      const heir = await ctx.db
+        .query("chapters")
+        .withIndex("by_book_and_parent", (q) =>
+          q.eq("bookId", chapter.bookId).eq("parentChapterId", chapter.parentChapterId),
+        )
+        .first();
+      if (heir) await ctx.db.patch(heir._id, { isCanonical: true });
+    }
+
+    await ctx.scheduler.runAfter(0, internal.cleanup.purgeTarget, {
+      targetType: "chapter",
+      targetId: chapter._id,
+    });
+    return { parentChapterId: chapter.parentChapterId ?? null };
   },
 });
 

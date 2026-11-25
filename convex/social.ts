@@ -2,7 +2,24 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { requireUserId } from "./users";
-import type { MutationCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+import { canViewChapter, optionalUserId, viewableBook } from "./access";
+
+async function canViewTarget(
+  ctx: QueryCtx,
+  targetType: "book" | "chapter",
+  targetId: string,
+  viewerId: Id<"users"> | null,
+) {
+  if (targetType === "book") {
+    const bookId = ctx.db.normalizeId("books", targetId);
+    return bookId !== null && (await viewableBook(ctx, bookId, viewerId)) !== null;
+  }
+  const chapterId = ctx.db.normalizeId("chapters", targetId);
+  const chapter = chapterId === null ? null : await ctx.db.get(chapterId);
+  return chapter !== null && (await canViewChapter(ctx, chapter, viewerId));
+}
 
 const likeableTarget = v.union(v.literal("book"), v.literal("chapter"));
 const favoriteTarget = v.union(
@@ -101,6 +118,10 @@ export const listComments = query({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
+    const userId = await optionalUserId(ctx);
+    if (!(await canViewTarget(ctx, args.targetType, args.targetId, userId))) {
+      return { page: [], isDone: true, continueCursor: "" };
+    }
     return await ctx.db
       .query("comments")
       .withIndex("by_target", (q) =>

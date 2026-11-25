@@ -1,6 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { requireUserId } from "./users";
+import { optionalUserId, viewableBook } from "./access";
 
 export const create = mutation({
   args: {
@@ -10,6 +12,12 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
+    if (args.originBookId !== undefined) {
+      const book = await ctx.db.get(args.originBookId);
+      if (!book || book.ownerId !== userId) {
+        throw new Error("Bu kitaba paket ekleyemezsin.");
+      }
+    }
     const characterId = await ctx.db.insert("characters", {
       name: args.name,
       description: args.description,
@@ -47,6 +55,8 @@ export const listMine = query({
 export const listForBook = query({
   args: { bookId: v.id("books") },
   handler: async (ctx, args) => {
+    const userId = await optionalUserId(ctx);
+    if ((await viewableBook(ctx, args.bookId, userId)) === null) return [];
     const links = await ctx.db
       .query("bookCharacters")
       .withIndex("by_book", (q) => q.eq("bookId", args.bookId))
@@ -94,6 +104,25 @@ export const update = mutation({
     }
     const { characterId, ...patch } = args;
     await ctx.db.patch(characterId, patch);
+    return null;
+  },
+});
+
+// Deletes a character and takes it out of every writing it was part of.
+export const remove = mutation({
+  args: { characterId: v.id("characters") },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const character = await ctx.db.get(args.characterId);
+    if (!character || character.creatorId !== userId) {
+      throw new Error("Bu karakteri silemezsin.");
+    }
+    if (character.imageStorageId) await ctx.storage.delete(character.imageStorageId);
+    await ctx.db.delete(character._id);
+    await ctx.scheduler.runAfter(0, internal.cleanup.purgeTarget, {
+      targetType: "character",
+      targetId: character._id,
+    });
     return null;
   },
 });

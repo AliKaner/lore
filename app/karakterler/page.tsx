@@ -9,6 +9,7 @@ import FavoriteButton from "@/components/FavoriteButton";
 import { useCommunityOpen } from "@/lib/community";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
+import DeleteButton from "@/components/DeleteButton";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import {
   buttonPrimary,
@@ -157,6 +158,13 @@ export default function CharactersPage() {
                       </button>
                     </div>
                   )}
+
+                  <div className="mt-4">
+                    <DeleteButton
+                      target={{ kind: "character", id: character._id }}
+                      label="Karakteri sil"
+                    />
+                  </div>
                 </li>
               ))}
             </ul>

@@ -10,6 +10,7 @@ import { useCommunityOpen } from "@/lib/community";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
+import EmptyState from "@/components/EmptyState";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import {
   buttonPrimary,
@@ -74,7 +75,7 @@ export default function CharactersPage() {
       {me === undefined ? (
         <Loading />
       ) : me === null ? (
-        <SignInPrompt message="Karakter oluşturmak için giriş yapman gerekiyor." />
+        <SignInPrompt title="Karakter oluşturmak için giriş yap" />
       ) : (
         <>
           <form onSubmit={handleCreate} className="flex flex-col gap-3 mb-10">
@@ -99,7 +100,12 @@ export default function CharactersPage() {
           {characters === undefined ? (
             <Loading />
           ) : characters.length === 0 ? (
-            <p className="text-muted text-sm">Henüz karakter oluşturmadın.</p>
+            <EmptyState compact art="cast" title="Henüz bir karakterin yok">
+              <p>
+                Yukarıdan oluştur ya da yazarken bir adı seçip “+ Karakter”e
+                bas. Bir yazıya eklediğin karakterin adı metinde vurgulanır.
+              </p>
+            </EmptyState>
           ) : (
             <ul className={cardList}>
               {characters.map((character) => (

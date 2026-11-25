@@ -209,6 +209,13 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
       sessizce yutulmuyor.
 - [x] Anlık geri bildirim: beğeni ve favori artık optimistic update ile
       tıklandığı an değişiyor, sunucu cevabını beklemiyor.
+- [x] Boş durumlar (`components/EmptyState.tsx`): giriş gereken sayfalar,
+      bulunamayan yazı/bölüm/yazar, yetkisiz düzenleme, ilk yazı ve boş
+      karakter/mekan listeleri artık tek satır gri yazı değil; ortalanmış bir
+      kart, küçük bir hikâye-dalı çizimi, açıklama ve bir sonraki adım. Giriş
+      sonrası kullanıcı geldiği sayfaya döner (`?next=`, `lib/safeNext.ts` ile
+      yalnızca site içi adresler). Bozuk bir bağlantı `app/error.tsx` ile
+      "bulunamadı" kartına düşer, sayfa çökmez; `app/not-found.tsx` 404 için
 - [x] Mobil uyum: header ve aksiyon satırları artık `flex-wrap`, dar ekranda
       taşmıyor.
 - [x] Akış: yazma/düzenleme sayfalarına geri dönüş linki eklendi; giriş

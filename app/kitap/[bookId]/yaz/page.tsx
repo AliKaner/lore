@@ -9,6 +9,7 @@ import ChapterForm from "@/components/ChapterForm";
 import BookTitleEditor from "@/components/BookTitleEditor";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
+import NotFoundState from "@/components/NotFoundState";
 import { buttonLink } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
 
@@ -32,11 +33,9 @@ export default function NewRootChapterPage({
           <Loading />
         </div>
       ) : me === null ? (
-        <div className="mt-4">
-          <SignInPrompt message="Yazmaya başlamak için giriş yapman gerekiyor." />
-        </div>
+        <SignInPrompt title="Yazmaya başlamak için giriş yap" />
       ) : book === null ? (
-        <p className="text-muted text-sm mt-4">Kitap bulunamadı.</p>
+        <NotFoundState />
       ) : (
         <>
           <div className="mt-4">

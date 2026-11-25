@@ -10,6 +10,7 @@ import { useCommunityOpen } from "@/lib/community";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
+import EmptyState from "@/components/EmptyState";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import {
   buttonPrimary,
@@ -74,7 +75,7 @@ export default function PlacesPage() {
       {me === undefined ? (
         <Loading />
       ) : me === null ? (
-        <SignInPrompt message="Mekan oluşturmak için giriş yapman gerekiyor." />
+        <SignInPrompt title="Mekan oluşturmak için giriş yap" />
       ) : (
         <>
           <form onSubmit={handleCreate} className="flex flex-col gap-3 mb-10">
@@ -99,7 +100,12 @@ export default function PlacesPage() {
           {places === undefined ? (
             <Loading />
           ) : places.length === 0 ? (
-            <p className="text-muted text-sm">Henüz mekan oluşturmadın.</p>
+            <EmptyState compact art="blank" title="Henüz bir mekanın yok">
+              <p>
+                Yukarıdan oluştur ya da yazarken bir yer adını seçip “+ Mekan”a
+                bas. Bir yazıya eklediğin mekanın adı metinde vurgulanır.
+              </p>
+            </EmptyState>
           ) : (
             <ul className={cardList}>
               {places.map((place) => (

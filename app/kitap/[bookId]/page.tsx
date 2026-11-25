@@ -15,6 +15,7 @@ import ImageUploader from "@/components/ImageUploader";
 import ReportButton from "@/components/ReportButton";
 import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
+import NotFoundState from "@/components/NotFoundState";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonPrimary } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
@@ -43,7 +44,11 @@ export default function BookPage({
     );
   }
   if (book === null) {
-    return <main className="mx-auto max-w-3xl px-4 py-10">Bulunamadı.</main>;
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-10">
+        <NotFoundState />
+      </main>
+    );
   }
 
   async function handleCoverUpload(storageId: Id<"_storage">) {

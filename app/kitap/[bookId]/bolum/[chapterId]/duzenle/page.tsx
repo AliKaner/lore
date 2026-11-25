@@ -9,7 +9,9 @@ import ChapterForm from "@/components/ChapterForm";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
-import { buttonLink } from "@/lib/ui";
+import EmptyState from "@/components/EmptyState";
+import NotFoundState from "@/components/NotFoundState";
+import { buttonLink, buttonPrimary } from "@/lib/ui";
 
 export default function EditChapterPage({
   params,
@@ -42,20 +44,38 @@ export default function EditChapterPage({
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
         {backLink}
-        <div className="mt-4">
-          <SignInPrompt message="Bu bölümü düzenlemek için giriş yapman gerekiyor." />
-        </div>
+        <SignInPrompt title="Bu bölümü düzenlemek için giriş yap" />
       </main>
     );
   }
 
-  if (chapter === null || chapter.authorId !== me._id) {
+  if (chapter === null) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-10">
+        <NotFoundState title="Bu bölüm bulunamadı" />
+      </main>
+    );
+  }
+
+  if (chapter.authorId !== me._id) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
         {backLink}
-        <p className="text-muted text-sm mt-4">
-          Bu bölümü düzenleyemezsin — sadece onu yazan kişi düzenleyebilir.
-        </p>
+        <EmptyState
+          art="locked"
+          eyebrow="Düzenleme"
+          title="Bu bölümü yalnızca yazarı düzenleyebilir"
+          actions={
+            <Link href={`/kitap/${bookId}/bolum/${chapterId}`} className={`${buttonPrimary} px-6`}>
+              Bölümü oku
+            </Link>
+          }
+        >
+          <p>
+            Bir şey eklemek istiyorsan, yazı okurlara açıksa bölümün altındaki
+            düğmeyle kendi dalını yazabilirsin.
+          </p>
+        </EmptyState>
       </main>
     );
   }

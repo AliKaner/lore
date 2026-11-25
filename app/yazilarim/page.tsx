@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import BookCover from "@/components/BookCover";
 import Loading from "@/components/Loading";
 import SignInPrompt from "@/components/SignInPrompt";
+import EmptyState from "@/components/EmptyState";
 import { buttonPrimary, cardHover, cardList } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
 
@@ -30,17 +31,25 @@ export default function MyWritingsPage() {
       {me === undefined ? (
         <Loading />
       ) : me === null ? (
-        <SignInPrompt message="Yazılarını görmek için giriş yapman gerekiyor." />
+        <SignInPrompt title="Yazılarını görmek için giriş yap" />
       ) : books === undefined ? (
         <Loading label="Yazıların yükleniyor…" />
       ) : books.length === 0 ? (
-        <p className="text-muted">
-          Henüz bir yazın yok.{" "}
-          <Link href="/yaz" className="underline">
-            İlkini yaz
-          </Link>
-          .
-        </p>
+        <EmptyState
+          art="blank"
+          eyebrow="Masan hazır"
+          title="İlk yazın burada başlayacak"
+          actions={
+            <Link href="/yaz" className={`${buttonPrimary} px-6`}>
+              Bir tür seç, yazmaya başla
+            </Link>
+          }
+        >
+          <p>
+            Roman, öykü, şiir, köşe yazısı, röportaj ya da günlük: her tür kendi
+            şablonuyla açılır. Yazdıkça taslağın kendiliğinden kaydedilir.
+          </p>
+        </EmptyState>
       ) : (
         <ul className={cardList}>
           {books.map((book) => (

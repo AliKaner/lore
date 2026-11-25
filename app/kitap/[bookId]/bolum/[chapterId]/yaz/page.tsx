@@ -9,7 +9,9 @@ import { isOpenToBranches } from "@/convex/writingKinds";
 import ChapterForm from "@/components/ChapterForm";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
-import { buttonLink } from "@/lib/ui";
+import EmptyState from "@/components/EmptyState";
+import NotFoundState from "@/components/NotFoundState";
+import { buttonLink, buttonPrimary } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
 
 export default function NewBranchChapterPage({
@@ -34,11 +36,9 @@ export default function NewBranchChapterPage({
           <Loading />
         </div>
       ) : me === null ? (
-        <div className="mt-4">
-          <SignInPrompt message="Yazmaya başlamak için giriş yapman gerekiyor." />
-        </div>
+        <SignInPrompt title="Yazmaya başlamak için giriş yap" />
       ) : book === null || cfg === null ? (
-        <p className="text-muted text-sm mt-4">Bulunamadı.</p>
+        <NotFoundState />
       ) : isOwner ? (
         <>
           <h1 className="text-2xl font-semibold mt-2 mb-6">{cfg.continueCta}</h1>
@@ -51,9 +51,21 @@ export default function NewBranchChapterPage({
           <ChapterForm bookId={bookId} parentChapterId={chapterId} kind={book.kind} />
         </>
       ) : (
-        <p className="text-muted text-sm mt-4">
-          {cfg.label} türündeki yazılara yalnızca yazarı ekleme yapabilir.
-        </p>
+        <EmptyState
+          art="locked"
+          eyebrow={cfg.label}
+          title="Bu yazıya yalnızca yazarı ekleme yapabilir"
+          actions={
+            <Link href={`/kitap/${bookId}/bolum/${chapterId}`} className={`${buttonPrimary} px-6`}>
+              Okumaya dön
+            </Link>
+          }
+        >
+          <p>
+            Kitap, öykü ve şiirde okurlar kendi dallarını yazabilir; {cfg.label.toLocaleLowerCase("tr-TR")}{" "}
+            gibi türlerde metin yalnızca yazarına aittir.
+          </p>
+        </EmptyState>
       )}
     </main>
   );

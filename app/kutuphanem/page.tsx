@@ -19,7 +19,7 @@ export default function LibraryPage() {
       {me === undefined ? (
         <Loading />
       ) : me === null ? (
-        <SignInPrompt message="Kütüphaneni görmek için giriş yapman gerekiyor." />
+        <SignInPrompt title="Kütüphaneni görmek için giriş yap" />
       ) : (
         <>
           <div className="mb-6 mt-1">

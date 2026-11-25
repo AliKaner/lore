@@ -7,6 +7,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import ImageUploader from "@/components/ImageUploader";
 import BookCover from "@/components/BookCover";
 import Loading from "@/components/Loading";
+import NotFoundState from "@/components/NotFoundState";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { levelInfo } from "@/lib/levels";
 import { useCommunityOpen } from "@/lib/community";
@@ -42,7 +43,11 @@ export default function ProfilePage({
     );
   }
   if (profile === null) {
-    return <main className="mx-auto max-w-2xl px-4 py-10">Kullanıcı bulunamadı.</main>;
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-10">
+        <NotFoundState title="Bu yazar bulunamadı" />
+      </main>
+    );
   }
 
   async function handleSaveBio(event: React.FormEvent) {

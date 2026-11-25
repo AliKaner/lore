@@ -1,9 +1,11 @@
 import { convexAuthNextjsProxy, nextjsProxyRedirect } from "@/lib/convexAuth";
+import { safeNext } from "@/lib/safeNext";
 
 export default convexAuthNextjsProxy(async (request, { isAuthenticated }) => {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
   if ((pathname === "/" || pathname === "/giris") && (await isAuthenticated())) {
-    return nextjsProxyRedirect(request, "/yazilarim");
+    const target = pathname === "/giris" ? safeNext(searchParams.get("next")) : "/yazilarim";
+    return nextjsProxyRedirect(request, target);
   }
   return undefined;
 });

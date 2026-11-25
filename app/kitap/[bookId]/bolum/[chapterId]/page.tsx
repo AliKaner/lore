@@ -18,6 +18,7 @@ import CommentSection from "@/components/CommentSection";
 import ReportButton from "@/components/ReportButton";
 import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
+import NotFoundState from "@/components/NotFoundState";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonLink, pillInactive } from "@/lib/ui";
 import { isOpenToBranches } from "@/convex/writingKinds";
@@ -71,7 +72,11 @@ export default function ChapterPage({
     );
   }
   if (chapter === null) {
-    return <main className="mx-auto max-w-2xl px-4 py-10">Bölüm bulunamadı.</main>;
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-10">
+        <NotFoundState title="Bu bölüm bulunamadı" />
+      </main>
+    );
   }
 
   const canBranch = me !== null && me !== undefined;

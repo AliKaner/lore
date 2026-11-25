@@ -42,7 +42,7 @@ export default function ModerationPage() {
       {me === undefined ? (
         <Loading />
       ) : me === null ? (
-        <SignInPrompt message="Bildirimlerini görmek için giriş yapman gerekiyor." />
+        <SignInPrompt title="Bildirimlerini görmek için giriş yap" />
       ) : reports === undefined ? (
         <Loading />
       ) : reports.length === 0 ? (

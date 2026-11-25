@@ -17,6 +17,7 @@ import Loading from "@/components/Loading";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonPrimary } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
+import { useCommunityOpen } from "@/lib/community";
 
 export default function BookPage({
   params,
@@ -31,6 +32,7 @@ export default function BookPage({
   const me = useQuery(api.users.me);
   const setBookCover = useMutation(api.files.setBookCover);
   const showToast = useToast();
+  const communityOpen = useCommunityOpen();
 
   if (book === undefined) {
     return (
@@ -91,10 +93,14 @@ export default function BookPage({
       )}
 
       <div className="flex flex-wrap items-center gap-2 mb-6">
-        <LikeButton targetType="book" targetId={bookId} likeCount={book.likeCount} />
+        {communityOpen && (
+          <LikeButton targetType="book" targetId={bookId} likeCount={book.likeCount} />
+        )}
         <ShareButton targetType="book" targetId={bookId} shareCount={book.shareCount} />
-        <FavoriteButton targetType="book" targetId={bookId} />
-        {!isOwner && me && <ReportButton targetType="book" targetId={bookId} />}
+        {communityOpen && <FavoriteButton targetType="book" targetId={bookId} />}
+        {communityOpen && !isOwner && me && (
+          <ReportButton targetType="book" targetId={bookId} />
+        )}
       </div>
 
       {book.rootChapterId ? (

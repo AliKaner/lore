@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import ImageUploader from "@/components/ImageUploader";
 import FavoriteButton from "@/components/FavoriteButton";
+import { useCommunityOpen } from "@/lib/community";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
@@ -19,6 +20,7 @@ import {
 
 export default function CharactersPage() {
   const me = useQuery(api.users.me);
+  const communityOpen = useCommunityOpen();
   const characters = useQuery(api.characters.listMine, me ? {} : "skip");
   const myBooks = useQuery(api.books.listMine, me ? {} : "skip");
   const createCharacter = useMutation(api.characters.create);
@@ -110,7 +112,9 @@ export default function CharactersPage() {
                         </p>
                       )}
                     </div>
-                    <FavoriteButton targetType="character" targetId={character._id} />
+                    {communityOpen && (
+                      <FavoriteButton targetType="character" targetId={character._id} />
+                    )}
                   </div>
 
                   <div className="mt-3">

@@ -46,10 +46,7 @@ export default function LibraryPage() {
           ) : library.length === 0 ? (
             <p className="text-muted text-sm">
               Henüz bir bölüm okumadın.{" "}
-              <Link href="/kesfet" className="underline">
-                Keşfet
-              </Link>{" "}
-              sayfasından başla.
+              Sana paylaşılan bir bağlantıdan okumaya başla.
             </p>
           ) : (
             <ul className={cardList}>

@@ -38,6 +38,22 @@ export const get = query({
   },
 });
 
+export const COMMUNITY_BOOK_THRESHOLD = 100;
+
+// Browsing and social features stay hidden until the platform has this many
+// books; until then a book is reached only through a shared link.
+export const communityStatus = query({
+  args: {},
+  handler: async (ctx) => {
+    const books = await ctx.db.query("books").take(COMMUNITY_BOOK_THRESHOLD);
+    return {
+      open: books.length >= COMMUNITY_BOOK_THRESHOLD,
+      bookCount: books.length,
+      threshold: COMMUNITY_BOOK_THRESHOLD,
+    };
+  },
+});
+
 export const listPublic = query({
   args: {
     paginationOpts: paginationOptsValidator,

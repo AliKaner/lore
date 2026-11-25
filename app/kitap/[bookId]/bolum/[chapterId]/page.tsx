@@ -15,6 +15,7 @@ import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonLink, pillInactive } from "@/lib/ui";
 import { isOpenToBranches } from "@/convex/writingKinds";
 import { kindConfig } from "@/lib/writingKinds";
+import { useCommunityOpen } from "@/lib/community";
 
 export default function ChapterPage({
   params,
@@ -32,6 +33,7 @@ export default function ChapterPage({
   const markRead = useMutation(api.reading.markChapterRead);
   const markCanonical = useMutation(api.chapters.markCanonical);
   const showToast = useToast();
+  const communityOpen = useCommunityOpen();
 
   useEffect(() => {
     if (chapter?.status === "published" && me) {
@@ -56,7 +58,7 @@ export default function ChapterPage({
   const cfg = kindConfig(book ?? {});
   const writeNextLabel = isBookOwner
     ? cfg.continueCta
-    : book?.visibility === "public" && book && isOpenToBranches(book)
+    : communityOpen && book?.visibility === "public" && book && isOpenToBranches(book)
       ? cfg.branchCta
       : undefined;
 
@@ -88,11 +90,13 @@ export default function ChapterPage({
       <ChapterReader content={chapter.content} />
 
       <div className="flex flex-wrap items-center gap-2 mt-6">
-        <LikeButton
-          targetType="chapter"
-          targetId={chapterId}
-          likeCount={chapter.likeCount}
-        />
+        {communityOpen && (
+          <LikeButton
+            targetType="chapter"
+            targetId={chapterId}
+            likeCount={chapter.likeCount}
+          />
+        )}
         <ShareButton
           targetType="chapter"
           targetId={chapterId}
@@ -106,7 +110,7 @@ export default function ChapterPage({
             ✎ {writeNextLabel}
           </Link>
         )}
-        {canBranch && !isAuthor && (
+        {communityOpen && canBranch && !isAuthor && (
           <ReportButton targetType="chapter" targetId={chapterId} />
         )}
       </div>
@@ -146,7 +150,7 @@ export default function ChapterPage({
         )}
       </div>
 
-      <CommentSection targetType="chapter" targetId={chapterId} />
+      {communityOpen && <CommentSection targetType="chapter" targetId={chapterId} />}
     </main>
   );
 }

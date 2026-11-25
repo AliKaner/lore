@@ -24,7 +24,7 @@ export default function SignInPage() {
       );
       return;
     }
-    router.push("/kesfet");
+    router.push("/yazilarim");
   }
 
   return (

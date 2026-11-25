@@ -116,6 +116,33 @@ describe("writing kinds", () => {
     expect(nazireId).toBeDefined();
   });
 
+  test("the community opens once there are 100 books", async () => {
+    const { t, authApi } = setupTest(modules);
+    const { userId } = await signInAsNewUser(t, authApi);
+    const insertBooks = (count: number) =>
+      t.run(async (ctx) => {
+        for (let i = 0; i < count; i++) {
+          await ctx.db.insert("books", {
+            title: `Kitap ${i}`,
+            ownerId: userId,
+            kind: "book",
+            visibility: "private",
+            likeCount: 0,
+            shareCount: 0,
+            createdAt: i,
+          });
+        }
+      });
+
+    await insertBooks(99);
+    const before = await t.query(api.books.communityStatus, {});
+    expect(before).toMatchObject({ open: false, bookCount: 99 });
+
+    await insertBooks(1);
+    const after = await t.query(api.books.communityStatus, {});
+    expect(after).toMatchObject({ open: true, bookCount: 100 });
+  });
+
   test("the backfill marks kindless legacy books as books", async () => {
     const { t, authApi } = setupTest(modules);
     const { userId } = await signInAsNewUser(t, authApi);

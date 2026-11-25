@@ -92,6 +92,14 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
 
 ### Sosyal Yapı
 
+> **Topluluk eşiği:** Platformda toplam 100 yazı olana kadar sosyal taraf
+> gizli (`books.communityStatus`, `lib/community.ts`). O zamana kadar
+> Keşfet, Kütüphanem, Moderasyon, beğeni, yorum, favori, bildirme, başkalarının
+> dal açması ve okur seviyeleri görünmüyor; bir yazı yalnızca paylaşılan
+> bağlantıyla (`/kitap/<id>`) okunuyor. Giriş yapan kullanıcı "Yazılarım"
+> (`/yazilarim`) sayfasına düşüyor. 100'e ulaşınca hepsi kendiliğinden açılıyor.
+> Gizleme yalnızca arayüzde; backend fonksiyonları aynı.
+
 - [x] Public kitaplar — herkes bölümleri okuyabiliyor
 - [x] Fan-fiction / dallanma — herhangi bir kullanıcı, public bir kitabın
       yayınlanmış bir bölümünden kendi dalını açıkça yazabiliyor (kitap

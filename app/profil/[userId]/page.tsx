@@ -9,6 +9,7 @@ import BookCover from "@/components/BookCover";
 import Loading from "@/components/Loading";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { levelInfo } from "@/lib/levels";
+import { useCommunityOpen } from "@/lib/community";
 import { buttonPrimary, inputBase } from "@/lib/ui";
 
 export default function ProfilePage({
@@ -27,6 +28,7 @@ export default function ProfilePage({
     me?._id === userId ? { targetType: "book" } : "skip",
   );
   const showToast = useToast();
+  const communityOpen = useCommunityOpen();
 
   const isOwnProfile = me?._id === userId;
   const [bio, setBio] = useState<string | null>(null);
@@ -94,15 +96,21 @@ export default function ProfilePage({
         <h1 className="text-2xl font-semibold mb-1">
           {profile.username ?? "Yazar"}
         </h1>
-        <p className="text-muted mb-1">
-          {badge} {title} · Seviye {profile.level}
-        </p>
-        <div className="w-48 h-1.5 bg-border rounded-full mb-4">
-          <div
-            className="h-1.5 bg-foreground rounded-full"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
+        {communityOpen ? (
+          <>
+            <p className="text-muted mb-1">
+              {badge} {title} · Seviye {profile.level}
+            </p>
+            <div className="w-48 h-1.5 bg-border rounded-full mb-4">
+              <div
+                className="h-1.5 bg-foreground rounded-full"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="mb-4" />
+        )}
 
         {isOwnProfile ? (
           <form onSubmit={handleSaveBio} className="flex flex-col gap-2 mb-6">
@@ -136,7 +144,7 @@ export default function ProfilePage({
           </div>
         )}
 
-        {isOwnProfile && myFavoriteBooks && myFavoriteBooks.length > 0 && (
+        {communityOpen && isOwnProfile && myFavoriteBooks && myFavoriteBooks.length > 0 && (
           <div>
             <h2 className="font-medium mb-2">Favori kitaplarım</h2>
             <p className="text-muted text-sm">

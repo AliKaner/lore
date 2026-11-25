@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Unauthenticated, usePaginatedQuery } from "convex/react";
+import { Unauthenticated, usePaginatedQuery, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import type { WritingKind } from "@/convex/writingKinds";
@@ -74,11 +74,38 @@ function BookCard({ book }: { book: Doc<"books"> }) {
 
 export default function Home() {
   const [kind, setKind] = useState<WritingKind | undefined>(undefined);
+  const community = useQuery(api.books.communityStatus);
   const { results, status, loadMore } = usePaginatedQuery(
     api.books.listPublic,
-    kind ? { kind } : {},
+    community?.open ? (kind ? { kind } : {}) : "skip",
     { initialNumItems: 20 },
   );
+
+  if (community === undefined) {
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-10">
+        <Loading />
+      </main>
+    );
+  }
+  if (!community.open) {
+    return (
+      <main className="mx-auto max-w-xl px-4 py-16">
+        <h1 className="text-3xl font-semibold">Keşfet yakında açılıyor</h1>
+        <p className="mt-3 text-muted">
+          Keşfet, beğeniler, yorumlar ve okur dalları Booktion&apos;da{" "}
+          {community.threshold} yazı olduğunda açılacak. O zamana kadar bir
+          yazı yalnızca yazarının paylaştığı bağlantıyla okunur.
+        </p>
+        <p className="mt-2 text-sm text-muted">
+          Şu an {community.bookCount}/{community.threshold}.
+        </p>
+        <Link href="/yaz" className="mt-6 inline-block underline">
+          Sen de bir yazı başlat
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">

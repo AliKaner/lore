@@ -253,6 +253,102 @@ h1, h2, h3 {
   cursor: help;
 }
 
+/* The floating selection toolbar: it rises out of the text, its buttons
+   follow one by one, and each step (note, name, done) slides in. */
+@keyframes menu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.94);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@keyframes menu-item {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes menu-panel {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+    clip-path: inset(0 0 22% 0 round 12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 0 0 round 12px);
+  }
+}
+@keyframes menu-check {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.menu-pop {
+  animation: menu-pop 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.menu-item {
+  animation: menu-item 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.menu-panel {
+  animation: menu-panel 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.menu-check {
+  stroke-dasharray: 1;
+  animation: menu-check 0.4s 0.1s ease-out both;
+}
+
+/* The writing sheet: a quiet prompt in the empty page, a caramel caret and a
+   soft selection colour. */
+.writing-surface .ProseMirror {
+  caret-color: var(--accent);
+}
+.writing-surface .ProseMirror ::selection {
+  background-color: color-mix(in srgb, var(--sapphire) 24%, transparent);
+}
+.writing-surface .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--muted);
+  opacity: 0.55;
+  font-style: italic;
+}
+
+/* The text a floating-toolbar form is about, kept visible while focus is in
+   the form. */
+.held-selection {
+  background-color: color-mix(in srgb, var(--sapphire) 22%, transparent);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sapphire) 30%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-pop,
+  .menu-item,
+  .menu-panel {
+    animation-duration: 0.01ms !important;
+  }
+  .menu-check {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
 /* Bionic reading: the start of each word in bold guides the eye. */
 .bionic {
   font-weight: 700;

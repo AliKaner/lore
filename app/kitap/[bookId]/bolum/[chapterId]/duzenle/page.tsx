@@ -81,28 +81,23 @@ export default function EditChapterPage({
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      {backLink}
-      <h1 className="text-2xl font-semibold mt-2 mb-6">
-        {chapter.status === "draft" ? "Taslak" : "Düzenle"}
-      </h1>
-      <ChapterForm
-        key={chapter._id}
-        bookId={bookId}
-        existingChapter={chapter}
-        kind={book?.kind}
-      />
-      <div className="mt-10 border-t border-border pt-4">
+    <ChapterForm
+      key={chapter._id}
+      bookId={bookId}
+      existingChapter={chapter}
+      kind={book?.kind}
+      backHref={`/kitap/${bookId}/bolum/${chapterId}`}
+      backLabel="Bölüme dön"
+      eyebrow={chapter.status === "draft" ? "Taslak" : "Yayında · düzenleniyor"}
+      footer={
         <DeleteButton
           target={{ kind: "chapter", id: chapter._id }}
           label="Bu bölümü sil"
           afterDelete={({ parentChapterId }) =>
-            parentChapterId
-              ? `/kitap/${bookId}/bolum/${parentChapterId}`
-              : `/kitap/${bookId}`
+            parentChapterId ? `/kitap/${bookId}/bolum/${parentChapterId}` : `/kitap/${bookId}`
           }
         />
-      </div>
-    </main>
+      }
+    />
   );
 }

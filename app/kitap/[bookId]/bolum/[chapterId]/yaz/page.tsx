@@ -25,6 +25,21 @@ export default function NewBranchChapterPage({
 
   const isOwner = !!me && !!book && me._id === book.ownerId;
   const cfg = book ? kindConfig(book) : null;
+  const backHref = `/kitap/${bookId}/bolum/${chapterId}`;
+
+  if (me && book && cfg && (isOwner || (isOpenToBranches(book) && cfg.branchCta))) {
+    return (
+      <ChapterForm
+        bookId={bookId}
+        parentChapterId={chapterId}
+        kind={book.kind}
+        backHref={backHref}
+        backLabel="Bölüme dön"
+        eyebrow={isOwner ? cfg.continueCta : cfg.branchCta}
+        intro={isOwner ? undefined : cfg.branchIntro}
+      />
+    );
+  }
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
@@ -39,17 +54,6 @@ export default function NewBranchChapterPage({
         <SignInPrompt title="Yazmaya başlamak için giriş yap" />
       ) : book === null || cfg === null ? (
         <NotFoundState />
-      ) : isOwner ? (
-        <>
-          <h1 className="text-2xl font-semibold mt-2 mb-6">{cfg.continueCta}</h1>
-          <ChapterForm bookId={bookId} parentChapterId={chapterId} kind={book.kind} />
-        </>
-      ) : isOpenToBranches(book) && cfg.branchCta ? (
-        <>
-          <h1 className="text-2xl font-semibold mt-2 mb-2">{cfg.branchCta}</h1>
-          <p className="text-muted text-sm mb-6">{cfg.branchIntro}</p>
-          <ChapterForm bookId={bookId} parentChapterId={chapterId} kind={book.kind} />
-        </>
       ) : (
         <EmptyState
           art="locked"

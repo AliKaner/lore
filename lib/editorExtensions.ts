@@ -130,9 +130,12 @@ function buildDecorations(doc: PMNode, names: NameEntry[], bionic: boolean) {
           const end = index + needle.text.length;
           const before = haystack[index - 1];
           const after = haystack[end];
+          // Turkish adds suffixes straight onto common nouns ("iskelenin",
+          // "Limanlar"), so a name of four letters or more may run on into
+          // its suffix; shorter ones ("Ada") must stand alone.
           const bounded =
             (before === undefined || !WORD_CHAR.test(before)) &&
-            (after === undefined || !WORD_CHAR.test(after));
+            (needle.text.length >= 4 || after === undefined || !WORD_CHAR.test(after));
           const overlaps = taken.some(([a, b]) => index < b && end > a);
           if (bounded && !overlaps) {
             taken.push([index, end]);
@@ -215,6 +218,108 @@ export const ReadingAids = Extension.create({
     ];
   },
 });
+
+/* ---------- Held selection ---------- */
+
+// While the writer types a note or a name in the floating toolbar, focus
+// leaves the editor and the browser stops painting the selection. This keeps
+// the chosen text visibly marked until the toolbar closes.
+export type HeldRange = { from: number; to: number } | null;
+
+export const heldSelectionKey = new PluginKey<HeldRange>("heldSelection");
+
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    heldSelection: {
+      holdSelection: (range: HeldRange) => ReturnType;
+    };
+  }
+}
+
+export const HeldSelection = Extension.create({
+  name: "heldSelection",
+  addCommands() {
+    return {
+      holdSelection:
+        (range) =>
+        ({ tr, dispatch }) => {
+          if (dispatch) tr.setMeta(heldSelectionKey, { range });
+          return true;
+        },
+    };
+  },
+  addProseMirrorPlugins() {
+    return [
+      new Plugin<HeldRange>({
+        key: heldSelectionKey,
+        state: {
+          init: () => null,
+          apply: (tr, previous) => {
+            const meta = tr.getMeta(heldSelectionKey) as { range: HeldRange } | undefined;
+            if (meta) return meta.range;
+            if (!previous || !tr.docChanged) return previous;
+            return {
+              from: tr.mapping.map(previous.from),
+              to: tr.mapping.map(previous.to),
+            };
+          },
+        },
+        props: {
+          decorations: (state) => {
+            const range = heldSelectionKey.getState(state);
+            if (!range || range.from >= range.to) return DecorationSet.empty;
+            return DecorationSet.create(state.doc, [
+              Decoration.inline(range.from, range.to, { class: "held-selection" }),
+            ]);
+          },
+        },
+      }),
+    ];
+  },
+});
+
+// The word around a document position, for right-clicking without a
+// selection.
+export function wordRangeAt(doc: PMNode, pos: number): { from: number; to: number } | null {
+  const $pos = doc.resolve(pos);
+  const parent = $pos.parent;
+  if (!parent.isTextblock) return null;
+  const text = parent.textBetween(0, parent.content.size, "\n", "￼");
+  let start = $pos.parentOffset;
+  // Clicked on a space or comma: take the nearest word, left side first.
+  const isWord = (i: number) => i >= 0 && i < text.length && WORD_CHAR.test(text[i]);
+  if (!isWord(start) && !isWord(start - 1)) {
+    if (isWord(start - 2)) start -= 2;
+    else if (isWord(start + 1)) start += 1;
+  }
+  let end = start;
+  while (start > 0 && WORD_CHAR.test(text[start - 1])) start--;
+  while (end < text.length && WORD_CHAR.test(text[end])) end++;
+  if (start === end) return null;
+  const base = $pos.start();
+  return { from: base + start, to: base + end };
+}
+
+// The sentence around a range: from the previous ., !, ? or … (or the start
+// of the paragraph) to the next one.
+export function sentenceRangeAt(
+  doc: PMNode,
+  from: number,
+  to: number,
+): { from: number; to: number } | null {
+  const $from = doc.resolve(from);
+  const parent = $from.parent;
+  if (!parent.isTextblock || !$from.sameParent(doc.resolve(to))) return null;
+  const text = parent.textBetween(0, parent.content.size, "\n", "￼");
+  const base = $from.start();
+  let start = from - base;
+  let end = to - base;
+  while (start > 0 && !/[.!?…\n]/u.test(text[start - 1])) start--;
+  while (start < text.length && /\s/u.test(text[start])) start++;
+  while (end < text.length && !/[.!?…\n]/u.test(text[end])) end++;
+  while (end < text.length && /[.!?…"'»”’)]/u.test(text[end])) end++;
+  return { from: base + start, to: base + end };
+}
 
 /* ---------- Plain text for the speed reader ---------- */
 

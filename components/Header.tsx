@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
-import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
+import { Authenticated, AuthLoading, Unauthenticated, useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "@/convex/_generated/api";
 import { levelInfo } from "@/lib/levels";
 import { useCommunityOpen } from "@/lib/community";
 import Wordmark from "@/components/Wordmark";
+
+const WRITING_SCREEN = /^\/kitap\/[^/]+(\/bolum\/[^/]+)?\/(yaz|duzenle)$/;
 
 function NavLinks() {
   const communityOpen = useCommunityOpen();
@@ -33,6 +35,7 @@ function UserBadge() {
   const me = useQuery(api.users.me);
   const communityOpen = useCommunityOpen();
   const { signOut } = useAuthActions();
+  const router = useRouter();
   if (!me) return null;
   const { badge, title } = levelInfo(me.level, me.xp);
   return (
@@ -47,7 +50,7 @@ function UserBadge() {
           : (me.username ?? "Profilim")}
       </Link>
       <button
-        onClick={() => void signOut()}
+        onClick={() => void signOut().then(() => router.push("/"))}
         className="text-muted hover:text-foreground"
       >
         Çıkış
@@ -58,23 +61,31 @@ function UserBadge() {
 
 export default function Header() {
   const pathname = usePathname();
-  if (pathname === "/") return null;
+  const { isAuthenticated } = useConvexAuth();
+  // The landing and sign-in pages carry their own wordmark, and the writing
+  // screen has its own slim bar so nothing else competes with the text.
+  if (pathname === "/" || pathname === "/giris" || WRITING_SCREEN.test(pathname)) return null;
   return (
     <header className="flex flex-col gap-2 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-        <Link href="/yazilarim" className="text-2xl">
+        <Link href={isAuthenticated ? "/yazilarim" : "/"} className="text-2xl">
           <Wordmark />
         </Link>
-        <NavLinks />
+        {/* The desk's pages are for signed-in writers only. */}
+        <Authenticated>
+          <NavLinks />
+        </Authenticated>
       </div>
       <div className="text-sm">
         <AuthLoading>
           <span className="text-muted">…</span>
         </AuthLoading>
         <Unauthenticated>
-          <Link href="/giris" className="font-medium">
-            Giriş yap
-          </Link>
+          {pathname !== "/giris" && (
+            <Link href="/giris" className="font-medium">
+              Giriş yap
+            </Link>
+          )}
         </Unauthenticated>
         <Authenticated>
           <UserBadge />

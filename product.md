@@ -59,7 +59,22 @@ Dört alanda üçer seçenek karşılaştırıldı (bkz. yayınlanmış mockup);
       Ctrl/Cmd+S ile kaydetme. Yayındaki bir metin otomatik değişmez —
       "Güncelle"ye basılana kadar cihazda bekler.
 - [x] Kelime sayacı editörün altında, kayıt durumunun yanında
-- [x] Editör araç çubuğu: kalın, italik, ara başlık, alıntı, liste
+- [x] **Yazma ekranı** (Medium / Wattpad / Apple Pages örneğiyle,
+      `components/ChapterForm.tsx`): site menüsü yok, kâğıt renginde geniş tek
+      sütun, büyük Garamond başlık (Enter metne geçer), kutusuz metin alanı,
+      "Yazmaya başla…" yer tutucusu. Üstte ince bir çubuk: geri, tür · yazı
+      adı, kayıt durumu (nokta + kısa yazı, ayrıntısı üzerine gelince), kelime
+      sayısı, Notlar çekmecesi, yazı ayarları (ad, açıklama, gizli/açık) ve
+      Yayınla/Güncelle. Yazarken çubuk solar, fare oynayınca geri gelir.
+      Markdown kısayolları: `##` ara başlık, `>` alıntı, `-` liste
+- [x] **Seçim araç çubuğu** (`components/SelectionMenu.tsx`): metni seçince
+      üstünde, sağ tıklayınca imlecin yanında açılan animasyonlu lacivert
+      çubuk — kalın, italik, ara başlık, alıntı, Not, Karakter, Mekan; sağ
+      tıklanan kelime kendiliğinden seçilir, "Cümle" seçimi cümleye genişletir.
+      Not ve ad formları çubuğun içinde açılır (Enter kaydeder, Esc geri),
+      bu sırada seçili metin vurgulu kalır; kayıtlı bir adda "Selin Aras ·
+      karakter" etiketi görünür. Shift+sağ tık tarayıcının kendi menüsünü açar.
+      4+ harfli adlar Türkçe ekleriyle de yakalanır ("İskele" → "iskelenin")
 - [x] **Yazar notları** (`authorNote` işareti, `lib/editorExtensions.ts`): metinde
       bir yeri seçip not eklenir; editörde fosforlu kalem gibi görünür, altta
       "Bu bölümdeki notların" listesi (tıklayınca o yere gider). Notlar yalnızca
@@ -209,6 +224,12 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
       sessizce yutulmuyor.
 - [x] Anlık geri bildirim: beğeni ve favori artık optimistic update ile
       tıklandığı an değişiyor, sunucu cevabını beklemiyor.
+- [x] Giriş duvarı (`proxy.ts`): girişsiz ziyaretçi yalnızca landing (`/`),
+      giriş (`/giris`), Keşfet ve paylaşılan okuma bağlantılarını
+      (`/kitap/<id>`, `/kitap/<id>/bolum/<id>`) açabilir; geri kalan her sayfa
+      sunucuda `/giris?next=…`'e yönlenir. Oturum kontrolü Convex'e sorulur
+      (`api.auth.isAuthenticated`). Girişsizken üst menüde yalnızca logo (→ `/`)
+      ve "Giriş yap" görünür; çıkış yapınca landing'e dönülür
 - [x] Boş durumlar (`components/EmptyState.tsx`): giriş gereken sayfalar,
       bulunamayan yazı/bölüm/yazar, yetkisiz düzenleme, ilk yazı ve boş
       karakter/mekan listeleri artık tek satır gri yazı değil; ortalanmış bir

@@ -4,6 +4,7 @@ import { internal } from "./_generated/api";
 import { requireUserId } from "./users";
 import { isOpenToBranches } from "./writingKinds";
 import { canViewChapter, optionalUserId, viewableBook } from "./access";
+import { snapshotBeforeChange } from "./versions";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 
@@ -170,6 +171,7 @@ export const update = mutation({
       throw new Error("Bu bölümü düzenleyemezsin.");
     }
     const { chapterId, ...patch } = args;
+    await snapshotBeforeChange(ctx, chapter, patch);
     await ctx.db.patch(chapterId, patch);
     return null;
   },

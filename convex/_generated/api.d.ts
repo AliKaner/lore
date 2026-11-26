@@ -14,6 +14,7 @@ import type * as books from "../books.js";
 import type * as chapters from "../chapters.js";
 import type * as characters from "../characters.js";
 import type * as cleanup from "../cleanup.js";
+import type * as exports from "../exports.js";
 import type * as files from "../files.js";
 import type * as migrations from "../migrations.js";
 import type * as places from "../places.js";
@@ -21,6 +22,7 @@ import type * as reading from "../reading.js";
 import type * as reports from "../reports.js";
 import type * as social from "../social.js";
 import type * as users from "../users.js";
+import type * as versions from "../versions.js";
 import type * as writingKinds from "../writingKinds.js";
 
 import type {
@@ -36,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   chapters: typeof chapters;
   characters: typeof characters;
   cleanup: typeof cleanup;
+  exports: typeof exports;
   files: typeof files;
   migrations: typeof migrations;
   places: typeof places;
@@ -43,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   reports: typeof reports;
   social: typeof social;
   users: typeof users;
+  versions: typeof versions;
   writingKinds: typeof writingKinds;
 }>;
 

@@ -184,6 +184,28 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
 
 - [ ] Sosyal medya entegrasyonu / dışarı paylaşım tarafı netleştirilecek
 
+### Güven
+
+- [x] **Hesap kurtarma = ikinci cihaz** (`/hesap`): giriş anahtarlarının
+      listesi, adlandırma, kaldırma (son anahtar kaldırılamaz) ve "Cihaz ya da
+      anahtar ekle" (telefon QR ile eklenir). @convex-dev/auth'un kendi passkey
+      yönetimi kullanılıyor (`convex/auth.ts`). Tek cihazı olan yazara
+      Yazılarım'da "Hesabını güvenceye al" hatırlatması (7 gün ertelenebilir).
+      Kurtarma kodu bilinçli olarak yok: kütüphane, uygulama kodunun kendi
+      başına oturum açmasını yasaklıyor; e-posta ile kurtarma ileride
+      `email-magic-link` yöntemiyle eklenebilir
+- [x] **Sürüm geçmişi** (`convex/versions.ts`, yazma ekranında "Geçmiş"):
+      metin değişmeden önceki hali saklanır — en fazla 10 dakikada bir, her
+      yayında mutlaka; bölüm başına son 50 sürüm. Önizle → "Bu sürüme dön"
+      editörü doldurur, hiçbir şey kaydedilmeden üzerine yazılmaz. Yalnızca
+      yazarı görür; bölüm silinince sürümleri de silinir
+- [x] **Dışa aktarma** (yazı sayfasında "Dışa aktar", yalnızca sahibi):
+      Word (.docx, `docx` paketi), PDF (`/kitap/<id>/yazdir` kitap gibi baskı
+      sayfası → "PDF olarak kaydet"), Markdown; isteğe bağlı dallar dahil. Yazar
+      notları bu dosyalara girmez
+- [x] **Tam yedek** (`/hesap`): bütün yazılar, tüm dallar, taslaklar ve
+      notlar (dipnot olarak) ayrı Markdown dosyaları hâlinde tek ZIP
+
 ## Version 2
 
 Şimdilik kodlanmayacak; v2'de ele alınacak:

@@ -45,6 +45,18 @@ export default defineSchema({
     .index("by_book_and_parent", ["bookId", "parentChapterId"])
     .index("by_author", ["authorId"]),
 
+  // Earlier states of a chapter, so a writer can go back. Written by
+  // chapters.update before it overwrites the text.
+  chapterVersions: defineTable({
+    chapterId: v.id("chapters"),
+    authorId: v.id("users"),
+    title: v.string(),
+    content: v.string(),
+    words: v.number(),
+    reason: v.union(v.literal("edit"), v.literal("publish")),
+    createdAt: v.number(),
+  }).index("by_chapter_and_time", ["chapterId", "createdAt"]),
+
   characters: defineTable({
     name: v.string(),
     description: v.optional(v.string()),

@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Doc } from "@/convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import type { Doc, Id } from "@/convex/_generated/dataModel";
 import BookTitleEditor from "@/components/BookTitleEditor";
+import { ChapterReader } from "@/components/Editor";
 import type { NoteEntry } from "@/lib/editorExtensions";
 
 // Small pieces of the writing screen's top bar: the writing's settings and
@@ -62,6 +65,169 @@ export function BookSettingsButton({ book }: { book: Doc<"books"> }) {
         </>
       )}
     </div>
+  );
+}
+
+function dayLabel(at: number) {
+  const day = new Date(at);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (day.toDateString() === today.toDateString()) return "Bugün";
+  if (day.toDateString() === yesterday.toDateString()) return "Dün";
+  return day.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function timeLabel(at: number) {
+  return new Date(at).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+}
+
+// Earlier states of the chapter: pick one, read it, bring it back. Bringing
+// a version back only fills the editor; nothing is overwritten until it is
+// saved, and the text it replaces becomes a version of its own.
+export function HistoryDrawer({
+  chapterId,
+  open,
+  onClose,
+  onRestore,
+}: {
+  chapterId: Id<"chapters"> | undefined;
+  open: boolean;
+  onClose: () => void;
+  onRestore: (version: { title: string; content: string }) => void;
+}) {
+  const versions = useQuery(api.versions.list, chapterId && open ? { chapterId } : "skip");
+  const [selectedId, setSelectedId] = useState<Id<"chapterVersions"> | null>(null);
+  const selected = useQuery(api.versions.get, selectedId ? { versionId: selectedId } : "skip");
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (selectedId) setSelectedId(null);
+      else onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose, selectedId]);
+
+  const groups: { day: string; items: NonNullable<typeof versions> }[] = [];
+  for (const version of versions ?? []) {
+    const day = dayLabel(version.createdAt);
+    const last = groups[groups.length - 1];
+    if (last && last.day === day) last.items.push(version);
+    else groups.push({ day, items: [version] });
+  }
+
+  return (
+    <aside
+      aria-label="Sürüm geçmişi"
+      aria-hidden={!open}
+      inert={!open}
+      className={`fixed inset-y-0 right-0 z-50 flex w-[min(28rem,100vw)] flex-col border-l border-border bg-surface transition-[translate,visibility,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        open ? "visible translate-x-0 shadow-[-24px_0_60px_-40px_rgba(15,25,57,0.5)]" : "invisible translate-x-full"
+      }`}
+    >
+      <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sapphire">
+            {selectedId ? "Önizleme" : "Her şey saklanıyor"}
+          </p>
+          <h2 className="font-display text-2xl">{selectedId ? "Eski bir sürüm" : "Geçmiş"}</h2>
+        </div>
+        <button
+          type="button"
+          onClick={() => (selectedId ? setSelectedId(null) : onClose())}
+          aria-label={selectedId ? "Listeye dön" : "Geçmişi kapat"}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-muted hover:bg-accent-soft/60 hover:text-foreground"
+        >
+          {selectedId ? "←" : "✕"}
+        </button>
+      </div>
+
+      {selectedId ? (
+        selected === undefined ? (
+          <p className="px-5 py-6 text-sm text-muted">Yükleniyor…</p>
+        ) : selected === null ? (
+          <p className="px-5 py-6 text-sm text-muted">Bu sürüm artık yok.</p>
+        ) : (
+          <>
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              <p className="text-xs text-muted">
+                {dayLabel(selected.createdAt)} · {timeLabel(selected.createdAt)} ·{" "}
+                {selected.words.toLocaleString("tr-TR")} kelime
+              </p>
+              <h3 className="mt-2 font-display text-2xl">{selected.title}</h3>
+              <div className="mt-4 text-[15px]">
+                <ChapterReader key={selected._id} content={selected.content} />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 border-t border-border px-5 py-4">
+              <p className="mr-auto text-xs leading-snug text-muted">
+                Şu anki metnin de geçmişe eklenir; istersen geri dönebilirsin.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  onRestore({ title: selected.title, content: selected.content });
+                  setSelectedId(null);
+                }}
+                className="inline-flex h-9 shrink-0 items-center rounded-full bg-accent px-4 text-sm font-medium text-accent-contrast hover:bg-accent-hover"
+              >
+                Bu sürüme dön
+              </button>
+            </div>
+          </>
+        )
+      ) : !chapterId ? (
+        <p className="px-5 py-6 text-sm leading-relaxed text-muted">
+          Yazdıkça burada önceki hallerin birikir: en fazla on dakikada bir ve her yayında bir.
+        </p>
+      ) : versions === undefined ? (
+        <p className="px-5 py-6 text-sm text-muted">Yükleniyor…</p>
+      ) : versions.length === 0 ? (
+        <p className="px-5 py-6 text-sm leading-relaxed text-muted">
+          Henüz eski bir sürüm yok. Metni değiştirdikçe önceki hallerin burada birikir: en fazla on
+          dakikada bir ve her yayında bir.
+        </p>
+      ) : (
+        <div className="flex-1 overflow-y-auto px-3 py-3">
+          {groups.map((group) => (
+            <div key={group.day} className="mb-3">
+              <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                {group.day}
+              </p>
+              <ul>
+                {group.items.map((version) => (
+                  <li key={version._id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedId(version._id)}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-caramel-soft/60"
+                    >
+                      <span className="w-12 shrink-0 text-sm tabular-nums text-foreground">
+                        {timeLabel(version.createdAt)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm text-foreground">{version.title}</span>
+                        <span className="block text-xs text-muted">
+                          {version.words.toLocaleString("tr-TR")} kelime
+                        </span>
+                      </span>
+                      {version.reason === "publish" && (
+                        <span className="rounded-full bg-sapphire-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-sapphire">
+                          Yayından önce
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </aside>
   );
 }
 

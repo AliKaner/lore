@@ -10,7 +10,7 @@ import { levelInfo } from "@/lib/levels";
 import { useCommunityOpen } from "@/lib/community";
 import Wordmark from "@/components/Wordmark";
 
-const WRITING_SCREEN = /^\/kitap\/[^/]+(\/bolum\/[^/]+)?\/(yaz|duzenle)$/;
+const WRITING_SCREEN = /^\/kitap\/[^/]+((\/bolum\/[^/]+)?\/(yaz|duzenle)|\/yazdir)$/;
 
 function NavLinks() {
   const communityOpen = useCommunityOpen();
@@ -48,6 +48,9 @@ function UserBadge() {
         {communityOpen
           ? `${badge} ${me.username ?? "Profilim"} · Seviye ${me.level}`
           : (me.username ?? "Profilim")}
+      </Link>
+      <Link href="/hesap" className="text-muted hover:text-foreground">
+        Hesap
       </Link>
       <button
         onClick={() => void signOut().then(() => router.push("/"))}

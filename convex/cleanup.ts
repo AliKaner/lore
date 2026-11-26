@@ -9,7 +9,20 @@ import type { Id } from "./_generated/dataModel";
 
 const BATCH = 200;
 
-type Sweepable = { _id: Id<"likes" | "comments" | "shares" | "reports" | "favorites" | "chapterReads" | "bookCharacters" | "bookPlaces" | "chapters"> };
+type Sweepable = {
+  _id: Id<
+    | "likes"
+    | "comments"
+    | "shares"
+    | "reports"
+    | "favorites"
+    | "chapterReads"
+    | "bookCharacters"
+    | "bookPlaces"
+    | "chapters"
+    | "chapterVersions"
+  >;
+};
 
 async function sweep(ctx: MutationCtx, docs: Sweepable[]) {
   for (const doc of docs) await ctx.db.delete(doc._id);
@@ -78,6 +91,11 @@ export const purgeTarget = internalMutation({
           .withIndex("by_chapter", (q) => q.eq("chapterId", chapterId))
           .take(BATCH);
         more = (await sweep(ctx, reads)) || more;
+        const versions = await ctx.db
+          .query("chapterVersions")
+          .withIndex("by_chapter_and_time", (q) => q.eq("chapterId", chapterId))
+          .take(BATCH);
+        more = (await sweep(ctx, versions)) || more;
       }
     }
 

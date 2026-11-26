@@ -16,6 +16,7 @@ import ReportButton from "@/components/ReportButton";
 import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
 import NotFoundState from "@/components/NotFoundState";
+import ExportMenu from "@/components/ExportMenu";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonPrimary } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
@@ -103,6 +104,7 @@ export default function BookPage({
           <LikeButton targetType="book" targetId={bookId} likeCount={book.likeCount} />
         )}
         <ShareButton targetType="book" targetId={bookId} shareCount={book.shareCount} />
+        {isOwner && <ExportMenu bookId={bookId} />}
         {communityOpen && <FavoriteButton targetType="book" targetId={bookId} />}
         {communityOpen && !isOwner && me && (
           <ReportButton targetType="book" targetId={bookId} />

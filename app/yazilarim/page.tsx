@@ -7,6 +7,7 @@ import BookCover from "@/components/BookCover";
 import Loading from "@/components/Loading";
 import SignInPrompt from "@/components/SignInPrompt";
 import EmptyState from "@/components/EmptyState";
+import SecureAccountNudge from "@/components/SecureAccountNudge";
 import { buttonPrimary, cardHover, cardList } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
 
@@ -27,6 +28,8 @@ export default function MyWritingsPage() {
           Yeni yazı
         </Link>
       </div>
+
+      {me && <SecureAccountNudge />}
 
       {me === undefined ? (
         <Loading />

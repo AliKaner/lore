@@ -8,7 +8,7 @@ import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import type { WritingKind } from "@/convex/writingKinds";
 import { ChapterEditor, type ChapterEditorHandle } from "@/components/Editor";
-import { BookSettingsButton, NotesDrawer } from "@/components/WritingChrome";
+import { BookSettingsButton, HistoryDrawer, NotesDrawer } from "@/components/WritingChrome";
 import { useBookNames } from "@/lib/bookNames";
 import type { NoteEntry } from "@/lib/editorExtensions";
 import { KINDS, todayTitle } from "@/lib/writingKinds";
@@ -125,6 +125,10 @@ export default function ChapterForm({
   const [editorKey, setEditorKey] = useState(0);
   const [notes, setNotes] = useState<NoteEntry[]>([]);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [savedChapterId, setSavedChapterId] = useState<Id<"chapters"> | undefined>(
+    existingChapter?._id,
+  );
   const [calm, setCalm] = useState(false);
   const editorRef = useRef<ChapterEditorHandle>(null);
 
@@ -180,6 +184,7 @@ export default function ChapterForm({
       } else {
         const id = await createChapter({ bookId, parentChapterId, ...payload });
         chapterIdRef.current = id;
+        setSavedChapterId(id);
         clearBackup(newKey);
         // Reloading now reopens this draft instead of starting a new one.
         window.history.replaceState(null, "", `/kitap/${bookId}/bolum/${id}/duzenle`);
@@ -360,6 +365,18 @@ export default function ChapterForm({
               </span>
             )}
           </button>
+          <button
+            type="button"
+            onClick={() => setHistoryOpen(true)}
+            title="Sürüm geçmişi"
+            aria-label="Sürüm geçmişi"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground"
+          >
+            <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M3.5 10a6.5 6.5 0 1 0 1.9-4.6M3.5 3.5v2.6h2.6M10 6.5V10l2.4 1.6" />
+            </svg>
+            <span className="hidden lg:inline">Geçmiş</span>
+          </button>
           {isOwner && book && <BookSettingsButton book={book} />}
           {liveEdit && (
             <button
@@ -462,11 +479,25 @@ export default function ChapterForm({
           editorRef.current?.goTo(pos);
         }}
       />
-      {notesOpen && (
+      <HistoryDrawer
+        chapterId={savedChapterId}
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onRestore={(version) => {
+          setTitle(version.title);
+          setContent(version.content);
+          setEditorKey((key) => key + 1);
+          setHistoryOpen(false);
+        }}
+      />
+      {(notesOpen || historyOpen) && (
         <button
           type="button"
-          aria-label="Notları kapat"
-          onClick={() => setNotesOpen(false)}
+          aria-label="Kapat"
+          onClick={() => {
+            setNotesOpen(false);
+            setHistoryOpen(false);
+          }}
           className="fixed inset-0 z-40 cursor-default bg-ink/10 backdrop-blur-[1px]"
         />
       )}

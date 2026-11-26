@@ -22,8 +22,15 @@ export default defineSchema({
     likeCount: v.number(),
     shareCount: v.number(),
     createdAt: v.number(),
+    // The writer's desk, kept up to date by chapters.create/update/remove for
+    // the owner's own chapters.
+    wordCount: v.optional(v.number()),
+    chapterCount: v.optional(v.number()),
+    lastEditedAt: v.optional(v.number()),
+    lastEditedChapterId: v.optional(v.id("chapters")),
   })
     .index("by_owner", ["ownerId"])
+    .index("by_owner_and_edited", ["ownerId", "lastEditedAt"])
     .index("by_visibility", ["visibility"])
     .index("by_visibility_and_kind", ["visibility", "kind"])
     .index("by_root_chapter", ["rootChapterId"]),
@@ -37,6 +44,8 @@ export default defineSchema({
     order: v.number(),
     isCanonical: v.boolean(),
     status: v.union(v.literal("draft"), v.literal("published")),
+    words: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
     likeCount: v.number(),
     shareCount: v.number(),
     createdAt: v.number(),

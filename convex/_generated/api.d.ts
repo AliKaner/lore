@@ -14,6 +14,7 @@ import type * as books from "../books.js";
 import type * as chapters from "../chapters.js";
 import type * as characters from "../characters.js";
 import type * as cleanup from "../cleanup.js";
+import type * as desk from "../desk.js";
 import type * as exports from "../exports.js";
 import type * as files from "../files.js";
 import type * as migrations from "../migrations.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   chapters: typeof chapters;
   characters: typeof characters;
   cleanup: typeof cleanup;
+  desk: typeof desk;
   exports: typeof exports;
   files: typeof files;
   migrations: typeof migrations;

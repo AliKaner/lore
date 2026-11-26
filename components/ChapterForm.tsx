@@ -8,7 +8,12 @@ import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import type { WritingKind } from "@/convex/writingKinds";
 import { ChapterEditor, type ChapterEditorHandle } from "@/components/Editor";
-import { BookSettingsButton, HistoryDrawer, NotesDrawer } from "@/components/WritingChrome";
+import {
+  BookSettingsButton,
+  HistoryDrawer,
+  NotesDrawer,
+  PublishPrivateDialog,
+} from "@/components/WritingChrome";
 import { useBookNames } from "@/lib/bookNames";
 import type { NoteEntry } from "@/lib/editorExtensions";
 import { KINDS, todayTitle } from "@/lib/writingKinds";
@@ -89,6 +94,8 @@ export default function ChapterForm({
   const cfg = KINDS[kind];
   const createChapter = useMutation(api.chapters.create);
   const updateChapter = useMutation(api.chapters.update);
+  const updateBook = useMutation(api.books.update);
+  const [askPublish, setAskPublish] = useState(false);
   const createCharacter = useMutation(api.characters.create);
   const createPlace = useMutation(api.places.create);
   const book = useQuery(api.books.get, { bookId });
@@ -243,6 +250,43 @@ export default function ChapterForm({
     return () => window.removeEventListener("keydown", saveShortcut);
   }, []);
 
+  // A private writing's published chapter is still seen by no one. Say so
+  // before publishing, unless the writer asked not to be asked for this one.
+  const quietKey = `booktion:yayin-sorma:${bookId}`;
+  function requestPublish() {
+    let quiet = false;
+    try {
+      quiet = window.localStorage.getItem(quietKey) === "1";
+    } catch {
+      // Ask anyway.
+    }
+    if (!liveEdit && isOwner && book?.visibility === "private" && !quiet) {
+      setAskPublish(true);
+      return;
+    }
+    void handleSubmit("published");
+  }
+
+  async function publishWith(open: boolean, dontAskAgain: boolean) {
+    setAskPublish(false);
+    if (dontAskAgain && !open) {
+      try {
+        window.localStorage.setItem(quietKey, "1");
+      } catch {
+        // Not remembered.
+      }
+    }
+    if (open) {
+      try {
+        await updateBook({ bookId, visibility: "public" });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Yazı herkese açılamadı.");
+        return;
+      }
+    }
+    await handleSubmit("published");
+  }
+
   async function handleSubmit(status: Status) {
     setError(null);
     setSubmitting(status);
@@ -391,7 +435,7 @@ export default function ChapterForm({
           )}
           <button
             type="button"
-            onClick={() => void handleSubmit("published")}
+            onClick={requestPublish}
             disabled={disabled}
             className="inline-flex h-9 shrink-0 items-center rounded-full bg-accent px-4 text-sm font-medium text-accent-contrast shadow-[0_8px_20px_-12px_rgba(38,66,139,0.9)] transition-colors hover:bg-accent-hover disabled:opacity-45"
           >
@@ -479,6 +523,13 @@ export default function ChapterForm({
           editorRef.current?.goTo(pos);
         }}
       />
+      {askPublish && (
+        <PublishPrivateDialog
+          kindLabel={cfg.label}
+          onCancel={() => setAskPublish(false)}
+          onChoose={(open, dontAskAgain) => void publishWith(open, dontAskAgain)}
+        />
+      )}
       <HistoryDrawer
         chapterId={savedChapterId}
         open={historyOpen}

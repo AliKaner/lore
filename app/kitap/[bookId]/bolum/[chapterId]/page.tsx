@@ -1,12 +1,11 @@
 "use client";
 
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useEffect, useEffectEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import SpeedReader from "@/components/SpeedReader";
 import { useBookNames } from "@/lib/bookNames";
 import { flowWords, type NameEntry } from "@/lib/editorExtensions";
 import { readPref, writePref } from "@/lib/readingPrefs";
-
-const NO_NAMES: NameEntry[] = [];
 import Link from "next/link";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -24,6 +23,8 @@ import { buttonLink, pillInactive } from "@/lib/ui";
 import { isOpenToBranches } from "@/convex/writingKinds";
 import { kindConfig } from "@/lib/writingKinds";
 import { useCommunityOpen } from "@/lib/community";
+
+const NO_NAMES: NameEntry[] = [];
 
 export default function ChapterPage({
   params,
@@ -48,6 +49,30 @@ export default function ChapterPage({
   const [flowOpen, setFlowOpen] = useState(false);
   const content = chapter?.content ?? "";
   const words = useMemo(() => flowWords(content), [content]);
+  const router = useRouter();
+  const parent = useQuery(
+    api.chapters.get,
+    chapter?.parentChapterId ? { chapterId: chapter.parentChapterId } : "skip",
+  );
+  // The main line continues through the chosen child; the others are
+  // branches.
+  const next = children?.find((c) => c.isCanonical) ?? children?.[0];
+  const branches = (children ?? []).filter((c) => c._id !== next?._id);
+  const prevHref = parent ? `/kitap/${bookId}/bolum/${parent._id}` : null;
+  const nextHref = next ? `/kitap/${bookId}/bolum/${next._id}` : null;
+
+  // ← and → turn the page, as in an e-reader.
+  const turnPage = useEffectEvent((event: KeyboardEvent) => {
+    if (flowOpen || event.metaKey || event.ctrlKey || event.altKey) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("input, textarea, [contenteditable='true']")) return;
+    if (event.key === "ArrowRight" && nextHref) router.push(nextHref);
+    if (event.key === "ArrowLeft" && prevHref) router.push(prevHref);
+  });
+  useEffect(() => {
+    window.addEventListener("keydown", turnPage);
+    return () => window.removeEventListener("keydown", turnPage);
+  }, []);
 
   function chooseBionic(value: boolean) {
     setBionic(value);
@@ -205,28 +230,61 @@ export default function ChapterPage({
         )}
       </div>
 
-      <div className="mt-8">
-        <h2 className="font-medium mb-2">Devamını oku</h2>
-        {children === undefined ? (
-          <Loading />
-        ) : children.length === 0 ? (
-          <p className="text-muted text-sm">
-            Henüz bir devamı yok.
-          </p>
+      {/* Turning the page */}
+      <nav aria-label="Bölümler arasında" className="mt-12 grid gap-3 sm:grid-cols-2">
+        {prevHref && parent ? (
+          <Link
+            href={prevHref}
+            className="group rounded-xl border border-border bg-surface px-5 py-4 transition-colors hover:border-border-hover"
+          >
+            <span className="text-xs text-muted">← Önceki</span>
+            <span className="mt-1 block truncate font-display text-lg text-foreground group-hover:text-accent">
+              {parent.title}
+            </span>
+          </Link>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {children.map((child) => (
-              <li key={child._id} className="flex flex-wrap items-center gap-2">
+          <span className="hidden sm:block" />
+        )}
+        {children === undefined ? null : next && nextHref ? (
+          <Link
+            href={nextHref}
+            className="group rounded-xl border border-accent/30 bg-accent-soft/50 px-5 py-4 text-right transition-colors hover:border-accent"
+          >
+            <span className="text-xs text-accent">Sonraki →</span>
+            <span className="mt-1 block truncate font-display text-lg text-foreground group-hover:text-accent">
+              {next.title}
+            </span>
+          </Link>
+        ) : (
+          <div className="rounded-xl border border-dashed border-border px-5 py-4 text-right">
+            <span className="text-xs text-muted">Burada bitiyor</span>
+            <span className="mt-1 block text-sm text-muted">
+              {isBookOwner ? "Devamını yazmak sana kalmış." : "Henüz bir devamı yok."}
+            </span>
+          </div>
+        )}
+      </nav>
+      {(prevHref || nextHref) && (
+        <p className="mt-2 hidden text-center text-[11px] text-muted sm:block">
+          ← → tuşlarıyla da sayfa çevirebilirsin
+        </p>
+      )}
+
+      {branches.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+            Buradan ayrılan başka dallar
+          </h2>
+          <ul className="mt-3 flex flex-col gap-2">
+            {branches.map((child) => (
+              <li key={child._id} className="flex flex-wrap items-center gap-3">
                 <Link
                   href={`/kitap/${bookId}/bolum/${child._id}`}
-                  className="text-sm underline"
+                  className="font-display text-lg text-foreground underline decoration-border-hover underline-offset-4 hover:text-accent"
                 >
                   {child.title}
                 </Link>
-                {child.isCanonical && (
-                  <span className="text-xs text-muted">ana hat</span>
-                )}
-                {isBookOwner && !child.isCanonical && (
+                {isBookOwner && (
                   <button
                     onClick={() => void handleMarkCanonical(child._id)}
                     className={buttonLink}
@@ -237,8 +295,8 @@ export default function ChapterPage({
               </li>
             ))}
           </ul>
-        )}
-      </div>
+        </div>
+      )}
 
       {communityOpen && <CommentSection targetType="chapter" targetId={chapterId} />}
 

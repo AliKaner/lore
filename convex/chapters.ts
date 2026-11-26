@@ -4,7 +4,8 @@ import { internal } from "./_generated/api";
 import { requireUserId } from "./users";
 import { isOpenToBranches } from "./writingKinds";
 import { canViewChapter, optionalUserId, viewableBook } from "./access";
-import { snapshotBeforeChange } from "./versions";
+import { snapshotBeforeChange, wordsIn } from "./versions";
+import { recordDeskChange } from "./desk";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 
@@ -80,6 +81,8 @@ export const create = mutation({
       )
       .collect();
 
+    const now = Date.now();
+    const words = wordsIn(args.content);
     const chapterId = await ctx.db.insert("chapters", {
       bookId: args.bookId,
       parentChapterId: args.parentChapterId,
@@ -89,14 +92,21 @@ export const create = mutation({
       order: siblings.length,
       isCanonical: siblings.length === 0,
       status: args.status,
+      words,
+      updatedAt: now,
       likeCount: 0,
       shareCount: 0,
-      createdAt: Date.now(),
+      createdAt: now,
     });
 
     if (args.parentChapterId === undefined && book.rootChapterId === undefined) {
       await ctx.db.patch(args.bookId, { rootChapterId: chapterId });
     }
+    await recordDeskChange(ctx, args.bookId, { _id: chapterId, authorId: userId }, {
+      words,
+      chapters: 1,
+      touched: true,
+    });
 
     return chapterId;
   },
@@ -172,7 +182,21 @@ export const update = mutation({
     }
     const { chapterId, ...patch } = args;
     await snapshotBeforeChange(ctx, chapter, patch);
-    await ctx.db.patch(chapterId, patch);
+    const textChanged =
+      (patch.content !== undefined && patch.content !== chapter.content) ||
+      (patch.title !== undefined && patch.title !== chapter.title);
+    const before = chapter.words ?? wordsIn(chapter.content);
+    const after = patch.content !== undefined ? wordsIn(patch.content) : before;
+    await ctx.db.patch(chapterId, {
+      ...patch,
+      words: after,
+      ...(textChanged ? { updatedAt: Date.now() } : {}),
+    });
+    await recordDeskChange(ctx, chapter.bookId, chapter, {
+      words: after - before,
+      chapters: 0,
+      touched: textChanged || patch.status !== undefined,
+    });
     return null;
   },
 });
@@ -220,6 +244,11 @@ export const remove = mutation({
     if (book && book.rootChapterId === chapter._id) {
       await ctx.db.patch(book._id, { rootChapterId: undefined });
     }
+    await recordDeskChange(ctx, chapter.bookId, chapter, {
+      words: -(chapter.words ?? wordsIn(chapter.content)),
+      chapters: -1,
+      touched: false,
+    });
     if (chapter.isCanonical) {
       const heir = await ctx.db
         .query("chapters")

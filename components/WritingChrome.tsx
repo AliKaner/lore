@@ -68,6 +68,94 @@ export function BookSettingsButton({ book }: { book: Doc<"books"> }) {
   );
 }
 
+// Asked when publishing in a private writing: publishing alone doesn't let
+// anyone read it.
+export function PublishPrivateDialog({
+  kindLabel,
+  onChoose,
+  onCancel,
+}: {
+  kindLabel: string;
+  onChoose: (open: boolean, dontAskAgain: boolean) => void;
+  onCancel: () => void;
+}) {
+  const [dontAsk, setDontAsk] = useState(false);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && onCancel();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onCancel]);
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center p-4 sm:items-center">
+      <button
+        type="button"
+        aria-label="Vazgeç"
+        onClick={onCancel}
+        className="absolute inset-0 cursor-default bg-ink/25 backdrop-blur-[2px]"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="publish-private-title"
+        className="menu-pop relative w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-[0_30px_80px_-30px_rgba(15,25,57,0.6)] sm:p-7"
+      >
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-caramel">
+          {kindLabel} · gizli
+        </p>
+        <h2 id="publish-private-title" className="mt-2 font-display text-[1.75rem] leading-tight">
+          Yazın şu an gizli
+        </h2>
+        <p className="mt-3 text-[15px] leading-relaxed text-muted">
+          Yayınladığın bölümü şimdilik yalnızca sen görürsün. Bağlantısını gönderdiğin kişi de
+          okuyabilsin mi?
+        </p>
+
+        <div className="mt-6 flex flex-col gap-2.5">
+          <button
+            type="button"
+            autoFocus
+            onClick={() => onChoose(true, false)}
+            className="flex items-center justify-between gap-3 rounded-xl bg-accent px-5 py-3.5 text-left text-accent-contrast transition-colors hover:bg-accent-hover"
+          >
+            <span>
+              <span className="block font-medium">Bağlantıyla aç ve yayınla</span>
+              <span className="block text-xs opacity-80">Bağlantısı olan herkes okuyabilir</span>
+            </span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onChoose(false, dontAsk)}
+            className="flex items-center justify-between gap-3 rounded-xl border border-border px-5 py-3.5 text-left transition-colors hover:border-border-hover"
+          >
+            <span>
+              <span className="block font-medium text-foreground">Gizli kalsın, yine de yayınla</span>
+              <span className="block text-xs text-muted">Bölüm “yayında” sayılır ama yalnızca sen görürsün</span>
+            </span>
+          </button>
+        </div>
+
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-muted">
+            <input
+              type="checkbox"
+              checked={dontAsk}
+              onChange={(event) => setDontAsk(event.target.checked)}
+              className="accent-[var(--caramel)]"
+            />
+            Bu yazı için bir daha sorma
+          </label>
+          <button type="button" onClick={onCancel} className="text-sm text-muted underline underline-offset-4">
+            Vazgeç
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function dayLabel(at: number) {
   const day = new Date(at);
   const today = new Date();

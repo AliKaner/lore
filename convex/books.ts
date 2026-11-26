@@ -96,6 +96,31 @@ export const listMine = query({
   },
 });
 
+// The writer's desk: their writings, most recently worked on first, each
+// with the chapter to pick up again.
+export const myDesk = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    const books = await ctx.db
+      .query("books")
+      .withIndex("by_owner_and_edited", (q) => q.eq("ownerId", userId))
+      .order("desc")
+      .take(200);
+    // Writings never written in (no edit yet) go after the rest, newest first.
+    books.sort((a, b) => (b.lastEditedAt ?? b.createdAt) - (a.lastEditedAt ?? a.createdAt));
+    return await Promise.all(
+      books.map(async (book) => {
+        const last = book.lastEditedChapterId ? await ctx.db.get(book.lastEditedChapterId) : null;
+        return {
+          ...book,
+          lastChapter: last ? { _id: last._id, title: last.title, status: last.status } : null,
+        };
+      }),
+    );
+  },
+});
+
 export const update = mutation({
   args: {
     bookId: v.id("books"),

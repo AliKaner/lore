@@ -184,6 +184,24 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
 
 - [ ] Sosyal medya entegrasyonu / dışarı paylaşım tarafı netleştirilecek
 
+### Yazma akışı
+
+- [x] **Yazılarım = masa** (`books.myDesk`): en son çalışılan yazı en üstte
+      büyük "Kaldığın yerden devam et" kartında (son bölüm, taslak mı, bölüm ve
+      kelime sayısı, "2 saat önce düzenlendi", Devam et → doğrudan o bölümün
+      editörü); diğerleri altta. Selamlama ve toplam kelime. Sayılar
+      `books.wordCount/chapterCount/lastEditedAt` alanlarında, yalnızca sahibin
+      kendi bölümleriyle güncellenir (`convex/desk.ts`); eski kayıtlar için
+      `npx convex run migrations:backfillDeskStats`
+- [x] **Okurken sayfa çevirme**: bölüm sonunda "← Önceki" ve ana hattı izleyen
+      "Sonraki →" kartları, ← → tuşlarıyla da; ana hattın dışındakiler "Buradan
+      ayrılan başka dallar" olarak ayrı
+- [x] **Gizli yazıda yayınlama**: "Yayınla"ya basınca "Yazın şu an gizli"
+      sorulur — "Bağlantıyla aç ve yayınla" ya da "Gizli kalsın, yine de
+      yayınla"; yazı başına "bir daha sorma"
+- [ ] Bölüm sıralaması: ağaçta sıra yalnızca aynı yerden ayrılan dallar
+      arasında anlamlı; şimdilik "ana hat yap" yeterli
+
 ### Güven
 
 - [x] **Hesap kurtarma = ikinci cihaz** (`/hesap`): giriş anahtarlarının

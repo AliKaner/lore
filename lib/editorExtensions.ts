@@ -1,6 +1,7 @@
 import { Extension, Mark, mergeAttributes } from "@tiptap/react";
 import type { Node as PMNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { markStyleOf, type EntityKind } from "@/convex/entityKinds";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 
 /* ---------- Author notes ---------- */
@@ -61,7 +62,7 @@ export function collectNotes(doc: PMNode): NoteEntry[] {
 
 export type NameEntry = {
   name: string;
-  kind: "character" | "place";
+  kind: EntityKind;
   detail?: string;
 };
 
@@ -142,7 +143,7 @@ function buildDecorations(doc: PMNode, names: NameEntry[], bionic: boolean) {
             const { entry } = needle;
             decorations.push(
               Decoration.inline(start + index, start + end, {
-                class: `name-mark name-${entry.kind}`,
+                class: `name-mark name-${markStyleOf(entry.kind)}`,
                 title: entry.detail ? `${entry.name} — ${entry.detail}` : entry.name,
               }),
             );

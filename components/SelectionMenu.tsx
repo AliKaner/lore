@@ -12,9 +12,9 @@ import {
 import { createPortal } from "react-dom";
 import { getMarkRange, useEditorState, type Editor } from "@tiptap/react";
 import { sentenceRangeAt, wordRangeAt, type NameEntry } from "@/lib/editorExtensions";
+import { ENTITY_KINDS, ENTITY_KIND_ORDER, markStyleOf, type EntityKind } from "@/convex/entityKinds";
 
-type AddableKind = "character" | "place";
-type Mode = "actions" | "note" | AddableKind | "done";
+type Mode = "actions" | "note" | "name" | "done";
 type Range = { from: number; to: number };
 type Anchor = { x: number; y: number; placement: "above" | "pointer" };
 
@@ -73,6 +73,13 @@ const PlaceIcon = () => (
   <Icon>
     <path d="M10 17.5s5.5-5 5.5-9.3a5.5 5.5 0 0 0-11 0c0 4.3 5.5 9.3 5.5 9.3z" />
     <circle cx="10" cy="8.2" r="2" />
+  </Icon>
+);
+const MoreIcon = () => (
+  <Icon>
+    <circle cx="5" cy="10" r="0.6" fill="currentColor" />
+    <circle cx="10" cy="10" r="0.6" fill="currentColor" />
+    <circle cx="15" cy="10" r="0.6" fill="currentColor" />
   </Icon>
 );
 const SentenceIcon = () => (
@@ -134,7 +141,7 @@ function FormShell({
   children: ReactNode;
 }) {
   return (
-    <div className="menu-panel w-[19.5rem] p-3">
+    <div className="menu-panel w-[21rem] p-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-caramel">{eyebrow}</p>
       <p className="mt-1 truncate font-display text-[15px] italic text-on-ink/70">“{quote}”</p>
       {children}
@@ -158,13 +165,14 @@ export default function SelectionMenu({
 }: {
   editor: Editor;
   names: NameEntry[];
-  onAddName?: (name: string, kind: AddableKind, description?: string) => Promise<void>;
+  onAddName?: (name: string, kind: EntityKind, description?: string) => Promise<void>;
   ref?: Ref<SelectionMenuHandle>;
 }) {
   const [menu, setMenu] = useState<MenuState | null>(null);
   const [noteText, setNoteText] = useState("");
   const [nameText, setNameText] = useState("");
   const [detailText, setDetailText] = useState("");
+  const [nameKind, setNameKind] = useState<EntityKind>("character");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -224,11 +232,12 @@ export default function SelectionMenu({
     return editor.state.doc.textBetween(range.from, range.to, " ");
   }
 
-  function enter(mode: Mode, current: MenuState) {
+  function enter(mode: Mode, current: MenuState, kind?: EntityKind) {
     if (mode === "note") setNoteText(existingNote(current.range));
-    if (mode === "character" || mode === "place") {
+    if (mode === "name") {
       setNameText(cleanName(textOf(current.range)));
       setDetailText("");
+      setNameKind(kind ?? "character");
     }
     show({ ...current, mode });
   }
@@ -320,7 +329,7 @@ export default function SelectionMenu({
     function onKey(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
       const current = menuRef.current;
-      if (current && (current.mode === "note" || current.mode === "character" || current.mode === "place")) {
+      if (current && (current.mode === "note" || current.mode === "name")) {
         show({ ...current, mode: "actions" });
         editor.commands.focus();
       } else {
@@ -424,14 +433,14 @@ export default function SelectionMenu({
     finish("Not kaldırıldı");
   }
 
-  async function saveName(kind: AddableKind) {
+  async function saveName(kind: EntityKind) {
     const name = nameText.trim();
     if (!onAddName || name.length < 2) return;
     setBusy(true);
     setError(null);
     try {
       await onAddName(name, kind, detailText.trim() || undefined);
-      finish(`${name} ${kind === "character" ? "karakter" : "mekan"} olarak kaydedildi`);
+      finish(`${name} ${ENTITY_KINDS[kind].label.toLocaleLowerCase("tr-TR")} olarak kaydedildi`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "";
       const match = /Uncaught Error: ([^\n]+)/u.exec(message);
@@ -487,20 +496,23 @@ export default function SelectionMenu({
                 style={{ animationDelay: `${40 + i++ * 28}ms` }}
                 title={known.detail}
               >
-                <span className={`h-1.5 w-1.5 rotate-45 ${known.kind === "character" ? "bg-caramel" : "bg-sapphire"}`} />
+                <span className={`h-1.5 w-1.5 rotate-45 ${markStyleOf(known.kind) === "character" ? "bg-caramel" : "bg-sapphire"}`} />
                 {known.name}
-                <span className="text-on-ink/45">· {known.kind === "character" ? "karakter" : "mekan"}</span>
+                <span className="text-on-ink/45">· {ENTITY_KINDS[known.kind].label.toLocaleLowerCase("tr-TR")}</span>
               </span>
             ) : (
               canName && (
                 <>
-                  <MenuButton index={i++} label="Karakter olarak kaydet" onClick={() => enter("character", menu)}>
+                  <MenuButton index={i++} label="Karakter olarak kaydet" onClick={() => enter("name", menu, "character")}>
                     <PersonIcon />
                     Karakter
                   </MenuButton>
-                  <MenuButton index={i++} label="Mekan olarak kaydet" onClick={() => enter("place", menu)}>
+                  <MenuButton index={i++} label="Mekan olarak kaydet" onClick={() => enter("name", menu, "place")}>
                     <PlaceIcon />
                     Mekan
+                  </MenuButton>
+                  <MenuButton index={i++} label="Ülke, ırk, silah… olarak kaydet" onClick={() => enter("name", menu, "country")}>
+                    <MoreIcon />
                   </MenuButton>
                 </>
               )
@@ -559,16 +571,33 @@ export default function SelectionMenu({
           </FormShell>
         )}
 
-        {(menu.mode === "character" || menu.mode === "place") && (
-          <FormShell
-            eyebrow={menu.mode === "character" ? "Yeni karakter" : "Yeni mekan"}
-            quote={excerpt(text)}
-          >
+        {menu.mode === "name" && (
+          <FormShell eyebrow={`Yeni ${ENTITY_KINDS[nameKind].label.toLocaleLowerCase("tr-TR")}`} quote={excerpt(text)}>
+            <div role="radiogroup" aria-label="Türü" className="mt-2.5 flex flex-wrap gap-1">
+              {ENTITY_KIND_ORDER.map((kind) => (
+                <button
+                  key={kind}
+                  type="button"
+                  role="radio"
+                  aria-checked={kind === nameKind}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => setNameKind(kind)}
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] transition-colors duration-150 ${
+                    kind === nameKind
+                      ? "bg-caramel text-[#0f1939] font-semibold"
+                      : "bg-white/[0.06] text-on-ink/70 hover:bg-white/[0.12] hover:text-on-ink"
+                  }`}
+                >
+                  <span aria-hidden="true" className="text-[10px] leading-none">{ENTITY_KINDS[kind].glyph}</span>
+                  {ENTITY_KINDS[kind].label}
+                </button>
+              ))}
+            </div>
             <form
               className="mt-2.5 flex flex-col gap-2"
               onSubmit={(event) => {
                 event.preventDefault();
-                void saveName(menu.mode as AddableKind);
+                void saveName(nameKind);
               }}
             >
               <input
@@ -583,12 +612,12 @@ export default function SelectionMenu({
                 value={detailText}
                 onChange={(event) => setDetailText(event.target.value)}
                 aria-label="Kısa açıklama"
-                placeholder={menu.mode === "character" ? "Kim? (isteğe bağlı)" : "Nasıl bir yer? (isteğe bağlı)"}
+                placeholder={`${ENTITY_KINDS[nameKind].summaryPlaceholder} (isteğe bağlı)`}
                 className={fieldClass}
               />
               {error && <p className="text-[12px] text-red-300">{error}</p>}
               <div className="mt-0.5 flex items-center gap-2">
-                <span className="mr-auto text-[11px] text-on-ink/45">Metinde hemen vurgulanır</span>
+                <span className="mr-auto text-[11px] text-on-ink/45">Ayrıntılar sonra Evren’de</span>
                 <button
                   type="submit"
                   disabled={busy || nameText.trim().length < 2}

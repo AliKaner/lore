@@ -18,8 +18,7 @@ function NavLinks() {
     <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
       <Link href="/yazilarim">Yazılarım</Link>
       <Link href="/yaz">Yeni yazı</Link>
-      <Link href="/karakterler">Karakterler</Link>
-      <Link href="/mekanlar">Mekanlar</Link>
+      <Link href="/evren">Evren</Link>
       {communityOpen && (
         <>
           <Link href="/kesfet">Keşfet</Link>

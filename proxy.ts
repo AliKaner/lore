@@ -11,6 +11,7 @@ const PUBLIC_PAGES = [
   /^\/kesfet$/,
   /^\/kitap\/[^/]+$/,
   /^\/kitap\/[^/]+\/bolum\/[^/]+$/,
+  /^\/kitap\/[^/]+\/evren\/[^/]+$/,
 ];
 
 export default convexAuthNextjsProxy(async (request, { isAuthenticated }) => {

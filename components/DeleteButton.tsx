@@ -10,14 +10,12 @@ import { toastErrorMessage, useToast } from "@/components/Toaster";
 type Target =
   | { kind: "book"; id: Id<"books"> }
   | { kind: "chapter"; id: Id<"chapters"> }
-  | { kind: "character"; id: Id<"characters"> }
-  | { kind: "place"; id: Id<"places"> };
+  | { kind: "entity"; id: Id<"entities"> };
 
 const WARNING: Record<Target["kind"], string> = {
   book: "Yazı, içindeki bütün bölümlerle birlikte kalıcı olarak silinecek.",
   chapter: "Bu bölüm kalıcı olarak silinecek.",
-  character: "Karakter, dahil olduğu bütün yazılardan çıkarılıp kalıcı olarak silinecek.",
-  place: "Mekan, dahil olduğu bütün yazılardan çıkarılıp kalıcı olarak silinecek.",
+  entity: "Kayıt, görselleri ve bağlantılarıyla birlikte bütün yazılardan çıkarılıp kalıcı olarak silinecek.",
 };
 
 // Deleting is permanent, so it takes two clicks: the first only asks.
@@ -25,15 +23,16 @@ export default function DeleteButton({
   target,
   label,
   afterDelete,
+  onDeleted,
 }: {
   target: Target;
   label: string;
   afterDelete?: (result: { parentChapterId: Id<"chapters"> | null }) => string;
+  onDeleted?: () => void;
 }) {
   const removeBook = useMutation(api.books.remove);
   const removeChapter = useMutation(api.chapters.remove);
-  const removeCharacter = useMutation(api.characters.remove);
-  const removePlace = useMutation(api.places.remove);
+  const removeEntity = useMutation(api.entities.remove);
   const router = useRouter();
   const showToast = useToast();
   const [asking, setAsking] = useState(false);
@@ -46,11 +45,10 @@ export default function DeleteButton({
       if (target.kind === "book") await removeBook({ bookId: target.id });
       else if (target.kind === "chapter") {
         ({ parentChapterId } = await removeChapter({ chapterId: target.id }));
-      } else if (target.kind === "character") {
-        await removeCharacter({ characterId: target.id });
-      } else await removePlace({ placeId: target.id });
+      } else await removeEntity({ entityId: target.id });
       showToast("Silindi.", "success");
-      if (afterDelete) router.push(afterDelete({ parentChapterId }));
+      if (onDeleted) onDeleted();
+      else if (afterDelete) router.push(afterDelete({ parentChapterId }));
       else setAsking(false);
     } catch (err) {
       showToast(toastErrorMessage(err));

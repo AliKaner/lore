@@ -184,7 +184,7 @@ export default function ChapterPage({
               onChange={(event) => chooseNames(event.target.checked)}
               className="accent-[var(--caramel)]"
             />
-            Karakter ve mekanları vurgula
+            Evrendeki adları vurgula
           </label>
         )}
         <span className="ml-auto text-xs text-muted tabular-nums">

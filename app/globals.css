@@ -241,6 +241,10 @@ h1, h2, h3 {
   text-decoration-color: var(--sapphire);
   text-decoration-style: dotted;
 }
+.name-thing {
+  text-decoration-color: var(--sapphire);
+  text-decoration-style: dashed;
+}
 .name-mark:hover {
   background-color: var(--caramel-soft);
 }

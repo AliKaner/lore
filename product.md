@@ -120,12 +120,47 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
 - [ ] Gerçek kullanıcı yorumları ve sayılar (henüz yok — uydurulmadı)
 - [ ] Premium içeriği ve fiyatı netleşecek (sayfadaki Premium maddeleri öneri)
 
-### Paketlenebilir Varlıklar
+### Evren (karakterler, yerler ve fazlası)
 
-- [x] Karakter oluşturma ve bir kitaba "paket" gibi dahil etme
-- [x] Mekan oluşturma ve bir kitaba "paket" gibi dahil etme
-- [x] Aynı karakter/mekanın birden fazla kitapta kullanılabilmesi
-- [x] Karakter/mekan görselleri kitap sayfasındaki listede gösteriliyor
+Yazarın dünyasındaki her adın kendi sayfası. Tek tablo (`entities`), türler
+`convex/entityKinds.ts` içinde tanımlı; form bu tanımdan çizilir, sunucu da
+aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satır.
+
+- [x] **Sekiz tür**: Karakter, Mekan, Ülke / krallık, Irk / halk, Topluluk
+      (lonca, tarikat, ordu…), Yapı, Silah, Eşya. Her türün kendi bölümleri
+      ve alanları var.
+- [x] **Karakter**: yaş *ya da* doğum yılı (yazar hangisini biliyorsa),
+      cinsiyet, unvan, meslek; **baba ve anne** (kardeşler, çocuklar ve
+      büyükanne-büyükbabalar bunlardan kendiliğinden çıkar); eş; ırk,
+      ülke/krallık, topluluk, yaşadığı yer; tıklayınca açılan **fiziksel
+      özellikler** (boy, kilo, yapı, göz, saç, ten, ayırt edici işaret);
+      kişilik, ne istiyor, geçmiş.
+- [x] **Ülke**: yönetim şekli (öneriler: krallık, imparatorluk, sultanlık,
+      cumhuriyet… ya da serbest), hükümdar, başkent, nüfus, kuruluş, dil,
+      inanç, **harita yükleme**, yaşayan ırklar, müttefik/düşman ülkeler,
+      amacı ve tarihi. Yapıda plan, mekanda harita alanı var.
+- [x] **Bağlantılar**: bir alan başka bir kayda bağlanır ("Babası → Aras",
+      "Irkı → Elf"). Seçici yazarken arar; yoksa "“Elf” adında yeni ırk"
+      ile yerinde oluşturur. Karşı tarafta ters adla görünür (ülkede
+      "Halkından", karakterde "Silahları").
+- [x] **Görseller**: birden fazla görsel, sürükle-bırak; ilki kapak,
+      "Kapak yap" ile değişir. Alan görselleri (harita, plan) ayrı tutulur.
+- [x] **Kendi alanların**: her kayda yazarın istediği kadar serbest alan.
+- [x] **Otomatik kayıt**: yazmayı bırakınca kaydedilir, "Kaydedildi" işareti.
+- [x] **Sayfalar**: `/evren` (tür sekmeleri, arama, kapaklı kartlar,
+      "Yeni ekle"), `/evren/[id]` (düzenleme), `/kitap/[id]/evren/[id]`
+      (okur görünümü: yalnızca doldurulan alanlar, yalnızca o yazıya dahil
+      kayıtlara bağlantılar). `/karakterler` ve `/mekanlar` buraya yönlenir.
+- [x] **Yazarken**: seçim araç çubuğunda Karakter, Mekan ve "···" (diğer
+      türler); üst çubukta **Evren** çekmecesi — yazının kayıtları, yeni
+      ekleme, evrenden başka bir kaydı bu yazıya ekleme ve kaydı metinden
+      ayrılmadan doldurma.
+- [x] Vurgu: karakterler karamel düz, yerler (mekan/ülke/yapı) safir noktalı,
+      diğerleri safir kesikli altı çizgi.
+- [x] Gizlilik: kayıtlar yaratıcısına ait; okur ancak kaydın dahil olduğu,
+      görebildiği bir yazı üzerinden görür. Yalnızca kendi kayıtların
+      bağlanabilir. Silince görseller, bağlantılar, favoriler ve yazı
+      bağları temizlenir.
 
 ### Sosyal Yapı
 
@@ -152,7 +187,7 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
 - [x] Yorumlar (kitap ve bölüm için)
 - [x] Paylaşma (link kopyalama + paylaşım sayacı)
 - [x] Favoriler — favori kitaplar
-- [x] Favori karakterler
+- [x] Favori evren kayıtları (karakter, ülke…)
 - [x] Favori mekanlar
 - [x] Moderasyon — kitap/bölüm bildirme (`ReportButton`), kitap sahibi için
       `/moderasyon` ekranı: bildirimi çözüldü işaretleme, uygunsuz bir dalı

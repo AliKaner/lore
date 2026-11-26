@@ -36,9 +36,10 @@ describe("private writings stay private", () => {
   test("a published page of a private diary is hidden from everyone but its owner", async () => {
     const { t, authApi } = setupTest(modules);
     const { asOwner, bookId, chapterId } = await writingWithChapter("private", t, authApi);
-    const characterId = await asOwner.mutation(api.characters.create, {
+    const characterId = await asOwner.mutation(api.entities.create, {
+      kind: "character",
       name: "Annem",
-      originBookId: bookId,
+      bookId,
     });
     await asOwner.mutation(api.social.addComment, {
       targetType: "chapter",
@@ -52,7 +53,7 @@ describe("private writings stay private", () => {
       expect(await viewer.query(api.chapters.get, { chapterId })).toBeNull();
       expect(await viewer.query(api.chapters.getTree, { bookId })).toEqual([]);
       expect(await viewer.query(api.chapters.listChildren, { bookId })).toEqual([]);
-      expect(await viewer.query(api.characters.listForBook, { bookId })).toEqual([]);
+      expect(await viewer.query(api.entities.listForBook, { bookId })).toEqual([]);
       const comments = await viewer.query(api.social.listComments, {
         targetType: "chapter",
         targetId: chapterId,
@@ -67,7 +68,7 @@ describe("private writings stay private", () => {
     expect(await asOwner.query(api.chapters.get, { chapterId })).not.toBeNull();
     expect(await asOwner.query(api.chapters.getTree, { bookId })).toHaveLength(1);
     expect(
-      (await asOwner.query(api.characters.listForBook, { bookId })).map((c) => c._id),
+      (await asOwner.query(api.entities.listForBook, { bookId })).map((c) => c._id),
     ).toEqual([characterId]);
   });
 
@@ -134,16 +135,17 @@ describe("author notes", () => {
     expect(tree[0].content).not.toContain("gizli plan");
   });
 
-  test("nobody can attach a new character or place to someone else's writing", async () => {
+  test("nobody can add an entity to someone else's writing", async () => {
     const { t, authApi } = setupTest(modules);
     const { bookId } = await writingWithChapter("public", t, authApi);
     const { t: asStranger } = await signInAsNewUser(t, authApi);
 
     await expect(
-      asStranger.mutation(api.characters.create, { name: "Sızma", originBookId: bookId }),
+      asStranger.mutation(api.entities.create, { kind: "character", name: "Sızma", bookId }),
     ).rejects.toThrow();
+    const ownId = await asStranger.mutation(api.entities.create, { kind: "place", name: "Sızma" });
     await expect(
-      asStranger.mutation(api.places.create, { name: "Sızma", originBookId: bookId }),
+      asStranger.mutation(api.entities.attachToBook, { bookId, entityId: ownId }),
     ).rejects.toThrow();
   });
 });
@@ -212,9 +214,10 @@ describe("deleting", () => {
   test("deleting a writing removes its chapters, reactions and cast links", async () => {
     const { t, authApi } = setupTest(modules);
     const { asOwner, bookId, chapterId } = await writingWithChapter("public", t, authApi);
-    const characterId = await asOwner.mutation(api.characters.create, {
+    const characterId = await asOwner.mutation(api.entities.create, {
+      kind: "character",
       name: "Selin",
-      originBookId: bookId,
+      bookId,
     });
     const { t: asReader } = await signInAsNewUser(t, authApi);
     await asReader.mutation(api.social.toggleLike, { targetType: "chapter", targetId: chapterId });
@@ -236,7 +239,7 @@ describe("deleting", () => {
       comments: await ctx.db.query("comments").collect(),
       favorites: await ctx.db.query("favorites").collect(),
       reads: await ctx.db.query("chapterReads").collect(),
-      links: await ctx.db.query("bookCharacters").collect(),
+      links: await ctx.db.query("bookEntities").collect(),
       character: await ctx.db.get(characterId),
     }));
     expect(leftovers).toMatchObject({
@@ -252,28 +255,32 @@ describe("deleting", () => {
     expect(leftovers.character).not.toBeNull();
   });
 
-  test("deleting a character takes it out of its writings", async () => {
+  test("deleting an entity takes it out of its writings and links", async () => {
     const { t, authApi } = setupTest(modules);
     const { asOwner, bookId } = await writingWithChapter("public", t, authApi);
-    const characterId = await asOwner.mutation(api.characters.create, {
+    const fatherId = await asOwner.mutation(api.entities.create, {
+      kind: "character",
+      name: "Aras",
+      bookId,
+    });
+    const childId = await asOwner.mutation(api.entities.create, {
+      kind: "character",
       name: "Selin",
-      originBookId: bookId,
+      bookId,
     });
-    const placeId = await asOwner.mutation(api.places.create, {
-      name: "Liman",
-      originBookId: bookId,
-    });
+    await asOwner.mutation(api.entities.setLinks, { entityId: childId, role: "father", toIds: [fatherId] });
+    await asOwner.mutation(api.social.toggleFavorite, { targetType: "entity", targetId: fatherId });
 
-    await asOwner.mutation(api.characters.remove, { characterId });
-    await asOwner.mutation(api.places.remove, { placeId });
+    await asOwner.mutation(api.entities.remove, { entityId: fatherId });
     await t.finishAllScheduledFunctions(vi.runAllTimers);
 
-    expect(await t.query(api.characters.listForBook, { bookId })).toEqual([]);
-    expect(await t.query(api.places.listForBook, { bookId })).toEqual([]);
-    const links = await t.run(async (ctx) => ({
-      characters: await ctx.db.query("bookCharacters").collect(),
-      places: await ctx.db.query("bookPlaces").collect(),
+    expect((await t.query(api.entities.listForBook, { bookId })).map((e) => e._id)).toEqual([childId]);
+    const leftovers = await t.run(async (ctx) => ({
+      links: await ctx.db.query("entityLinks").collect(),
+      favorites: await ctx.db.query("favorites").collect(),
     }));
-    expect(links).toEqual({ characters: [], places: [] });
+    expect(leftovers).toEqual({ links: [], favorites: [] });
+    const child = await asOwner.query(api.entities.get, { entityId: childId });
+    expect(child?.links.father).toEqual([]);
   });
 });

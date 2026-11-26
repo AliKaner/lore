@@ -45,29 +45,3 @@ export const setBookCover = mutation({
     return null;
   },
 });
-
-export const setCharacterImage = mutation({
-  args: { characterId: v.id("characters"), storageId: v.id("_storage") },
-  handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
-    const character = await ctx.db.get(args.characterId);
-    if (!character || character.creatorId !== userId) {
-      throw new Error("Bu karakterin görselini değiştiremezsin.");
-    }
-    await ctx.db.patch(args.characterId, { imageStorageId: args.storageId });
-    return null;
-  },
-});
-
-export const setPlaceImage = mutation({
-  args: { placeId: v.id("places"), storageId: v.id("_storage") },
-  handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
-    const place = await ctx.db.get(args.placeId);
-    if (!place || place.creatorId !== userId) {
-      throw new Error("Bu mekanın görselini değiştiremezsin.");
-    }
-    await ctx.db.patch(args.placeId, { imageStorageId: args.storageId });
-    return null;
-  },
-});

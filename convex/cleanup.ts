@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 
-// Deleting a writing, chapter, character or place removes the document right
+// Deleting a writing, chapter or entity (character, place…) removes the document right
 // away; what hangs off it (likes, comments, reads, links…) is swept here in
 // bounded batches that reschedule themselves until nothing is left.
 
@@ -17,8 +17,8 @@ type Sweepable = {
     | "reports"
     | "favorites"
     | "chapterReads"
-    | "bookCharacters"
-    | "bookPlaces"
+    | "bookEntities"
+    | "entityLinks"
     | "chapters"
     | "chapterVersions"
   >;
@@ -34,8 +34,7 @@ export const purgeTarget = internalMutation({
     targetType: v.union(
       v.literal("book"),
       v.literal("chapter"),
-      v.literal("character"),
-      v.literal("place"),
+      v.literal("entity"),
     ),
     targetId: v.string(),
   },
@@ -99,25 +98,24 @@ export const purgeTarget = internalMutation({
       }
     }
 
-    if (targetType === "character") {
-      const characterId = ctx.db.normalizeId("characters", targetId);
-      if (characterId !== null) {
-        const links = await ctx.db
-          .query("bookCharacters")
-          .withIndex("by_character", (q) => q.eq("characterId", characterId))
+    if (targetType === "entity") {
+      const entityId = ctx.db.normalizeId("entities", targetId);
+      if (entityId !== null) {
+        const inBooks = await ctx.db
+          .query("bookEntities")
+          .withIndex("by_entity", (q) => q.eq("entityId", entityId))
           .take(BATCH);
-        more = (await sweep(ctx, links)) || more;
-      }
-    }
-
-    if (targetType === "place") {
-      const placeId = ctx.db.normalizeId("places", targetId);
-      if (placeId !== null) {
-        const links = await ctx.db
-          .query("bookPlaces")
-          .withIndex("by_place", (q) => q.eq("placeId", placeId))
+        const outgoing = await ctx.db
+          .query("entityLinks")
+          .withIndex("by_from_and_role", (q) => q.eq("fromId", entityId))
           .take(BATCH);
-        more = (await sweep(ctx, links)) || more;
+        const incoming = await ctx.db
+          .query("entityLinks")
+          .withIndex("by_to", (q) => q.eq("toId", entityId))
+          .take(BATCH);
+        more = (await sweep(ctx, inBooks)) || more;
+        more = (await sweep(ctx, outgoing)) || more;
+        more = (await sweep(ctx, incoming)) || more;
       }
     }
 
@@ -132,7 +130,7 @@ export const purgeTarget = internalMutation({
 });
 
 // Removes every chapter of a deleted book (and schedules each chapter's own
-// sweep), plus the book's cast links.
+// sweep), plus its links to the writer's entities.
 export const purgeBook = internalMutation({
   args: { bookId: v.id("books") },
   handler: async (ctx, { bookId }) => {
@@ -148,17 +146,11 @@ export const purgeBook = internalMutation({
     }
     let more = await sweep(ctx, chapters);
 
-    const characterLinks = await ctx.db
-      .query("bookCharacters")
+    const entityLinks = await ctx.db
+      .query("bookEntities")
       .withIndex("by_book", (q) => q.eq("bookId", bookId))
       .take(BATCH);
-    more = (await sweep(ctx, characterLinks)) || more;
-
-    const placeLinks = await ctx.db
-      .query("bookPlaces")
-      .withIndex("by_book", (q) => q.eq("bookId", bookId))
-      .take(BATCH);
-    more = (await sweep(ctx, placeLinks)) || more;
+    more = (await sweep(ctx, entityLinks)) || more;
 
     if (more) {
       await ctx.scheduler.runAfter(0, internal.cleanup.purgeBook, { bookId });

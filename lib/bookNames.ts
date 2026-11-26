@@ -4,26 +4,22 @@ import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { ENTITY_KINDS } from "@/convex/entityKinds";
 import type { NameEntry } from "@/lib/editorExtensions";
 
-// The characters and places attached to a writing, in the shape the editor
-// and reader use to highlight them.
+// The named things of a writing (characters, places, countries…), in the
+// shape the editor and reader use to highlight them.
 export function useBookNames(bookId: Id<"books">): NameEntry[] {
-  const characters = useQuery(api.characters.listForBook, { bookId });
-  const places = useQuery(api.places.listForBook, { bookId });
+  const entities = useQuery(api.entities.listForBook, { bookId });
   return useMemo(
-    () => [
-      ...(characters ?? []).map((c) => ({
-        name: c.name,
-        kind: "character" as const,
-        detail: c.description,
+    () =>
+      (entities ?? []).map((entity) => ({
+        name: entity.name,
+        kind: entity.kind,
+        detail: entity.summary
+          ? `${ENTITY_KINDS[entity.kind].label} · ${entity.summary}`
+          : ENTITY_KINDS[entity.kind].label,
       })),
-      ...(places ?? []).map((p) => ({
-        name: p.name,
-        kind: "place" as const,
-        detail: p.description,
-      })),
-    ],
-    [characters, places],
+    [entities],
   );
 }

@@ -111,17 +111,18 @@ describe("favorites", () => {
   test("favoriting a character shows up filtered by target type", async () => {
     const { t, authApi } = setupTest(modules);
     const { t: asReader } = await signInAsNewUser(t, authApi);
-    const characterId = await asReader.mutation(api.characters.create, {
+    const characterId = await asReader.mutation(api.entities.create, {
+      kind: "character",
       name: "Elif",
     });
 
     await asReader.mutation(api.social.toggleFavorite, {
-      targetType: "character",
+      targetType: "entity",
       targetId: characterId,
     });
 
     const characterFavorites = await asReader.query(api.social.listMyFavorites, {
-      targetType: "character",
+      targetType: "entity",
     });
     expect(characterFavorites.map((f) => f.targetId)).toContain(characterId);
 
@@ -134,22 +135,23 @@ describe("favorites", () => {
   test("toggling favorite twice removes it", async () => {
     const { t, authApi } = setupTest(modules);
     const { t: asReader } = await signInAsNewUser(t, authApi);
-    const characterId = await asReader.mutation(api.characters.create, {
+    const characterId = await asReader.mutation(api.entities.create, {
+      kind: "character",
       name: "Elif",
     });
 
     await asReader.mutation(api.social.toggleFavorite, {
-      targetType: "character",
+      targetType: "entity",
       targetId: characterId,
     });
     const result = await asReader.mutation(api.social.toggleFavorite, {
-      targetType: "character",
+      targetType: "entity",
       targetId: characterId,
     });
     expect(result.favorited).toBe(false);
 
     const favorites = await asReader.query(api.social.listMyFavorites, {
-      targetType: "character",
+      targetType: "entity",
     });
     expect(favorites).toHaveLength(0);
   });

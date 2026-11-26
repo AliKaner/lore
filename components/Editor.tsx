@@ -11,6 +11,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extensions";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import SelectionMenu, { type SelectionMenuHandle } from "@/components/SelectionMenu";
+import type { EntityKind } from "@/convex/entityKinds";
 import {
   AuthorNote,
   AuthorNoteHidden,
@@ -72,7 +73,7 @@ export function ChapterReader({
 
 const EMPTY_NAMES: NameEntry[] = [];
 
-type AddableKind = "character" | "place";
+type AddableKind = EntityKind;
 
 export type ChapterEditorHandle = {
   focusStart: () => void;

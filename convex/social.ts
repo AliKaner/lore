@@ -22,11 +22,7 @@ async function canViewTarget(
 }
 
 const likeableTarget = v.union(v.literal("book"), v.literal("chapter"));
-const favoriteTarget = v.union(
-  v.literal("book"),
-  v.literal("character"),
-  v.literal("place"),
-);
+const favoriteTarget = v.union(v.literal("book"), v.literal("entity"));
 
 async function bumpCount(
   ctx: MutationCtx,

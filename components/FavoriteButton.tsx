@@ -41,7 +41,7 @@ export default function FavoriteButton({
   targetType,
   targetId,
 }: {
-  targetType: "book" | "character" | "place";
+  targetType: "book" | "entity";
   targetId: string;
 }) {
   const favorites = useQuery(api.social.listMyFavorites, { targetType });

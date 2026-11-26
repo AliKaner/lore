@@ -16,6 +16,8 @@ import {
 } from "@/components/WritingChrome";
 import { useBookNames } from "@/lib/bookNames";
 import type { NoteEntry } from "@/lib/editorExtensions";
+import type { EntityKind } from "@/convex/entityKinds";
+import EntityDrawer from "@/components/entity/EntityDrawer";
 import { KINDS, todayTitle } from "@/lib/writingKinds";
 
 const AUTOSAVE_MS = 1500;
@@ -96,8 +98,7 @@ export default function ChapterForm({
   const updateChapter = useMutation(api.chapters.update);
   const updateBook = useMutation(api.books.update);
   const [askPublish, setAskPublish] = useState(false);
-  const createCharacter = useMutation(api.characters.create);
-  const createPlace = useMutation(api.places.create);
+  const createEntity = useMutation(api.entities.create);
   const book = useQuery(api.books.get, { bookId });
   const me = useQuery(api.users.me);
   const names = useBookNames(bookId);
@@ -105,12 +106,8 @@ export default function ChapterForm({
   const isOwner = book != null && me != null && book.ownerId === me._id;
 
   // Errors surface inside the floating toolbar that asked for this.
-  async function addName(name: string, nameKind: "character" | "place", description?: string) {
-    if (nameKind === "character") {
-      await createCharacter({ name, description, originBookId: bookId });
-    } else {
-      await createPlace({ name, description, originBookId: bookId });
-    }
+  async function addName(name: string, nameKind: EntityKind, description?: string) {
+    await createEntity({ kind: nameKind, name, summary: description, bookId });
   }
 
   // A published text is never changed behind the reader's back: edits to it
@@ -132,6 +129,7 @@ export default function ChapterForm({
   const [editorKey, setEditorKey] = useState(0);
   const [notes, setNotes] = useState<NoteEntry[]>([]);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [worldOpen, setWorldOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [savedChapterId, setSavedChapterId] = useState<Id<"chapters"> | undefined>(
     existingChapter?._id,
@@ -409,6 +407,22 @@ export default function ChapterForm({
               </span>
             )}
           </button>
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setWorldOpen(true)}
+              title="Bu yazının karakterleri, yerleri ve fazlası"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground"
+            >
+              <span aria-hidden="true" className="text-[13px] leading-none text-sapphire">✦</span>
+              <span className="hidden sm:inline">Evren</span>
+              {names.length > 0 && (
+                <span className="min-w-5 rounded-full bg-sapphire-soft px-1.5 text-center text-[11px] font-semibold text-foreground">
+                  {names.length}
+                </span>
+              )}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setHistoryOpen(true)}
@@ -507,7 +521,7 @@ export default function ChapterForm({
         />
 
         <p className="mt-16 text-xs leading-relaxed text-muted/80">
-          Seç ya da sağ tıkla: biçim, not, karakter, mekan · <kbd className="font-sans">##</kbd> ara
+          Seç ya da sağ tıkla: biçim, not, karakter, mekan, ülke… · <kbd className="font-sans">##</kbd> ara
           başlık · <kbd className="font-sans">&gt;</kbd> alıntı · <kbd className="font-sans">-</kbd> liste ·{" "}
           <kbd className="font-sans">Ctrl+S</kbd> kaydet
         </p>
@@ -530,6 +544,7 @@ export default function ChapterForm({
           onChoose={(open, dontAskAgain) => void publishWith(open, dontAskAgain)}
         />
       )}
+      {isOwner && <EntityDrawer bookId={bookId} open={worldOpen} onClose={() => setWorldOpen(false)} />}
       <HistoryDrawer
         chapterId={savedChapterId}
         open={historyOpen}
@@ -541,13 +556,14 @@ export default function ChapterForm({
           setHistoryOpen(false);
         }}
       />
-      {(notesOpen || historyOpen) && (
+      {(notesOpen || historyOpen || worldOpen) && (
         <button
           type="button"
           aria-label="Kapat"
           onClick={() => {
             setNotesOpen(false);
             setHistoryOpen(false);
+            setWorldOpen(false);
           }}
           className="fixed inset-0 z-40 cursor-default bg-ink/10 backdrop-blur-[1px]"
         />

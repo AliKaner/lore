@@ -21,6 +21,8 @@ import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonPrimary } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
 import { useCommunityOpen } from "@/lib/community";
+import { ENTITY_KINDS, ENTITY_KIND_ORDER } from "@/convex/entityKinds";
+import { KindGlyph } from "@/components/entity/shared";
 
 export default function BookPage({
   params,
@@ -30,8 +32,7 @@ export default function BookPage({
   const { bookId } = use(params);
   const book = useQuery(api.books.get, { bookId });
   const chapters = useQuery(api.chapters.getTree, { bookId });
-  const characters = useQuery(api.characters.listForBook, { bookId });
-  const places = useQuery(api.places.listForBook, { bookId });
+  const entities = useQuery(api.entities.listForBook, { bookId });
   const me = useQuery(api.users.me);
   const setBookCover = useMutation(api.files.setBookCover);
   const showToast = useToast();
@@ -133,49 +134,42 @@ export default function BookPage({
         <ChapterTree chapters={chapters} bookId={bookId} />
       )}
 
-      {((characters && characters.length > 0) || (places && places.length > 0)) && (
-        <div className="mt-8 flex flex-col gap-6">
-          {characters && characters.length > 0 && (
-            <div>
-              <h2 className="font-medium mb-2">Karakterler</h2>
-              <ul className="flex flex-wrap gap-3">
-                {characters.map((character) => (
-                  <li
-                    key={character._id}
-                    className="flex items-center gap-2 border border-border rounded-full pl-1 pr-3 py-1"
-                  >
-                    <BookCover
-                      storageId={character.imageStorageId}
-                      title={character.name}
-                      className="h-8 w-8 rounded-full"
-                    />
-                    <span className="text-sm">{character.name}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {places && places.length > 0 && (
-            <div>
-              <h2 className="font-medium mb-2">Mekanlar</h2>
-              <ul className="flex flex-wrap gap-3">
-                {places.map((place) => (
-                  <li
-                    key={place._id}
-                    className="flex items-center gap-2 border border-border rounded-full pl-1 pr-3 py-1"
-                  >
-                    <BookCover
-                      storageId={place.imageStorageId}
-                      title={place.name}
-                      className="h-8 w-8 rounded-full"
-                    />
-                    <span className="text-sm">{place.name}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+      {entities && entities.length > 0 && (
+        <section className="mt-10">
+          <h2 className="font-medium mb-3">Evreni</h2>
+          <div className="flex flex-col gap-5">
+            {ENTITY_KIND_ORDER.filter((kind) => entities.some((e) => e.kind === kind)).map((kind) => (
+              <div key={kind}>
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
+                  {ENTITY_KINDS[kind].plural}
+                </p>
+                <ul className="flex flex-wrap gap-2">
+                  {entities
+                    .filter((e) => e.kind === kind)
+                    .map((entity) => (
+                      <li key={entity._id}>
+                        <Link
+                          href={isOwner ? `/evren/${entity._id}` : `/kitap/${bookId}/evren/${entity._id}`}
+                          title={entity.summary ?? undefined}
+                          className="flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 transition-colors hover:border-border-hover hover:text-accent"
+                        >
+                          {entity.coverUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={entity.coverUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+                          ) : (
+                            <span className="inline-flex h-8 w-8 items-center justify-center">
+                              <KindGlyph kind={entity.kind} />
+                            </span>
+                          )}
+                          <span className="text-sm">{entity.name}</span>
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       {isOwner && (

@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { writingKindValidator } from "./writingKinds";
+import { entityKindValidator } from "./entityKinds";
 
 export default defineSchema({
   users: defineTable({
@@ -66,39 +67,44 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_chapter_and_time", ["chapterId", "createdAt"]),
 
-  characters: defineTable({
+  // Everything with a name in a writer's world: characters, places,
+  // countries, races, weapons… The kind decides the form (convex/entityKinds.ts).
+  entities: defineTable({
+    kind: entityKindValidator,
     name: v.string(),
-    description: v.optional(v.string()),
-    imageStorageId: v.optional(v.id("_storage")),
+    summary: v.optional(v.string()),
+    // Plain values of the kind's fields, by key.
+    fields: v.record(v.string(), v.string()),
+    // Fields the writer added themselves.
+    custom: v.array(v.object({ label: v.string(), value: v.string() })),
+    // The gallery (no slot; the first is the portrait) and pictures with a
+    // purpose, like a country's map (slot = the field key).
+    images: v.array(
+      v.object({ storageId: v.id("_storage"), slot: v.optional(v.string()) }),
+    ),
     creatorId: v.id("users"),
-    originBookId: v.optional(v.id("books")),
     createdAt: v.number(),
-  }).index("by_creator", ["creatorId"]),
+    updatedAt: v.number(),
+  }).index("by_creator_and_kind", ["creatorId", "kind"]),
 
-  places: defineTable({
-    name: v.string(),
-    description: v.optional(v.string()),
-    imageStorageId: v.optional(v.id("_storage")),
+  // A link field's value: from one entity to another, under the field's key.
+  entityLinks: defineTable({
     creatorId: v.id("users"),
-    originBookId: v.optional(v.id("books")),
-    createdAt: v.number(),
-  }).index("by_creator", ["creatorId"]),
+    fromId: v.id("entities"),
+    role: v.string(),
+    toId: v.id("entities"),
+  })
+    .index("by_from_and_role", ["fromId", "role"])
+    .index("by_to", ["toId"]),
 
-  bookCharacters: defineTable({
+  // Which writings an entity is part of; its name is highlighted there.
+  bookEntities: defineTable({
     bookId: v.id("books"),
-    characterId: v.id("characters"),
+    entityId: v.id("entities"),
   })
     .index("by_book", ["bookId"])
-    .index("by_book_and_character", ["bookId", "characterId"])
-    .index("by_character", ["characterId"]),
-
-  bookPlaces: defineTable({
-    bookId: v.id("books"),
-    placeId: v.id("places"),
-  })
-    .index("by_book", ["bookId"])
-    .index("by_book_and_place", ["bookId", "placeId"])
-    .index("by_place", ["placeId"]),
+    .index("by_book_and_entity", ["bookId", "entityId"])
+    .index("by_entity", ["entityId"]),
 
   likes: defineTable({
     userId: v.id("users"),
@@ -119,11 +125,7 @@ export default defineSchema({
 
   favorites: defineTable({
     userId: v.id("users"),
-    targetType: v.union(
-      v.literal("book"),
-      v.literal("character"),
-      v.literal("place"),
-    ),
+    targetType: v.union(v.literal("book"), v.literal("entity")),
     targetId: v.string(),
     createdAt: v.number(),
   })

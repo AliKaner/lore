@@ -195,6 +195,33 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       halka ("320/500"), okuma sayfasında "Bugün 12/20 dk". Hedef o sayfa
       açıkken tamamlanırsa bir kere kutlama bildirimi çıkar.
 
+### Yazma ekranı: sayfa, panolar, modlar
+
+- [x] **Sayfa görünümü** (üst çubukta "Sayfa"): Serbest ya da A5, B5, A4, B4,
+      A3, B3. Metin gerçek kâğıt ölçüsünde, o boyuta uygun kenar boşluğu ve
+      yazı boyuyla sayfalara dizilir; bir satır sığmazsa sonraki sayfaya
+      geçer, paragraf sayfa sonunda bölünür. Ekrandaki bir sayfa = basılı bir
+      sayfa (ölçümle doğrulandı, ±1 px). Sığmayan boyutlar ekrana orantılı
+      küçültülür. Sayfa sayısı çubukta görünür. Seçim cihazda saklanır.
+      (`lib/paper.ts`, `Pagination` eklentisi + `usePagination`.)
+- [x] **Kenar panoları**: sayfanın solunda ve sağında, yer varsa açılır.
+      Not, yapılacaklar listesi, evrenden bir kayıt (görsel, özet, birkaç
+      bilgiyle; tıklayınca Evren çekmecesinde açılır) ve görsel eklenebilir.
+      Kartlar yukarı/aşağı ve öbür panoya taşınır. Her yazarın her yazı için
+      kendi panoları, yalnızca kendisi görür (`convex/boards.ts`).
+      "Panoları gizle" ile kapanır.
+- [x] **Yazma modu** (üst çubukta "Mod"): **Daktilo** — yazılan satır
+      ekranda hep aynı yükseklikte kalır, metin yukarı akar; **Odak** —
+      üzerinde çalışılan paragraf dışındakiler soluklaşır.
+- [x] **Yazma sesleri**: Sessiz (varsayılan), Daktilo (satır sonunda zil),
+      Mekanik klavye, Yumuşak tuş, Kalem; ses düzeyi ayarlanır. Sesler
+      tarayıcıda üretilir (Web Audio), dosya indirilmez; her vuruş biraz
+      farklı çıkar.
+- [x] Akış kontrolünden düzeltmeler: boş masada önce "ilk yazın" kartı
+      (hedef kartı yazı olunca çıkar); adsız yazıda çubukta "Ad ver"; kapak
+      ve görsel yükleme düğmesi tasarıma uygun; dar ekranda çubuk etiketleri
+      simgeye iner.
+
 ### Sosyal Yapı
 
 > **Topluluk eşiği:** Platformda toplam 100 yazı olana kadar sosyal taraf

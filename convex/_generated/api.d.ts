@@ -10,6 +10,7 @@
 
 import type * as access from "../access.js";
 import type * as auth from "../auth.js";
+import type * as boards from "../boards.js";
 import type * as books from "../books.js";
 import type * as chapters from "../chapters.js";
 import type * as cleanup from "../cleanup.js";
@@ -37,6 +38,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   access: typeof access;
   auth: typeof auth;
+  boards: typeof boards;
   books: typeof books;
   chapters: typeof chapters;
   cleanup: typeof cleanup;

@@ -612,3 +612,76 @@ h1, h2, h3 {
     radial-gradient(70% 90% at 35% 30%, rgba(81, 106, 200, 0.55) 0%, rgba(81, 106, 200, 0) 70%),
     #0f1939;
 }
+
+/* ---------- Page view (writing screen) ----------
+   The sheet is drawn at the paper's real size; usePagination puts a
+   .page-gap before the first line of each new page. */
+.paper-sheet {
+  background: var(--surface);
+  box-shadow:
+    0 1px 2px rgba(15, 25, 57, 0.06),
+    0 18px 50px -28px rgba(15, 25, 57, 0.4);
+}
+.paper-sheet .writing-surface {
+  font-size: inherit;
+  line-height: 1.55;
+}
+.paper-sheet .writing-surface p {
+  margin-bottom: 0.7em;
+}
+.paper-sheet .ProseMirror {
+  min-height: 0;
+}
+.page-gap {
+  display: block;
+  position: relative;
+  margin-inline: calc(-1 * var(--margin-x) - 3rem);
+  text-indent: 0;
+  font-style: normal;
+  font-weight: 400;
+  user-select: none;
+  cursor: default;
+}
+.page-gap-end,
+.page-gap-start {
+  display: block;
+  position: relative;
+  margin-inline: 3rem;
+  background: var(--surface);
+}
+.page-gap-end {
+  box-shadow: 0 16px 26px -22px rgba(15, 25, 57, 0.45);
+  z-index: 1;
+}
+.page-gap-start {
+  box-shadow: 0 -10px 20px -20px rgba(15, 25, 57, 0.3);
+}
+.page-gap-desk {
+  display: block;
+  background: var(--background);
+}
+.page-number {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0.9rem;
+  text-align: center;
+  font-family: var(--font-garamond), Garamond, Georgia, serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.pagination-measuring .page-gap {
+  display: none;
+}
+
+/* Focus mode: paragraphs other than the one being written fade back. Done
+   with colour, not opacity, so page breaks inside a paragraph stay solid. */
+.focus-mode .ProseMirror > * {
+  transition: color 0.35s ease;
+}
+.focus-mode .ProseMirror-focused > *:not(.has-focus) {
+  color: color-mix(in srgb, var(--foreground) 28%, transparent);
+}
+.focus-mode .ProseMirror-focused > *:not(.has-focus) .name-mark {
+  text-decoration-color: color-mix(in srgb, var(--caramel) 30%, transparent);
+}

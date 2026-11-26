@@ -105,6 +105,25 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_creator_and_kind", ["creatorId", "kind"]),
 
+  // The writer's side boards on the writing screen, one pair per writer and
+  // writing: notes, checklists, pinned entities and pictures.
+  boardItems: defineTable({
+    ownerId: v.id("users"),
+    bookId: v.id("books"),
+    side: v.union(v.literal("left"), v.literal("right")),
+    order: v.number(),
+    kind: v.union(v.literal("note"), v.literal("checklist"), v.literal("entity"), v.literal("image")),
+    title: v.optional(v.string()),
+    text: v.optional(v.string()),
+    items: v.optional(v.array(v.object({ text: v.string(), done: v.boolean() }))),
+    entityId: v.optional(v.id("entities")),
+    storageId: v.optional(v.id("_storage")),
+    createdAt: v.number(),
+  })
+    .index("by_owner_and_book", ["ownerId", "bookId"])
+    .index("by_book", ["bookId"])
+    .index("by_entity", ["entityId"]),
+
   // A link field's value: from one entity to another, under the field's key.
   entityLinks: defineTable({
     creatorId: v.id("users"),

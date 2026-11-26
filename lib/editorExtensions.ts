@@ -357,3 +357,94 @@ export function flowWords(content: string): FlowWord[] {
   }
   return words;
 }
+
+/* ---------- Page view: breaks between sheets ---------- */
+
+// Where one page ends and the next begins, worked out from the layout by
+// usePagination (components/Editor.tsx). `blank` is the empty space left at
+// the bottom of the page when the next line doesn't fit.
+export type PageBreak = { pos: number; blank: number; page: number };
+// The sheet's margins and the gap between sheets, in CSS pixels.
+export type PageGeometry = { marginTop: number; marginBottom: number; marginX: number; gap: number };
+
+export const paginationKey = new PluginKey<DecorationSet>("pagination");
+
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    pagination: {
+      setPageBreaks: (breaks: PageBreak[], geometry: PageGeometry | null) => ReturnType;
+    };
+  }
+}
+
+// A block that ends one sheet and starts the next: the rest of the page,
+// its bottom margin with the page number, the desk between the sheets and
+// the next page's top margin.
+function pageGap(page: PageBreak, g: PageGeometry) {
+  const gap = document.createElement("span");
+  gap.className = "page-gap";
+  gap.contentEditable = "false";
+  gap.setAttribute("aria-hidden", "true");
+  gap.style.setProperty("--margin-x", `${g.marginX}px`);
+  const end = document.createElement("span");
+  end.className = "page-gap-end";
+  end.style.height = `${Math.max(0, page.blank + g.marginBottom)}px`;
+  const number = document.createElement("span");
+  number.className = "page-number";
+  number.textContent = String(page.page);
+  end.append(number);
+  const desk = document.createElement("span");
+  desk.className = "page-gap-desk";
+  desk.style.height = `${g.gap}px`;
+  const start = document.createElement("span");
+  start.className = "page-gap-start";
+  start.style.height = `${g.marginTop}px`;
+  gap.append(end, desk, start);
+  return gap;
+}
+
+export const Pagination = Extension.create({
+  name: "pagination",
+  addCommands() {
+    return {
+      setPageBreaks:
+        (breaks, geometry) =>
+        ({ tr, dispatch }) => {
+          if (dispatch) tr.setMeta(paginationKey, { breaks, geometry }).setMeta("addToHistory", false);
+          return true;
+        },
+    };
+  },
+  addProseMirrorPlugins() {
+    return [
+      new Plugin<DecorationSet>({
+        key: paginationKey,
+        state: {
+          init: () => DecorationSet.empty,
+          apply(tr, set) {
+            const meta = tr.getMeta(paginationKey) as
+              | { breaks: PageBreak[]; geometry: PageGeometry | null }
+              | undefined;
+            if (!meta) return set.map(tr.mapping, tr.doc);
+            const g = meta.geometry;
+            if (!g) return DecorationSet.empty;
+            const shape = `${g.marginTop}-${g.marginBottom}-${g.marginX}-${g.gap}`;
+            return DecorationSet.create(
+              tr.doc,
+              meta.breaks.map((page) =>
+                Decoration.widget(page.pos, () => pageGap(page, g), {
+                  side: -1,
+                  ignoreSelection: true,
+                  key: `page-${page.page}-${Math.round(page.blank * 10)}-${shape}`,
+                }),
+              ),
+            );
+          },
+        },
+        props: {
+          decorations: (state) => paginationKey.getState(state),
+        },
+      }),
+    ];
+  },
+});

@@ -293,7 +293,7 @@ export function WritingGoalBadge() {
   return (
     <span
       title={`Bugün ${number(words)} / ${number(goal)} kelime${summary.writingStreak ? ` · ${summary.writingStreak} günlük seri` : ""}`}
-      className="hidden items-center gap-1.5 text-xs tabular-nums text-muted md:inline-flex"
+      className="hidden items-center gap-1.5 text-xs tabular-nums text-muted xl:inline-flex"
     >
       <GoalRing value={words} goal={goal} size={18} stroke={3} />
       {number(words)}/{number(goal)}

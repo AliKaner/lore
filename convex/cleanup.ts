@@ -19,6 +19,7 @@ type Sweepable = {
     | "chapterReads"
     | "bookEntities"
     | "entityLinks"
+    | "boardItems"
     | "chapters"
     | "chapterVersions"
   >;
@@ -113,6 +114,11 @@ export const purgeTarget = internalMutation({
           .query("entityLinks")
           .withIndex("by_to", (q) => q.eq("toId", entityId))
           .take(BATCH);
+        const pinned = await ctx.db
+          .query("boardItems")
+          .withIndex("by_entity", (q) => q.eq("entityId", entityId))
+          .take(BATCH);
+        more = (await sweep(ctx, pinned)) || more;
         more = (await sweep(ctx, inBooks)) || more;
         more = (await sweep(ctx, outgoing)) || more;
         more = (await sweep(ctx, incoming)) || more;
@@ -151,6 +157,15 @@ export const purgeBook = internalMutation({
       .withIndex("by_book", (q) => q.eq("bookId", bookId))
       .take(BATCH);
     more = (await sweep(ctx, entityLinks)) || more;
+
+    const boardItems = await ctx.db
+      .query("boardItems")
+      .withIndex("by_book", (q) => q.eq("bookId", bookId))
+      .take(BATCH);
+    for (const item of boardItems) {
+      if (item.storageId) await ctx.storage.delete(item.storageId);
+    }
+    more = (await sweep(ctx, boardItems)) || more;
 
     if (more) {
       await ctx.scheduler.runAfter(0, internal.cleanup.purgeBook, { bookId });

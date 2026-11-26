@@ -17,17 +17,24 @@ export default function EntityDrawer({
   bookId,
   open,
   onClose,
+  openId: openIdProp,
+  onOpenId,
 }: {
   bookId: Id<"books">;
   open: boolean;
   onClose: () => void;
+  // Lets the page open a given entry (a card on the side board, say).
+  openId?: Id<"entities"> | null;
+  onOpenId?: (id: Id<"entities"> | null) => void;
 }) {
   const inBook = useQuery(api.entities.listForBook, open ? { bookId } : "skip");
   const mine = useQuery(api.entities.listMine, open ? {} : "skip");
   const createEntity = useMutation(api.entities.create);
   const attachToBook = useMutation(api.entities.attachToBook);
   const showToast = useToast();
-  const [openId, setOpenId] = useState<Id<"entities"> | null>(null);
+  const [innerId, setInnerId] = useState<Id<"entities"> | null>(null);
+  const openId = openIdProp !== undefined ? openIdProp : innerId;
+  const setOpenId = onOpenId ?? setInnerId;
   const [newKind, setNewKind] = useState<EntityKind>("character");
   const [newName, setNewName] = useState("");
   const [query, setQuery] = useState("");
@@ -41,7 +48,7 @@ export default function EntityDrawer({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, openId, onClose]);
+  }, [open, openId, onClose, setOpenId]);
 
   async function create(event: React.FormEvent) {
     event.preventDefault();

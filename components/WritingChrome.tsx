@@ -30,19 +30,22 @@ export function BookSettingsButton({ book }: { book: Doc<"books"> }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // A writing still called "Başlıksız …" asks for its name right here.
+  const untitled = book.title.startsWith("Başlıksız");
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        aria-label="Yazı ayarları"
+        aria-label={untitled ? "Yazına ad ver" : "Yazı ayarları"}
         title="Yazı ayarları"
-        className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
-          open ? "bg-accent-soft text-accent" : "text-muted hover:bg-accent-soft/60 hover:text-foreground"
-        }`}
+        className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-full transition-colors ${
+          untitled ? "border border-dashed border-caramel px-3 text-sm" : "w-9"
+        } ${open ? "bg-accent-soft text-accent" : "text-muted hover:bg-accent-soft/60 hover:text-foreground"}`}
       >
         <GearIcon />
+        {untitled && <span className="hidden text-foreground lg:inline">Ad ver</span>}
       </button>
       {open && (
         <>

@@ -1,13 +1,26 @@
 "use client";
 
-import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import type { WritingKind } from "@/convex/writingKinds";
-import { ChapterEditor, type ChapterEditorHandle } from "@/components/Editor";
+import { ChapterEditor, type ChapterEditorHandle, type PageView } from "@/components/Editor";
+import PaperPicker from "@/components/PaperPicker";
+import SideBoards from "@/components/SideBoards";
+import WritingModeMenu from "@/components/WritingModeMenu";
+import { useWritingModes } from "@/lib/writingModes";
+import { MM, usePaperChoice } from "@/lib/paper";
 import {
   BookSettingsButton,
   HistoryDrawer,
@@ -23,6 +36,14 @@ import { WritingGoalBadge } from "@/components/Goals";
 import { KINDS, todayTitle } from "@/lib/writingKinds";
 
 const AUTOSAVE_MS = 1500;
+
+function subscribeResize(onChange: () => void) {
+  window.addEventListener("resize", onChange);
+  return () => window.removeEventListener("resize", onChange);
+}
+function useViewportWidth() {
+  return useSyncExternalStore(subscribeResize, () => window.innerWidth, () => 1280);
+}
 
 type Status = "draft" | "published";
 type Snapshot = { title: string; content: string };
@@ -131,7 +152,41 @@ export default function ChapterForm({
   const [editorKey, setEditorKey] = useState(0);
   const [notes, setNotes] = useState<NoteEntry[]>([]);
   const [notesOpen, setNotesOpen] = useState(false);
+
+  // Page view: the text on sheets of a real paper size.
+  const [paper, choosePaper] = usePaperChoice();
+  const [modes, changeModes] = useWritingModes();
+  const viewportWidth = useViewportWidth();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const pageContentRef = useRef<HTMLDivElement>(null);
+  const [pageLayout, setPageLayout] = useState({ pages: 1, lastBlank: 0 });
+  const [sheetHeight, setSheetHeight] = useState(0);
+  const sheetWidth = paper ? paper.width * MM : 0;
+  const scale = paper ? Math.min(1, (viewportWidth - 32) / sheetWidth) : 1;
+  const pageView = useMemo<PageView | undefined>(
+    () =>
+      paper
+        ? {
+            paper,
+            content: pageContentRef,
+            scale,
+            onLayout: (next) =>
+              setPageLayout((prev) =>
+                prev.pages === next.pages && Math.abs(prev.lastBlank - next.lastBlank) < 0.5 ? prev : next,
+              ),
+          }
+        : undefined,
+    [paper, scale],
+  );
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!paper || !sheet) return;
+    const observer = new ResizeObserver(() => setSheetHeight(sheet.offsetHeight));
+    observer.observe(sheet);
+    return () => observer.disconnect();
+  }, [paper]);
   const [worldOpen, setWorldOpen] = useState(false);
+  const [worldEntity, setWorldEntity] = useState<Id<"entities"> | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [savedChapterId, setSavedChapterId] = useState<Id<"chapters"> | undefined>(
     existingChapter?._id,
@@ -358,7 +413,7 @@ export default function ChapterForm({
   const disabled = submitting !== null || (title.trim().length === 0 && words === 0);
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className={`min-h-screen ${paper ? "bg-background" : "bg-surface"}`}>
       {/* Top bar */}
       <header
         className={`sticky top-0 z-40 border-b bg-surface/85 backdrop-blur-md transition-[opacity,border-color] duration-500 ${
@@ -393,7 +448,9 @@ export default function ChapterForm({
             </span>
           </div>
           <WritingGoalBadge />
-          <span className="hidden text-xs tabular-nums text-muted md:inline">
+          <PaperPicker paper={paper} pages={pageLayout.pages} onChoose={choosePaper} />
+          <WritingModeMenu modes={modes} onChange={changeModes} />
+          <span className="hidden text-xs tabular-nums text-muted xl:inline">
             {words.toLocaleString("tr-TR")} kelime
           </span>
           <button
@@ -403,7 +460,7 @@ export default function ChapterForm({
             className="relative inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground"
           >
             <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-[2px] bg-caramel/70" />
-            <span className="hidden sm:inline">Notlar</span>
+            <span className="hidden lg:inline">Notlar</span>
             {notes.length > 0 && (
               <span className="min-w-5 rounded-full bg-caramel-soft px-1.5 text-center text-[11px] font-semibold text-foreground">
                 {notes.length}
@@ -418,7 +475,7 @@ export default function ChapterForm({
               className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground"
             >
               <span aria-hidden="true" className="text-[13px] leading-none text-sapphire">✦</span>
-              <span className="hidden sm:inline">Evren</span>
+              <span className="hidden lg:inline">Evren</span>
               {names.length > 0 && (
                 <span className="min-w-5 rounded-full bg-sapphire-soft px-1.5 text-center text-[11px] font-semibold text-foreground">
                   {names.length}
@@ -436,7 +493,7 @@ export default function ChapterForm({
             <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M3.5 10a6.5 6.5 0 1 0 1.9-4.6M3.5 3.5v2.6h2.6M10 6.5V10l2.4 1.6" />
             </svg>
-            <span className="hidden lg:inline">Geçmiş</span>
+            <span className="hidden xl:inline">Geçmiş</span>
           </button>
           <ThemeButton />
           {isOwner && book && <BookSettingsButton book={book} />}
@@ -489,47 +546,92 @@ export default function ChapterForm({
       )}
 
       {/* The sheet */}
-      <main data-writing-canvas className="mx-auto max-w-[42rem] px-6 pb-40 pt-12 sm:pt-20">
-        {eyebrow && (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sapphire">{eyebrow}</p>
-        )}
-        <textarea
-          value={title}
-          rows={1}
-          onChange={(event) => setTitle(event.target.value.replace(/\n/gu, " "))}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              editorRef.current?.focusStart();
+      <main
+        data-writing-canvas
+        className={`${paper ? "overflow-x-clip px-4 pt-8 sm:pt-12" : "mx-auto max-w-[42rem] px-6 pt-12 sm:pt-20"} ${
+          // Room below the last line, so the typewriter can keep it mid-screen.
+          modes.typewriter ? "pb-[62vh]" : "pb-40"
+        }`}
+      >
+        {/* The same tree in both views, so switching keeps the editor (and its
+            undo history) alive. */}
+        <div
+          className={paper ? "mx-auto" : undefined}
+          style={paper ? { width: sheetWidth * scale, height: sheetHeight ? sheetHeight * scale : undefined } : undefined}
+        >
+          <div
+            ref={sheetRef}
+            className={paper ? "paper-sheet" : undefined}
+            style={
+              paper
+                ? {
+                    width: sheetWidth,
+                    padding: `${paper.marginTop * MM}px ${paper.marginX * MM}px 0`,
+                    fontSize: `${paper.fontPt}pt`,
+                    transform: scale < 1 ? `scale(${scale})` : undefined,
+                    transformOrigin: "top left",
+                  }
+                : undefined
             }
-          }}
-          placeholder={cfg.unitTitlePlaceholder}
-          aria-label="Başlık"
-          className="mt-3 block w-full resize-none overflow-hidden border-none bg-transparent p-0 font-display text-[2.4rem] font-medium leading-[1.12] text-foreground outline-none [field-sizing:content] placeholder:text-muted/45 sm:text-[3.1rem]"
-        />
-        {intro && <p className="mt-4 text-[15px] leading-relaxed text-muted">{intro}</p>}
-        <div aria-hidden="true" className="mb-9 mt-7 flex items-center gap-3 text-caramel/80">
-          <span className="h-px w-10 bg-caramel/60" />
-          <span className="h-1.5 w-1.5 rotate-45 bg-caramel" />
+          >
+            <div ref={pageContentRef}>
+              {eyebrow && !paper && (
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sapphire">{eyebrow}</p>
+              )}
+              <textarea
+                value={title}
+                rows={1}
+                onChange={(event) => setTitle(event.target.value.replace(/\n/gu, " "))}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    editorRef.current?.focusStart();
+                  }
+                }}
+                placeholder={cfg.unitTitlePlaceholder}
+                aria-label="Başlık"
+                className={`block w-full resize-none overflow-hidden border-none bg-transparent p-0 font-display font-medium leading-[1.12] text-foreground outline-none [field-sizing:content] placeholder:text-muted/45 ${
+                  paper ? "text-[2.1em]" : "mt-3 text-[2.4rem] sm:text-[3.1rem]"
+                }`}
+              />
+              {intro && !paper && <p className="mt-4 text-[15px] leading-relaxed text-muted">{intro}</p>}
+              <div
+                aria-hidden="true"
+                className={`flex items-center gap-3 text-caramel/80 ${paper ? "mb-[1.4em] mt-[0.9em]" : "mb-9 mt-7"}`}
+              >
+                <span className="h-px w-10 bg-caramel/60" />
+                <span className="h-1.5 w-1.5 rotate-45 bg-caramel" />
+              </div>
+              <ChapterEditor
+                ref={editorRef}
+                key={editorKey}
+                content={content}
+                onChange={setContent}
+                onWordCount={setWords}
+                onNotesChange={setNotes}
+                names={names}
+                onAddName={isOwner ? addName : undefined}
+                placeholder="Yazmaya başla…"
+                pageView={pageView}
+                modes={modes}
+              />
+            </div>
+            {paper && (
+              <div className="relative" style={{ height: pageLayout.lastBlank + paper.marginBottom * MM }}>
+                <span className="page-number">{pageLayout.pages}</span>
+              </div>
+            )}
+          </div>
         </div>
-        <ChapterEditor
-          ref={editorRef}
-          key={editorKey}
-          content={content}
-          onChange={setContent}
-          onWordCount={setWords}
-          onNotesChange={setNotes}
-          names={names}
-          onAddName={isOwner ? addName : undefined}
-          placeholder="Yazmaya başla…"
-        />
 
-        <p className="mt-16 text-xs leading-relaxed text-muted/80">
-          Seç ya da sağ tıkla: biçim, not, karakter, mekan, ülke… · <kbd className="font-sans">##</kbd> ara
-          başlık · <kbd className="font-sans">&gt;</kbd> alıntı · <kbd className="font-sans">-</kbd> liste ·{" "}
-          <kbd className="font-sans">Ctrl+S</kbd> kaydet
-        </p>
-        {footer && <div className="mt-10 border-t border-border/70 pt-5">{footer}</div>}
+        <div className={paper ? "mx-auto max-w-[42rem]" : undefined}>
+          <p className="mt-16 text-xs leading-relaxed text-muted/80">
+            Seç ya da sağ tıkla: biçim, not, karakter, mekan, ülke… · <kbd className="font-sans">##</kbd> ara
+            başlık · <kbd className="font-sans">&gt;</kbd> alıntı · <kbd className="font-sans">-</kbd> liste ·{" "}
+            <kbd className="font-sans">Ctrl+S</kbd> kaydet
+          </p>
+          {footer && <div className="mt-10 border-t border-border/70 pt-5">{footer}</div>}
+        </div>
       </main>
 
       <NotesDrawer
@@ -548,7 +650,28 @@ export default function ChapterForm({
           onChoose={(open, dontAskAgain) => void publishWith(open, dontAskAgain)}
         />
       )}
-      {isOwner && <EntityDrawer bookId={bookId} open={worldOpen} onClose={() => setWorldOpen(false)} />}
+      {isOwner && (
+        <EntityDrawer
+          bookId={bookId}
+          open={worldOpen}
+          onClose={() => setWorldOpen(false)}
+          openId={worldEntity}
+          onOpenId={setWorldEntity}
+        />
+      )}
+      {me && (
+        <SideBoards
+          bookId={bookId}
+          contentWidth={paper ? sheetWidth * scale : 672}
+          viewportWidth={viewportWidth}
+          onOpenEntity={(id) => {
+            if (isOwner) {
+              setWorldEntity(id);
+              setWorldOpen(true);
+            } else window.open(`/evren/${id}`, "_blank");
+          }}
+        />
+      )}
       <HistoryDrawer
         chapterId={savedChapterId}
         open={historyOpen}

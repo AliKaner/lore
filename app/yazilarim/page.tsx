@@ -183,7 +183,8 @@ export default function MyWritingsPage() {
       </div>
 
       {me && <SecureAccountNudge />}
-      {me && <GoalsCard />}
+      {/* On an empty desk the first step is a writing, not a goal. */}
+      {me && books && books.length > 0 && <GoalsCard />}
 
       {me === undefined ? (
         <Loading />

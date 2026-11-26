@@ -18,6 +18,8 @@ import { useBookNames } from "@/lib/bookNames";
 import type { NoteEntry } from "@/lib/editorExtensions";
 import type { EntityKind } from "@/convex/entityKinds";
 import EntityDrawer from "@/components/entity/EntityDrawer";
+import { ThemeButton } from "@/components/ThemePicker";
+import { WritingGoalBadge } from "@/components/Goals";
 import { KINDS, todayTitle } from "@/lib/writingKinds";
 
 const AUTOSAVE_MS = 1500;
@@ -390,6 +392,7 @@ export default function ChapterForm({
               {status.label}
             </span>
           </div>
+          <WritingGoalBadge />
           <span className="hidden text-xs tabular-nums text-muted md:inline">
             {words.toLocaleString("tr-TR")} kelime
           </span>
@@ -435,6 +438,7 @@ export default function ChapterForm({
             </svg>
             <span className="hidden lg:inline">Geçmiş</span>
           </button>
+          <ThemeButton />
           {isOwner && book && <BookSettingsButton book={book} />}
           {liveEdit && (
             <button

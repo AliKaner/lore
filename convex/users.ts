@@ -9,6 +9,7 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { components } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import { themeValidator } from "./themes";
 
 export const createUser = internalMutation({
   args: {
@@ -48,6 +49,16 @@ export const publicProfile = query({
       { userId: args.userId },
     );
     return { ...user, username };
+  },
+});
+
+export const setTheme = mutation({
+  args: { theme: themeValidator },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error("Giriş yapmalısın.");
+    await ctx.db.patch(userId, { theme: args.theme });
+    return null;
   },
 });
 

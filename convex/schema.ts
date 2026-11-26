@@ -2,12 +2,20 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { writingKindValidator } from "./writingKinds";
 import { entityKindValidator } from "./entityKinds";
+import { themeValidator } from "./themes";
 
 export default defineSchema({
   users: defineTable({
     bio: v.optional(v.string()),
     avatarStorageId: v.optional(v.id("_storage")),
     wallpaperStorageId: v.optional(v.id("_storage")),
+    // The colour theme they picked; follows them to every device.
+    theme: v.optional(themeValidator),
+    // Daily goals (words written, minutes read) and the device's UTC offset
+    // in minutes, so a day is the writer's own day.
+    writingGoal: v.optional(v.number()),
+    readingGoal: v.optional(v.number()),
+    tzOffset: v.optional(v.number()),
     xp: v.number(),
     level: v.number(),
   }),
@@ -54,6 +62,16 @@ export default defineSchema({
     .index("by_book", ["bookId"])
     .index("by_book_and_parent", ["bookId", "parentChapterId"])
     .index("by_author", ["authorId"]),
+
+  // What a writer did on one of their days (YYYY-MM-DD, their time zone):
+  // net words written and seconds spent reading. See convex/goals.ts.
+  dailyActivity: defineTable({
+    userId: v.id("users"),
+    day: v.string(),
+    wordsWritten: v.number(),
+    secondsRead: v.number(),
+    lastReadAt: v.optional(v.number()),
+  }).index("by_user_and_day", ["userId", "day"]),
 
   // Earlier states of a chapter, so a writer can go back. Written by
   // chapters.update before it overwrites the text.

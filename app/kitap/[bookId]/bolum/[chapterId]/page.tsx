@@ -22,6 +22,7 @@ import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonLink, pillInactive } from "@/lib/ui";
 import { isOpenToBranches } from "@/convex/writingKinds";
 import { kindConfig } from "@/lib/writingKinds";
+import { ReadingTracker } from "@/components/Goals";
 import { useCommunityOpen } from "@/lib/community";
 
 const NO_NAMES: NameEntry[] = [];
@@ -187,7 +188,9 @@ export default function ChapterPage({
             Evrendeki adları vurgula
           </label>
         )}
-        <span className="ml-auto text-xs text-muted tabular-nums">
+        <span className="ml-auto" />
+        <ReadingTracker chapterId={chapterId} />
+        <span className="text-xs text-muted tabular-nums">
           {words.length.toLocaleString("tr-TR")} kelime · ~
           {Math.max(1, Math.round(words.length / 220))} dk
         </span>

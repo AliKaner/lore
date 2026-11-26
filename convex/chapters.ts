@@ -6,6 +6,7 @@ import { isOpenToBranches } from "./writingKinds";
 import { canViewChapter, optionalUserId, viewableBook } from "./access";
 import { snapshotBeforeChange, wordsIn } from "./versions";
 import { recordDeskChange } from "./desk";
+import { recordWriting } from "./goals";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 
@@ -107,6 +108,7 @@ export const create = mutation({
       chapters: 1,
       touched: true,
     });
+    await recordWriting(ctx, userId, words);
 
     return chapterId;
   },
@@ -197,6 +199,7 @@ export const update = mutation({
       chapters: 0,
       touched: textChanged || patch.status !== undefined,
     });
+    await recordWriting(ctx, userId, after - before);
     return null;
   },
 });

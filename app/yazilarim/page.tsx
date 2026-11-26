@@ -11,6 +11,7 @@ import EmptyState from "@/components/EmptyState";
 import SecureAccountNudge from "@/components/SecureAccountNudge";
 import { buttonPrimary } from "@/lib/ui";
 import { kindConfig } from "@/lib/writingKinds";
+import { GoalsCard } from "@/components/Goals";
 import { timeAgo, useNow } from "@/lib/useNow";
 
 type DeskBook = FunctionReturnType<typeof api.books.myDesk>[number];
@@ -182,6 +183,7 @@ export default function MyWritingsPage() {
       </div>
 
       {me && <SecureAccountNudge />}
+      {me && <GoalsCard />}
 
       {me === undefined ? (
         <Loading />

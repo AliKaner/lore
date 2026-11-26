@@ -9,6 +9,7 @@ import { api } from "@/convex/_generated/api";
 import { levelInfo } from "@/lib/levels";
 import { useCommunityOpen } from "@/lib/community";
 import Wordmark from "@/components/Wordmark";
+import { ThemeButton } from "@/components/ThemePicker";
 
 const WRITING_SCREEN = /^\/kitap\/[^/]+((\/bolum\/[^/]+)?\/(yaz|duzenle)|\/yazdir)$/;
 
@@ -78,7 +79,8 @@ export default function Header() {
           <NavLinks />
         </Authenticated>
       </div>
-      <div className="text-sm">
+      <div className="flex items-center gap-2 text-sm">
+        <ThemeButton />
         <AuthLoading>
           <span className="text-muted">…</span>
         </AuthLoading>

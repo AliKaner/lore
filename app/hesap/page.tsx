@@ -6,6 +6,7 @@ import { useAddPasskey, useRemovePasskey } from "@convex-dev/auth/methods/userna
 import { api } from "@/convex/_generated/api";
 import Loading from "@/components/Loading";
 import BackupButton from "@/components/BackupButton";
+import { ThemeGrid } from "@/components/ThemePicker";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { passkeyErrorMessage } from "@/lib/passkeyErrors";
 
@@ -152,8 +153,15 @@ export default function AccountPage() {
         </div>
       </div>
 
-      {/* Passkeys */}
+      {/* Colour theme */}
       <section className="mt-10">
+        <h2 className="font-display text-2xl">Renk teması</h2>
+        <p className="mt-1 mb-4 text-sm text-muted">Bütün sayfalarda ve yazma ekranında geçerli; hesabınla her cihaza gelir.</p>
+        <ThemeGrid />
+      </section>
+
+      {/* Passkeys */}
+      <section className="mt-12">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-display text-2xl">Giriş anahtarların</h2>

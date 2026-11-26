@@ -13,7 +13,7 @@ export const eyebrow = "text-[10px] font-semibold uppercase tracking-[0.18em]";
 // places, ink for everything else.
 export function KindGlyph({ kind, size = "sm" }: { kind: EntityKind; size?: "sm" | "lg" }) {
   const tone = {
-    character: "bg-caramel-soft text-[#9a6a22] dark:text-caramel",
+    character: "bg-caramel-soft text-caramel-strong",
     place: "bg-sapphire-soft text-sapphire",
     thing: "bg-accent-soft text-accent",
   }[markStyleOf(kind)];

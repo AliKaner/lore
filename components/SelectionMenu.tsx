@@ -562,7 +562,7 @@ export default function SelectionMenu({
                 <button
                   type="submit"
                   disabled={!noteText.trim()}
-                  className="rounded-lg bg-caramel px-3.5 py-1.5 text-[13px] font-semibold text-[#0f1939] transition-opacity hover:opacity-90 disabled:opacity-40"
+                  className="rounded-lg bg-caramel px-3.5 py-1.5 text-[13px] font-semibold text-on-caramel transition-opacity hover:opacity-90 disabled:opacity-40"
                 >
                   Kaydet
                 </button>
@@ -584,7 +584,7 @@ export default function SelectionMenu({
                   onClick={() => setNameKind(kind)}
                   className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] transition-colors duration-150 ${
                     kind === nameKind
-                      ? "bg-caramel text-[#0f1939] font-semibold"
+                      ? "bg-caramel text-on-caramel font-semibold"
                       : "bg-white/[0.06] text-on-ink/70 hover:bg-white/[0.12] hover:text-on-ink"
                   }`}
                 >
@@ -621,9 +621,9 @@ export default function SelectionMenu({
                 <button
                   type="submit"
                   disabled={busy || nameText.trim().length < 2}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-caramel px-3.5 py-1.5 text-[13px] font-semibold text-[#0f1939] transition-opacity hover:opacity-90 disabled:opacity-40"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-caramel px-3.5 py-1.5 text-[13px] font-semibold text-on-caramel transition-opacity hover:opacity-90 disabled:opacity-40"
                 >
-                  {busy && <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#0f1939]/30 border-t-[#0f1939]" />}
+                  {busy && <span className="h-3 w-3 animate-spin rounded-full border-2 border-on-caramel/30 border-t-on-caramel" />}
                   Kaydet
                 </button>
               </div>

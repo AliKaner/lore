@@ -162,6 +162,39 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       bağlanabilir. Silince görseller, bağlantılar, favoriler ve yazı
       bağları temizlenir.
 
+### Renk temaları
+
+- [x] Dokuz tema: **Booktion** (varsayılan, sistemin açık/koyu ayarına uyar),
+      **Çilek**, **Kurbağa**, **At**, **Gökyüzü**, **Karanlık**, **Gül**,
+      **Ateş** (koyu) ve **PEMBİK**. Paletler `app/globals.css` içinde
+      `[data-theme]` ile, adlar ve çizimler `lib/themes.ts` ve
+      `components/ThemeIcons.tsx` içinde.
+- [x] Her temanın kendi çizimi (çilek, kurbağa, at başı, bulutlu güneş, hilal,
+      gül, alev, kalp); seçici bu çizimleri temanın kendi renginde gösterir.
+- [x] Seçici üst çubukta (düğme o anki temanın çizimini taşır), yazma
+      ekranında ve Hesap sayfasında. Seçim bu cihazda saklanır ve hesaba
+      yazılır (`users.setTheme`); başka cihazda giriş yapınca gelir.
+- [x] Sayfa açılırken tema `<head>` içindeki küçük betikle boyanmadan önce
+      uygulanır, varsayılan tema bir an bile görünmez. `dark:` stilleri
+      koyu temalarda da çalışır (`data-scheme`).
+
+### Okuma ve yazma hedefleri
+
+- [x] Günlük **yazma hedefi** (kelime; 250 / 500 / 1.000 / 2.000 ya da
+      serbest) ve günlük **okuma hedefi** (dakika; 10 / 20 / 30 / 60 ya da
+      serbest). İkisi de kaldırılabilir.
+- [x] Yazılan kelime, bölüm kaydedildikçe sayılır (net: silinen kelime düşer);
+      hangi yazıda olursa olsun bölümü yazan kişiye yazılır.
+- [x] Okuma süresi, bölüm okuma sayfasında okur sekmeyi açık tutup sayfayla
+      ilgilendikçe (kaydırma, fare, klavye) yarım dakikada bir sayılır;
+      90 saniye hareketsizlikte durur. İki sekmeden gelen çift sayım atılır.
+- [x] Gün yazarın kendi saat dilimine göre (`users.tzOffset`, cihazdan
+      gelir); gece yarısı onun gece yarısıdır.
+- [x] Yazılarım'da hedef kartı: bugünün halkası, "3 günlük seri", son yedi
+      günün çubukları ve hedef çizgisi. Yazma ekranının üst çubuğunda küçük
+      halka ("320/500"), okuma sayfasında "Bugün 12/20 dk". Hedef o sayfa
+      açıkken tamamlanırsa bir kere kutlama bildirimi çıkar.
+
 ### Sosyal Yapı
 
 > **Topluluk eşiği:** Platformda toplam 100 yazı olana kadar sosyal taraf

@@ -5,6 +5,7 @@ import Link from "next/link";
 import EmptyState from "@/components/EmptyState";
 import NotFoundState from "@/components/NotFoundState";
 import { buttonPrimary } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 // A mistyped or truncated link reaches Convex as an id that fails validation;
 // that is a missing page, not a crash.
@@ -14,6 +15,7 @@ function isBadLink(error: unknown) {
 }
 
 export default function ErrorPage({ error, retry }: { error: unknown; retry: () => void }) {
+  const t = useT();
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -21,29 +23,28 @@ export default function ErrorPage({ error, retry }: { error: unknown; retry: () 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       {isBadLink(error) ? (
-        <NotFoundState title="Bu bağlantı bir yere çıkmıyor" />
+        <NotFoundState title={t("Bu bağlantı bir yere çıkmıyor")} />
       ) : (
         <EmptyState
           art="lost"
-          eyebrow="Beklenmedik bir durum"
-          title="Bir şeyler ters gitti"
+          eyebrow={t("Beklenmedik bir durum")}
+          title={t("Bir şeyler ters gitti")}
           actions={
             <>
               <button onClick={() => retry()} className={`${buttonPrimary} px-6`}>
-                Tekrar dene
+                {t("Tekrar dene")}
               </button>
               <Link
                 href="/yazilarim"
                 className="text-sm text-muted underline underline-offset-4 hover:text-foreground"
               >
-                Yazılarıma dön
+                {t("Yazılarıma dön")}
               </Link>
             </>
           }
         >
           <p>
-            Sayfa yüklenirken bir sorun çıktı. Taslakların hem sunucuya hem bu
-            cihaza kaydedilir; tekrar denemek çoğu zaman yeter.
+            {t("Sayfa yüklenirken bir sorun çıktı. Taslakların hem sunucuya hem bu cihaza kaydedilir; tekrar denemek çoğu zaman yeter.")}
           </p>
         </EmptyState>
       )}

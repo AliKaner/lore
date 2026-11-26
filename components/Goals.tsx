@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useNow } from "@/lib/useNow";
 import { useToast } from "@/components/Toaster";
+import { useI18n, useT } from "@/lib/i18n";
 
 type Summary = NonNullable<FunctionReturnType<typeof api.goals.summary>>;
 type Kind = "writing" | "reading";
@@ -19,8 +20,12 @@ const CONFIG: Record<
   reading: { label: "Okuma", unit: "dakika", presets: [10, 20, 30, 60], min: 5, max: 600, step: 5 },
 };
 
-const DAY_INITIALS = ["Pz", "Pt", "Sa", "Ça", "Pe", "Cu", "Ct"];
-const number = (n: number) => n.toLocaleString("tr-TR");
+const DAY_INITIALS = {
+  tr: ["Pz", "Pt", "Sa", "Ça", "Pe", "Cu", "Ct"],
+  en: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+};
+// "320 kelime" / "320 words", "12 dakika" / "12 minutes".
+const amount = (kind: Kind) => (kind === "writing" ? "{n} kelime" : "{n} dakika");
 
 // The writer's calendar day, as the server's daily totals are keyed.
 export function localDay(now: number) {
@@ -85,14 +90,15 @@ const Flame = ({ lit }: { lit: boolean }) => (
 function WeekBars({ week, kind, goal, today }: { week: Summary["week"]; kind: Kind; goal: number | null; today: string }) {
   const values = week.map((d) => (kind === "writing" ? d.words : d.minutes));
   const top = Math.max(goal ?? 0, ...values, 1);
+  const { t, num, locale } = useI18n();
   return (
-    <div className="mt-4 flex items-end gap-1.5" aria-label="Son yedi gün">
+    <div className="mt-4 flex items-end gap-1.5" aria-label={t("Son yedi gün")}>
       {week.map((d, i) => {
         const value = values[i];
         const met = goal !== null && value >= goal;
         const date = new Date(`${d.day}T12:00:00`);
         return (
-          <div key={d.day} className="flex flex-1 flex-col items-center gap-1" title={`${d.day}: ${number(value)} ${CONFIG[kind].unit}`}>
+          <div key={d.day} className="flex flex-1 flex-col items-center gap-1" title={`${d.day}: ${t(amount(kind), { n: num(value) })}`}>
             <div className="relative flex h-12 w-full items-end overflow-hidden rounded-md bg-accent-soft/50">
               {goal !== null && (
                 <span aria-hidden="true" className="absolute inset-x-0 border-t border-dashed border-muted/40" style={{ bottom: `${(goal / top) * 100}%` }} />
@@ -103,7 +109,7 @@ function WeekBars({ week, kind, goal, today }: { week: Summary["week"]; kind: Ki
               />
             </div>
             <span className={`text-[10px] ${d.day === today ? "font-semibold text-foreground" : "text-muted"}`}>
-              {DAY_INITIALS[date.getDay()]}
+              {DAY_INITIALS[locale][date.getDay()]}
             </span>
           </div>
         );
@@ -115,6 +121,7 @@ function WeekBars({ week, kind, goal, today }: { week: Summary["week"]; kind: Ki
 function GoalEditor({ kind, current, onDone }: { kind: Kind; current: number | null; onDone: () => void }) {
   const setGoals = useMutation(api.goals.setGoals);
   const showToast = useToast();
+  const { t, num } = useI18n();
   const cfg = CONFIG[kind];
   const [value, setValue] = useState(String(current ?? cfg.presets[1]));
 
@@ -124,7 +131,7 @@ function GoalEditor({ kind, current, onDone }: { kind: Kind; current: number | n
       onDone();
     } catch (err) {
       const message = err instanceof Error ? /Uncaught Error: ([^\n]+)/u.exec(err.message)?.[1] : null;
-      showToast(message ?? "Kaydedilemedi.");
+      showToast(message ?? t("Kaydedilemedi."));
     }
   }
 
@@ -140,7 +147,7 @@ function GoalEditor({ kind, current, onDone }: { kind: Kind; current: number | n
               current === preset ? "border-accent bg-accent text-accent-contrast" : "border-border hover:border-border-hover"
             }`}
           >
-            {number(preset)}
+            {num(preset)}
           </button>
         ))}
       </div>
@@ -159,19 +166,19 @@ function GoalEditor({ kind, current, onDone }: { kind: Kind; current: number | n
           step={cfg.step}
           value={value}
           onChange={(event) => setValue(event.target.value)}
-          aria-label={`Günlük ${cfg.label.toLocaleLowerCase("tr-TR")} hedefi (${cfg.unit})`}
+          aria-label={kind === "writing" ? t("Günlük yazma hedefi (kelime)") : t("Günlük okuma hedefi (dakika)")}
           className="h-8 w-24 rounded-lg border border-border bg-background px-2 text-sm tabular-nums outline-none focus:border-accent"
         />
-        <span className="text-sm text-muted">{cfg.unit} / gün</span>
-        <button className="ml-auto rounded-lg bg-accent px-3 py-1 text-sm text-accent-contrast hover:bg-accent-hover">Kaydet</button>
+        <span className="text-sm text-muted">{kind === "writing" ? t("kelime / gün") : t("dakika / gün")}</span>
+        <button className="ml-auto rounded-lg bg-accent px-3 py-1 text-sm text-accent-contrast hover:bg-accent-hover">{t("Kaydet")}</button>
       </form>
       <div className="mt-2 flex gap-3 text-xs">
         <button type="button" onClick={onDone} className="text-muted hover:text-foreground">
-          Vazgeç
+          {t("Vazgeç")}
         </button>
         {current !== null && (
           <button type="button" onClick={() => void save(null)} className="text-muted hover:text-red-700">
-            Hedefi kaldır
+            {t("Hedefi kaldır")}
           </button>
         )}
       </div>
@@ -181,6 +188,7 @@ function GoalEditor({ kind, current, onDone }: { kind: Kind; current: number | n
 
 function GoalHalf({ kind, summary, today }: { kind: Kind; summary: Summary; today: string }) {
   const cfg = CONFIG[kind];
+  const { t, num } = useI18n();
   const goal = kind === "writing" ? summary.writingGoal : summary.readingGoal;
   const value = kind === "writing" ? summary.today.words : summary.today.minutes;
   const streakDays = kind === "writing" ? summary.writingStreak : summary.readingStreak;
@@ -190,10 +198,10 @@ function GoalHalf({ kind, summary, today }: { kind: Kind; summary: Summary; toda
   return (
     <div className="p-5">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">{cfg.label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">{t(cfg.label)}</p>
         {goal !== null && !editing && (
           <button type="button" onClick={() => setEditing(true)} className="text-xs text-muted hover:text-foreground">
-            Düzenle
+            {t("Düzenle")}
           </button>
         )}
       </div>
@@ -201,15 +209,15 @@ function GoalHalf({ kind, summary, today }: { kind: Kind; summary: Summary; toda
         <div className="mt-3">
           <p className="text-sm leading-relaxed text-muted">
             {kind === "writing"
-              ? "Her gün biraz yazmak, bitmiş bir kitabın en kısa yolu."
-              : "Okudukça yazın da beslenir. Günde kaç dakika?"}
+              ? t("Her gün biraz yazmak, bitmiş bir kitabın en kısa yolu.")
+              : t("Okudukça yazın da beslenir. Günde kaç dakika?")}
           </p>
           <button
             type="button"
             onClick={() => setEditing(true)}
             className="mt-3 rounded-full border border-dashed border-border-hover px-3.5 py-1.5 text-sm hover:border-accent hover:text-accent"
           >
-            + Günlük {cfg.label.toLocaleLowerCase("tr-TR")} hedefi koy
+            {kind === "writing" ? t("+ Günlük yazma hedefi koy") : t("+ Günlük okuma hedefi koy")}
           </button>
         </div>
       ) : editing ? (
@@ -224,12 +232,12 @@ function GoalHalf({ kind, summary, today }: { kind: Kind; summary: Summary; toda
             </GoalRing>
             <div className="min-w-0">
               <p className="font-display text-3xl leading-none tabular-nums">
-                {number(value)}
-                <span className="ml-1.5 font-sans text-sm text-muted">/ {number(goal!)} {cfg.unit}</span>
+                {num(value)}
+                <span className="ml-1.5 font-sans text-sm text-muted">/ {t(amount(kind), { n: num(goal!) })}</span>
               </p>
               <p className="mt-1.5 inline-flex items-center gap-1 text-xs text-muted">
                 <Flame lit={streakDays > 0} />
-                {streakDays > 0 ? `${streakDays} günlük seri` : done ? "Bugün tamam" : "Bugün seriyi başlat"}
+                {streakDays > 0 ? t("{n} günlük seri", { n: streakDays }) : done ? t("Bugün tamam") : t("Bugün seriyi başlat")}
               </p>
             </div>
           </div>
@@ -244,11 +252,12 @@ function GoalHalf({ kind, summary, today }: { kind: Kind; summary: Summary; toda
 export function GoalsCard() {
   const summary = useGoalSummary();
   const now = useNow();
+  const t = useT();
   if (!summary) return null;
   const today = localDay(now);
   return (
     <section
-      aria-label="Günlük hedeflerin"
+      aria-label={t("Günlük hedeflerin")}
       className="mb-8 grid overflow-hidden rounded-2xl border border-border bg-surface sm:grid-cols-2 sm:divide-x sm:divide-border max-sm:divide-y max-sm:divide-border"
     >
       <GoalHalf kind="writing" summary={summary} today={today} />
@@ -261,6 +270,7 @@ export function GoalsCard() {
 
 function useCelebrate(kind: Kind, reached: boolean, today: string) {
   const showToast = useToast();
+  const t = useT();
   const was = useRef<boolean | null>(null);
   useEffect(() => {
     // Only a goal crossed while the page is open is celebrated.
@@ -273,30 +283,31 @@ function useCelebrate(kind: Kind, reached: boolean, today: string) {
       } catch {}
       if (!shown) {
         showToast(
-          kind === "writing" ? "Bugünkü yazma hedefine ulaştın. Eline sağlık!" : "Bugünkü okuma hedefin tamam.",
+          kind === "writing" ? t("Bugünkü yazma hedefine ulaştın. Eline sağlık!") : t("Bugünkü okuma hedefin tamam."),
           "success",
         );
       }
     }
     was.current = reached;
-  }, [reached, kind, today, showToast]);
+  }, [reached, kind, today, showToast, t]);
 }
 
 // A small ring in the writing screen's bar: today's words against the goal.
 export function WritingGoalBadge() {
   const summary = useGoalSummary();
   const now = useNow();
+  const { t, num } = useI18n();
   const goal = summary?.writingGoal ?? null;
   const words = summary?.today.words ?? 0;
   useCelebrate("writing", summary !== undefined && summary !== null && goal !== null && words >= goal, localDay(now));
   if (!summary || goal === null) return null;
   return (
     <span
-      title={`Bugün ${number(words)} / ${number(goal)} kelime${summary.writingStreak ? ` · ${summary.writingStreak} günlük seri` : ""}`}
+      title={`${t("Bugün {done} / {goal} kelime", { done: num(words), goal: num(goal) })}${summary.writingStreak ? ` · ${t("{n} günlük seri", { n: summary.writingStreak })}` : ""}`}
       className="hidden items-center gap-1.5 text-xs tabular-nums text-muted xl:inline-flex"
     >
       <GoalRing value={words} goal={goal} size={18} stroke={3} />
-      {number(words)}/{number(goal)}
+      {num(words)}/{num(goal)}
     </span>
   );
 }
@@ -311,6 +322,7 @@ export function ReadingTracker({ chapterId }: { chapterId: Id<"chapters"> }) {
   const logReading = useMutation(api.goals.logReading);
   const summary = useGoalSummary();
   const now = useNow();
+  const t = useT();
   const goal = summary?.readingGoal ?? null;
   const minutes = summary?.today.minutes ?? 0;
   useCelebrate("reading", summary !== undefined && summary !== null && goal !== null && minutes >= goal, localDay(now));
@@ -337,11 +349,11 @@ export function ReadingTracker({ chapterId }: { chapterId: Id<"chapters"> }) {
   if (!summary || goal === null) return null;
   return (
     <span
-      title={`Bugün ${minutes} / ${goal} dakika okudun${summary.readingStreak ? ` · ${summary.readingStreak} günlük seri` : ""}`}
+      title={`${t("Bugün {done} / {goal} dakika okudun", { done: minutes, goal })}${summary.readingStreak ? ` · ${t("{n} günlük seri", { n: summary.readingStreak })}` : ""}`}
       className="inline-flex items-center gap-1.5 text-xs tabular-nums text-muted"
     >
       <GoalRing value={minutes} goal={goal} size={18} stroke={3} />
-      Bugün {minutes}/{goal} dk
+      {t("Bugün {done}/{goal} dk", { done: minutes, goal })}
     </span>
   );
 }

@@ -6,7 +6,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { WritingKind } from "@/convex/writingKinds";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
-import { KINDS } from "@/lib/writingKinds";
+import { useT } from "@/lib/i18n";
+import { useWritingKinds } from "@/lib/localized";
 
 export default function NewBookButton({
   className,
@@ -21,6 +22,8 @@ export default function NewBookButton({
   const createBook = useMutation(api.books.create);
   const router = useRouter();
   const showToast = useToast();
+  const kinds = useWritingKinds();
+  const t = useT();
   const [creating, setCreating] = useState(false);
 
   async function handleClick() {
@@ -32,7 +35,7 @@ export default function NewBookButton({
     setCreating(true);
     try {
       const bookId = await createBook({
-        title: KINDS[kind].untitled,
+        title: kinds[kind].untitled,
         kind,
         visibility: "private",
       });
@@ -45,7 +48,7 @@ export default function NewBookButton({
 
   return (
     <button onClick={() => void handleClick()} disabled={creating} className={className}>
-      {creating ? "Oluşturuluyor…" : children}
+      {creating ? t("Oluşturuluyor…") : children}
     </button>
   );
 }

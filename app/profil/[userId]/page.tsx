@@ -12,6 +12,7 @@ import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { levelInfo } from "@/lib/levels";
 import { useCommunityOpen } from "@/lib/community";
 import { buttonPrimary, inputBase } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 export default function ProfilePage({
   params,
@@ -30,6 +31,7 @@ export default function ProfilePage({
   );
   const showToast = useToast();
   const communityOpen = useCommunityOpen();
+  const t = useT();
 
   const isOwnProfile = me?._id === userId;
   const [bio, setBio] = useState<string | null>(null);
@@ -45,7 +47,7 @@ export default function ProfilePage({
   if (profile === null) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
-        <NotFoundState title="Bu yazar bulunamadı" />
+        <NotFoundState title={t("Bu yazar bulunamadı")} />
       </main>
     );
   }
@@ -55,7 +57,7 @@ export default function ProfilePage({
     setSavingBio(true);
     try {
       await updateProfile({ bio: bio ?? profile!.bio ?? "" });
-      showToast("Kaydedildi.", "success");
+      showToast(t("Kaydedildi."), "success");
     } catch (err) {
       showToast(toastErrorMessage(err));
     } finally {
@@ -86,12 +88,12 @@ export default function ProfilePage({
       <div className="relative h-40 bg-border">
         <BookCover
           storageId={profile.wallpaperStorageId}
-          title="Duvar kağıdı"
+          title={t("Duvar kağıdı")}
           className="h-40 w-full"
         />
         <BookCover
           storageId={profile.avatarStorageId}
-          title={profile.username ?? "Yazar"}
+          title={profile.username ?? t("Yazar")}
           placeholder="pp"
           className="absolute -bottom-8 left-4 h-20 w-20 rounded-full border-4 border-white"
         />
@@ -99,12 +101,12 @@ export default function ProfilePage({
 
       <div className="px-4 pt-12 pb-10">
         <h1 className="text-2xl font-semibold mb-1">
-          {profile.username ?? "Yazar"}
+          {profile.username ?? t("Yazar")}
         </h1>
         {communityOpen ? (
           <>
             <p className="text-muted mb-1">
-              {badge} {title} · Seviye {profile.level}
+              {badge} {t(title)} · {t("Seviye {n}", { n: profile.level })}
             </p>
             <div className="w-48 h-1.5 bg-border rounded-full mb-4">
               <div
@@ -124,10 +126,10 @@ export default function ProfilePage({
               onChange={(event) => setBio(event.target.value)}
               rows={3}
               className={`${inputBase} text-sm`}
-              placeholder="Kendinden bahset…"
+              placeholder={t("Kendinden bahset…")}
             />
             <button disabled={savingBio} className={`${buttonPrimary} self-start`}>
-              {savingBio ? "Kaydediliyor…" : "Kaydet"}
+              {savingBio ? t("Kaydediliyor…") : t("Kaydet")}
             </button>
           </form>
         ) : (
@@ -137,12 +139,12 @@ export default function ProfilePage({
         {isOwnProfile && (
           <div className="flex flex-col gap-4 mb-8">
             <ImageUploader
-              label="Profil fotoğrafı"
+              label={t("Profil fotoğrafı")}
               storageId={profile.avatarStorageId}
               onUploaded={(storageId) => void handleSetAvatar(storageId)}
             />
             <ImageUploader
-              label="Duvar kağıdı"
+              label={t("Duvar kağıdı")}
               storageId={profile.wallpaperStorageId}
               onUploaded={(storageId) => void handleSetWallpaper(storageId)}
             />
@@ -151,9 +153,9 @@ export default function ProfilePage({
 
         {communityOpen && isOwnProfile && myFavoriteBooks && myFavoriteBooks.length > 0 && (
           <div>
-            <h2 className="font-medium mb-2">Favori kitaplarım</h2>
+            <h2 className="font-medium mb-2">{t("Favori kitaplarım")}</h2>
             <p className="text-muted text-sm">
-              {myFavoriteBooks.length} favori kitap
+              {t("{n} favori kitap", { n: myFavoriteBooks.length })}
             </p>
           </div>
         )}

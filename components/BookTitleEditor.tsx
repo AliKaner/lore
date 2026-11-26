@@ -6,10 +6,12 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { pillInactive } from "@/lib/ui";
-import { kindConfig } from "@/lib/writingKinds";
+import { useT } from "@/lib/i18n";
+import { useKindConfig } from "@/lib/localized";
 
 export default function BookTitleEditor({ book }: { book: Doc<"books"> }) {
-  const untitled = kindConfig(book).untitled;
+  const untitled = useKindConfig(book).untitled;
+  const t = useT();
   const updateBook = useMutation(api.books.update);
   const showToast = useToast();
   const [title, setTitle] = useState(book.title);
@@ -40,7 +42,7 @@ export default function BookTitleEditor({ book }: { book: Doc<"books"> }) {
     try {
       await updateBook({ bookId: book._id, visibility: next });
       showToast(
-        next === "public" ? "Herkese açıldı." : "Gizli yapıldı.",
+        next === "public" ? t("Herkese açıldı.") : t("Gizli yapıldı."),
         "success",
       );
     } catch (err) {
@@ -61,12 +63,12 @@ export default function BookTitleEditor({ book }: { book: Doc<"books"> }) {
         value={description}
         onChange={(event) => setDescription(event.target.value)}
         onBlur={() => void saveDescription()}
-        placeholder="Kısa bir açıklama ekle (opsiyonel)…"
+        placeholder={t("Kısa bir açıklama ekle (opsiyonel)…")}
         rows={2}
         className="w-full resize-none border-none bg-transparent p-0 text-sm text-muted focus:outline-none"
       />
       <button onClick={() => void toggleVisibility()} className={`${pillInactive} self-start`}>
-        {book.visibility === "public" ? "Herkese açık" : "Gizli — herkese aç"}
+        {book.visibility === "public" ? t("Herkese açık") : t("Gizli — herkese aç")}
       </button>
     </div>
   );

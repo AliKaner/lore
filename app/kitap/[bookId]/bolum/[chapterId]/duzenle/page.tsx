@@ -12,6 +12,7 @@ import DeleteButton from "@/components/DeleteButton";
 import EmptyState from "@/components/EmptyState";
 import NotFoundState from "@/components/NotFoundState";
 import { buttonLink, buttonPrimary } from "@/lib/ui";
+import { useT } from "@/lib/i18n";
 
 export default function EditChapterPage({
   params,
@@ -22,10 +23,11 @@ export default function EditChapterPage({
   const chapter = useQuery(api.chapters.get, { chapterId });
   const book = useQuery(api.books.get, { bookId });
   const me = useQuery(api.users.me);
+  const t = useT();
 
   const backLink = (
     <Link href={`/kitap/${bookId}/bolum/${chapterId}`} className={buttonLink}>
-      ← Bölüme dön
+      ← {t("Bölüme dön")}
     </Link>
   );
 
@@ -44,7 +46,7 @@ export default function EditChapterPage({
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
         {backLink}
-        <SignInPrompt title="Bu bölümü düzenlemek için giriş yap" />
+        <SignInPrompt title={t("Bu bölümü düzenlemek için giriş yap")} />
       </main>
     );
   }
@@ -52,7 +54,7 @@ export default function EditChapterPage({
   if (chapter === null) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
-        <NotFoundState title="Bu bölüm bulunamadı" />
+        <NotFoundState title={t("Bu bölüm bulunamadı")} />
       </main>
     );
   }
@@ -63,17 +65,16 @@ export default function EditChapterPage({
         {backLink}
         <EmptyState
           art="locked"
-          eyebrow="Düzenleme"
-          title="Bu bölümü yalnızca yazarı düzenleyebilir"
+          eyebrow={t("Düzenleme")}
+          title={t("Bu bölümü yalnızca yazarı düzenleyebilir")}
           actions={
             <Link href={`/kitap/${bookId}/bolum/${chapterId}`} className={`${buttonPrimary} px-6`}>
-              Bölümü oku
+              {t("Bölümü oku")}
             </Link>
           }
         >
           <p>
-            Bir şey eklemek istiyorsan, yazı okurlara açıksa bölümün altındaki
-            düğmeyle kendi dalını yazabilirsin.
+            {t("Bir şey eklemek istiyorsan, yazı okurlara açıksa bölümün altındaki düğmeyle kendi dalını yazabilirsin.")}
           </p>
         </EmptyState>
       </main>
@@ -87,12 +88,12 @@ export default function EditChapterPage({
       existingChapter={chapter}
       kind={book?.kind}
       backHref={`/kitap/${bookId}/bolum/${chapterId}`}
-      backLabel="Bölüme dön"
-      eyebrow={chapter.status === "draft" ? "Taslak" : "Yayında · düzenleniyor"}
+      backLabel={t("Bölüme dön")}
+      eyebrow={chapter.status === "draft" ? t("Taslak") : t("Yayında · düzenleniyor")}
       footer={
         <DeleteButton
           target={{ kind: "chapter", id: chapter._id }}
-          label="Bu bölümü sil"
+          label={t("Bu bölümü sil")}
           afterDelete={({ parentChapterId }) =>
             parentChapterId ? `/kitap/${bookId}/bolum/${parentChapterId}` : `/kitap/${bookId}`
           }

@@ -13,6 +13,7 @@ import {
   type ThemeId,
 } from "@/lib/themes";
 import ThemeIcon from "@/components/ThemeIcons";
+import { useT } from "@/lib/i18n";
 
 /* ---------- The current theme, shared by every picker on the page ---------- */
 
@@ -116,6 +117,7 @@ function Swatch({ theme, size = "sm" }: { theme: Theme; size?: "sm" | "lg" }) {
 // A small button that opens the theme list; for headers and toolbars.
 export function ThemeButton({ className = "" }: { className?: string }) {
   const [theme, choose] = useTheme();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
 
@@ -139,22 +141,22 @@ export function ThemeButton({ className = "" }: { className?: string }) {
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
-        title="Renk teması"
+        title={t("Renk teması")}
         onClick={() => setOpen((o) => !o)}
         className={`inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground ${className}`}
       >
         {/* The button wears the current theme's drawing. */}
         <ThemeIcon id={theme} className="h-5 w-5" />
-        <span className="sr-only">Renk teması</span>
+        <span className="sr-only">{t("Renk teması")}</span>
       </button>
       {open && (
         <div
           role="menu"
-          aria-label="Renk teması"
+          aria-label={t("Renk teması")}
           className="menu-pop absolute right-0 top-full z-50 mt-2 w-60 rounded-2xl border border-border bg-surface p-1.5 shadow-[0_24px_50px_-24px_rgba(15,25,57,0.45)]"
           style={{ transformOrigin: "100% 0" }}
         >
-          <p className="px-2.5 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">Tema</p>
+          <p className="px-2.5 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">{t("Tema")}</p>
           {THEMES.map((option) => (
             <button
               key={option.id}
@@ -167,7 +169,7 @@ export function ThemeButton({ className = "" }: { className?: string }) {
               }`}
             >
               <Swatch theme={option} />
-              <span className="flex-1">{option.label}</span>
+              <span className="flex-1">{t(option.label)}</span>
               {option.id === theme && <span aria-hidden="true" className="text-accent">✓</span>}
             </button>
           ))}
@@ -180,6 +182,7 @@ export function ThemeButton({ className = "" }: { className?: string }) {
 // The full picker, for the account page.
 export function ThemeGrid() {
   const [theme, choose] = useTheme();
+  const t = useT();
   return (
     <div role="radiogroup" aria-label="Renk teması" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {THEMES.map((option) => (
@@ -197,9 +200,9 @@ export function ThemeGrid() {
         >
           <Swatch theme={option} size="lg" />
           <span className="flex items-center justify-between px-1 pb-0.5 text-sm">
-            <span className={option.id === theme ? "font-medium" : ""}>{option.label}</span>
+            <span className={option.id === theme ? "font-medium" : ""}>{t(option.label)}</span>
             <span className="text-xs text-muted">
-              {option.scheme === "system" ? "Sisteme uyar" : option.scheme === "dark" ? "Koyu" : "Açık"}
+              {option.scheme === "system" ? t("Sisteme uyar") : option.scheme === "dark" ? t("Koyu") : t("Açık")}
             </span>
           </span>
         </button>

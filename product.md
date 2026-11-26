@@ -222,6 +222,28 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       ve görsel yükleme düğmesi tasarıma uygun; dar ekranda çubuk etiketleri
       simgeye iner.
 
+### Dil: İngilizce ve Türkçe
+
+- [x] Varsayılan dil **İngilizce**; üst çubukta ve tanıtım sayfasında **TR | EN**
+      düğmesi. Seçim çerezde saklanır (`booktion-dil`), sayfa başlığı ve
+      `<html lang>` da değişir.
+- [x] Metinler kodda Türkçe yazılır, `t("…")` ile geçer; İngilizceleri
+      `lib/i18n/*.ts`. Sunucu bileşenleri `lib/serverI18n.ts`, istemci
+      `useT`/`useI18n` kullanır. Sunucu hata mesajları gösterilirken çevrilir.
+- [x] Türler (yazı türleri, Evren türlerinin alanları ve önerileri), temalar,
+      kâğıt boyutları, sesler ve şablonlar da İngilizce. Sayılar, tarihler ve
+      "2 saat önce" dile göre biçimlenir.
+- [x] `lib/i18n.test.ts`: çevrilmemiş bir metin, sunucu hatası ya da tür
+      etiketi kalırsa test kırılır.
+
+### SEO ve paylaşım
+
+- [x] Favicon, iPhone ikonu, manifest (ana ekrana ekleme), tema rengi.
+- [x] Başlık, açıklama, canonical, schema.org verisi; WhatsApp/X/Telegram
+      kartları (site kartı; paylaşılan yazı için yazının adı, türü, yazarı).
+- [x] `sitemap.xml`, `robots.txt` (özel sayfalar kapalı, paylaşılan yazılar
+      noindex), yapay zekâ asistanları için `llms.txt` ve `llms-full.txt`.
+
 ### Sosyal Yapı
 
 > **Topluluk eşiği:** Platformda toplam 100 yazı olana kadar sosyal taraf

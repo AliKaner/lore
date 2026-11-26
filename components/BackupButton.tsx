@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { download, slugify, toMarkdown } from "@/lib/exportFormats";
+import { useT } from "@/lib/i18n";
 
 // Downloads every writing as Markdown (all branches, drafts and notes as
 // footnotes) in one ZIP.
 export default function BackupButton() {
   const convex = useConvex();
+  const t = useT();
   const [state, setState] = useState<{ kind: "idle" } | { kind: "busy"; done: number; total: number } | { kind: "error" }>({
     kind: "idle",
   });
@@ -49,11 +51,11 @@ export default function BackupButton() {
         className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-surface px-5 text-sm font-medium text-foreground transition-colors hover:border-border-hover disabled:cursor-wait disabled:opacity-60"
       >
         <span aria-hidden="true">↓</span>
-        {busy ? `Hazırlanıyor… ${state.done}/${state.total}` : "Tüm yazılarımı indir (.zip)"}
+        {busy ? `${t("Hazırlanıyor…")} ${state.done}/${state.total}` : t("Tüm yazılarımı indir (.zip)")}
       </button>
       {state.kind === "error" && (
         <span role="alert" className="text-sm text-red-700">
-          Yedek hazırlanamadı. Bağlantını kontrol edip tekrar dene.
+          {t("Yedek hazırlanamadı. Bağlantını kontrol edip tekrar dene.")}
         </span>
       )}
     </div>

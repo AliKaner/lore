@@ -6,6 +6,7 @@ import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { download, slugify, toDocx, toMarkdown, type Scope } from "@/lib/exportFormats";
+import { useT } from "@/lib/i18n";
 
 function Row({
   title,
@@ -22,13 +23,14 @@ function Row({
   href?: string;
   busy?: boolean;
 }) {
+  const t = useT();
   const inner = (
     <>
       <span className="inline-flex h-9 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-background text-[10px] font-semibold uppercase tracking-wider text-sapphire">
         {badge}
       </span>
       <span className="min-w-0 text-left">
-        <span className="block text-sm font-medium text-foreground">{busy ? "Hazırlanıyor…" : title}</span>
+        <span className="block text-sm font-medium text-foreground">{busy ? t("Hazırlanıyor…") : title}</span>
         <span className="block text-xs text-muted">{detail}</span>
       </span>
     </>
@@ -53,6 +55,7 @@ export default function ExportMenu({ bookId }: { bookId: Id<"books"> }) {
   const [scope, setScope] = useState<Scope>("main");
   const [busy, setBusy] = useState<"docx" | "md" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const t = useT();
 
   useEffect(() => {
     if (!open) return;
@@ -76,7 +79,7 @@ export default function ExportMenu({ bookId }: { bookId: Id<"books"> }) {
       }
       setOpen(false);
     } catch {
-      setError("Dosya hazırlanamadı. Tekrar dene.");
+      setError(t("Dosya hazırlanamadı. Tekrar dene."));
     } finally {
       setBusy(null);
     }
@@ -92,20 +95,20 @@ export default function ExportMenu({ bookId }: { bookId: Id<"books"> }) {
           open ? "border-accent text-accent" : "border-border text-foreground hover:border-border-hover"
         }`}
       >
-        <span aria-hidden="true">↓</span> Dışa aktar
+        <span aria-hidden="true">↓</span> {t("Dışa aktar")}
       </button>
       {open && (
         <>
           <button type="button" aria-label="Kapat" className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} />
           <div className="menu-pop absolute left-0 top-10 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-xl border border-border bg-surface p-2 shadow-[0_24px_60px_-28px_rgba(15,25,57,0.45)]">
-            <Row badge="docx" title="Word belgesi" detail="Editöre, yayınevine göndermek için" busy={busy === "docx"} onClick={() => void run("docx")} />
+            <Row badge="docx" title={t("Word belgesi")} detail={t("Editöre, yayınevine göndermek için")} busy={busy === "docx"} onClick={() => void run("docx")} />
             <Row
               badge="pdf"
               title="PDF"
-              detail="Baskıya hazır sayfa; “PDF olarak kaydet”"
+              detail={t("Baskıya hazır sayfa; “PDF olarak kaydet”")}
               href={`/kitap/${bookId}/yazdir${scope === "all" ? "?kapsam=tum" : ""}`}
             />
-            <Row badge="md" title="Markdown" detail="Düz metin; her yerde açılır" busy={busy === "md"} onClick={() => void run("md")} />
+            <Row badge="md" title="Markdown" detail={t("Düz metin; her yerde açılır")} busy={busy === "md"} onClick={() => void run("md")} />
             <label className="mt-1 flex cursor-pointer items-center gap-2 border-t border-border px-3 pb-1 pt-3 text-xs text-muted">
               <input
                 type="checkbox"
@@ -113,7 +116,7 @@ export default function ExportMenu({ bookId }: { bookId: Id<"books"> }) {
                 onChange={(event) => setScope(event.target.checked ? "all" : "main")}
                 className="accent-[var(--caramel)]"
               />
-              Ana hattın dışındaki dalları da ekle
+              {t("Ana hattın dışındaki dalları da ekle")}
             </label>
             {error && <p className="px-3 pb-2 pt-1 text-xs text-red-700">{error}</p>}
           </div>

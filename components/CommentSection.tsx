@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { buttonLink, buttonPrimary, inputBase } from "@/lib/ui";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import Loading from "@/components/Loading";
+import { useT } from "@/lib/i18n";
 
 export default function CommentSection({
   targetType,
@@ -21,6 +22,7 @@ export default function CommentSection({
   );
   const addComment = useMutation(api.social.addComment);
   const showToast = useToast();
+  const t = useT();
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -40,22 +42,22 @@ export default function CommentSection({
 
   return (
     <div className="mt-6">
-      <h3 className="font-medium mb-3">Yorumlar</h3>
+      <h3 className="font-medium mb-3">{t("Yorumlar")}</h3>
       <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 mb-4">
         <input
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Bir şey yaz…"
+          placeholder={t("Bir şey yaz…")}
           className={`${inputBase} flex-1 text-sm`}
         />
         <button disabled={submitting} className={buttonPrimary}>
-          {submitting ? "Gönderiliyor…" : "Gönder"}
+          {submitting ? t("Gönderiliyor…") : t("Gönder")}
         </button>
       </form>
       {status === "LoadingFirstPage" ? (
         <Loading />
       ) : results.length === 0 ? (
-        <p className="text-sm text-muted">Henüz yorum yok. İlk yorumu sen yaz.</p>
+        <p className="text-sm text-muted">{t("Henüz yorum yok. İlk yorumu sen yaz.")}</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {results.map((comment) => (
@@ -67,7 +69,7 @@ export default function CommentSection({
       )}
       {status === "CanLoadMore" && (
         <button onClick={() => loadMore(10)} className={`${buttonLink} mt-2`}>
-          Daha fazla yorum
+          {t("Daha fazla yorum")}
         </button>
       )}
     </div>

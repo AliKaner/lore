@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { playKey } from "@/lib/typingSounds";
 import { SOUNDS, type WritingModes } from "@/lib/writingModes";
+import { useT } from "@/lib/i18n";
 
 function Toggle({
   on,
@@ -52,6 +53,7 @@ export default function WritingModeMenu({
   onChange: (patch: Partial<WritingModes>) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   const boxRef = useRef<HTMLDivElement>(null);
   const active = modes.typewriter || modes.focus || modes.sound !== "none";
 
@@ -75,39 +77,39 @@ export default function WritingModeMenu({
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
-        title="Yazma modu ve sesler"
+        title={t("Yazma modu ve sesler")}
         onClick={() => setOpen((o) => !o)}
         className={`relative inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-sm transition-colors ${
           open || active ? "bg-accent-soft/70 text-foreground" : "text-muted hover:bg-accent-soft/60 hover:text-foreground"
         }`}
       >
         <QuillIcon />
-        <span className="hidden xl:inline">Mod</span>
-        <span className="sr-only">Yazma modu</span>
+        <span className="hidden xl:inline">{t("Mod")}</span>
+        <span className="sr-only">{t("Yazma modu")}</span>
       </button>
       {open && (
         <div
           role="dialog"
-          aria-label="Yazma modu"
+          aria-label={t("Yazma modu")}
           className="menu-pop absolute right-0 top-full z-50 mt-2 w-72 rounded-2xl border border-border bg-surface p-1.5 shadow-[0_24px_50px_-24px_rgba(15,25,57,0.45)]"
           style={{ transformOrigin: "100% 0" }}
         >
-          <p className="px-2.5 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">Yazma modu</p>
+          <p className="px-2.5 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">{t("Yazma modu")}</p>
           <Toggle
             on={modes.typewriter}
             onChange={(typewriter) => onChange({ typewriter })}
-            title="Daktilo"
-            hint="Yazdığın satır ekranda hep aynı yerde durur, yazı yukarı akar."
+            title={t("Daktilo")}
+            hint={t("Yazdığın satır ekranda hep aynı yerde durur, yazı yukarı akar.")}
           />
           <Toggle
             on={modes.focus}
             onChange={(focus) => onChange({ focus })}
-            title="Odak"
-            hint="Yalnızca üzerinde çalıştığın paragraf belirgin kalır."
+            title={t("Odak")}
+            hint={t("Yalnızca üzerinde çalıştığın paragraf belirgin kalır.")}
           />
           <div className="my-1.5 h-px bg-border" />
-          <p className="px-2.5 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">Yazma sesi</p>
-          <div role="radiogroup" aria-label="Yazma sesi">
+          <p className="px-2.5 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">{t("Yazma sesi")}</p>
+          <div role="radiogroup" aria-label={t("Yazma sesi")}>
             {SOUNDS.map((sound) => (
               <button
                 key={sound.id}
@@ -133,14 +135,14 @@ export default function WritingModeMenu({
                     modes.sound === sound.id ? "border-[5px] border-accent" : "border-border-hover"
                   }`}
                 />
-                <span className="flex-1">{sound.label}</span>
-                <span className="truncate text-[11px] text-muted">{sound.hint}</span>
+                <span className="flex-1">{t(sound.label)}</span>
+                <span className="truncate text-[11px] text-muted">{t(sound.hint)}</span>
               </button>
             ))}
           </div>
           {modes.sound !== "none" && (
             <label className="flex items-center gap-3 px-2.5 pb-2 pt-2 text-xs text-muted">
-              Ses
+              {t("Ses")}
               <input
                 type="range"
                 min={0.05}
@@ -150,7 +152,7 @@ export default function WritingModeMenu({
                 onChange={(event) => onChange({ volume: Number(event.target.value) })}
                 onPointerUp={() => playKey(modes.sound, "char", modes.volume)}
                 className="flex-1 accent-[var(--accent)]"
-                aria-label="Ses düzeyi"
+                aria-label={t("Ses düzeyi")}
               />
             </label>
           )}

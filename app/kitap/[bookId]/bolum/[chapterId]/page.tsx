@@ -21,7 +21,8 @@ import NotFoundState from "@/components/NotFoundState";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonLink, pillInactive } from "@/lib/ui";
 import { isOpenToBranches } from "@/convex/writingKinds";
-import { kindConfig } from "@/lib/writingKinds";
+import { useKindConfig } from "@/lib/localized";
+import { useI18n } from "@/lib/i18n";
 import { ReadingTracker } from "@/components/Goals";
 import { useCommunityOpen } from "@/lib/community";
 
@@ -48,6 +49,8 @@ export default function ChapterPage({
   const [bionic, setBionic] = useState(() => readPref("bionic", false));
   const [showNames, setShowNames] = useState(() => readPref("names", true));
   const [flowOpen, setFlowOpen] = useState(false);
+  const { t, num } = useI18n();
+  const localizedCfg = useKindConfig(book);
   const content = chapter?.content ?? "";
   const words = useMemo(() => flowWords(content), [content]);
   const router = useRouter();
@@ -100,7 +103,7 @@ export default function ChapterPage({
   if (chapter === null) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
-        <NotFoundState title="Bu bölüm bulunamadı" />
+        <NotFoundState title={t("Bu bölüm bulunamadı")} />
       </main>
     );
   }
@@ -108,7 +111,7 @@ export default function ChapterPage({
   const canBranch = me !== null && me !== undefined;
   const isAuthor = me?._id === chapter.authorId;
   const isBookOwner = me?._id === book?.ownerId;
-  const cfg = kindConfig(book ?? {});
+  const cfg = localizedCfg;
   const writeNextLabel = isBookOwner
     ? cfg.continueCta
     : communityOpen && book?.visibility === "public" && book && isOpenToBranches(book)
@@ -135,7 +138,7 @@ export default function ChapterPage({
             href={`/kitap/${bookId}/bolum/${chapterId}/duzenle`}
             className={buttonLink}
           >
-            Düzenle
+            {t("Düzenle")}
           </Link>
         )}
       </div>
@@ -143,12 +146,12 @@ export default function ChapterPage({
       <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
         <div
           role="group"
-          aria-label="Okuma modu"
+          aria-label={t("Okuma modu")}
           className="inline-flex rounded-full border border-border p-0.5"
         >
           {[
-            { value: false, label: "Normal" },
-            { value: true, label: "Biyonik" },
+            { value: false, label: t("Normal") },
+            { value: true, label: t("Biyonik") },
           ].map((option) => (
             <button
               key={option.label}
@@ -156,7 +159,7 @@ export default function ChapterPage({
               onClick={() => chooseBionic(option.value)}
               title={
                 option.value
-                  ? "Kelimelerin başı kalın: göz kelimeyi daha hızlı tanır"
+                  ? t("Kelimelerin başı kalın: göz kelimeyi daha hızlı tanır")
                   : undefined
               }
               className={`rounded-full px-3 py-1 transition-colors ${
@@ -165,17 +168,17 @@ export default function ChapterPage({
                   : "text-muted hover:text-foreground"
               }`}
             >
-              {option.value ? <><b>Biy</b>onik</> : option.label}
+              {option.value ? <><b>{t("Biy")}</b>{t("onik")}</> : option.label}
             </button>
           ))}
         </div>
         <button
           onClick={() => setFlowOpen(true)}
           disabled={words.length === 0}
-          title="Kelimeler tek tek, seçtiğin hızda akar"
+          title={t("Kelimeler tek tek, seçtiğin hızda akar")}
           className={`${pillInactive} disabled:opacity-40`}
         >
-          ▶ Akış ile oku
+          ▶ {t("Akış ile oku")}
         </button>
         {bookNames.length > 0 && (
           <label className="inline-flex cursor-pointer items-center gap-1.5 text-muted">
@@ -185,14 +188,13 @@ export default function ChapterPage({
               onChange={(event) => chooseNames(event.target.checked)}
               className="accent-[var(--caramel)]"
             />
-            Evrendeki adları vurgula
+            {t("Evrendeki adları vurgula")}
           </label>
         )}
         <span className="ml-auto" />
         <ReadingTracker chapterId={chapterId} />
         <span className="text-xs text-muted tabular-nums">
-          {words.length.toLocaleString("tr-TR")} kelime · ~
-          {Math.max(1, Math.round(words.length / 220))} dk
+          {t("{n} kelime", { n: num(words.length) })} · {t("~{n} dk", { n: Math.max(1, Math.round(words.length / 220)) })}
         </span>
       </div>
 
@@ -240,7 +242,7 @@ export default function ChapterPage({
             href={prevHref}
             className="group rounded-xl border border-border bg-surface px-5 py-4 transition-colors hover:border-border-hover"
           >
-            <span className="text-xs text-muted">← Önceki</span>
+            <span className="text-xs text-muted">← {t("Önceki")}</span>
             <span className="mt-1 block truncate font-display text-lg text-foreground group-hover:text-accent">
               {parent.title}
             </span>
@@ -253,30 +255,30 @@ export default function ChapterPage({
             href={nextHref}
             className="group rounded-xl border border-accent/30 bg-accent-soft/50 px-5 py-4 text-right transition-colors hover:border-accent"
           >
-            <span className="text-xs text-accent">Sonraki →</span>
+            <span className="text-xs text-accent">{t("Sonraki")} →</span>
             <span className="mt-1 block truncate font-display text-lg text-foreground group-hover:text-accent">
               {next.title}
             </span>
           </Link>
         ) : (
           <div className="rounded-xl border border-dashed border-border px-5 py-4 text-right">
-            <span className="text-xs text-muted">Burada bitiyor</span>
+            <span className="text-xs text-muted">{t("Burada bitiyor")}</span>
             <span className="mt-1 block text-sm text-muted">
-              {isBookOwner ? "Devamını yazmak sana kalmış." : "Henüz bir devamı yok."}
+              {isBookOwner ? t("Devamını yazmak sana kalmış.") : t("Henüz bir devamı yok.")}
             </span>
           </div>
         )}
       </nav>
       {(prevHref || nextHref) && (
         <p className="mt-2 hidden text-center text-[11px] text-muted sm:block">
-          ← → tuşlarıyla da sayfa çevirebilirsin
+          {t("← → tuşlarıyla da sayfa çevirebilirsin")}
         </p>
       )}
 
       {branches.length > 0 && (
         <div className="mt-10">
           <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-            Buradan ayrılan başka dallar
+            {t("Buradan ayrılan başka dallar")}
           </h2>
           <ul className="mt-3 flex flex-col gap-2">
             {branches.map((child) => (
@@ -292,7 +294,7 @@ export default function ChapterPage({
                     onClick={() => void handleMarkCanonical(child._id)}
                     className={buttonLink}
                   >
-                    ana hat yap
+                    {t("ana hat yap")}
                   </button>
                 )}
               </li>
@@ -307,7 +309,7 @@ export default function ChapterPage({
         <div className="mt-12 border-t border-border pt-4">
           <DeleteButton
             target={{ kind: "chapter", id: chapterId }}
-            label="Bu bölümü sil"
+            label={t("Bu bölümü sil")}
             afterDelete={({ parentChapterId }) =>
               parentChapterId
                 ? `/kitap/${bookId}/bolum/${parentChapterId}`

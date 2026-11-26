@@ -33,7 +33,9 @@ import type { EntityKind } from "@/convex/entityKinds";
 import EntityDrawer from "@/components/entity/EntityDrawer";
 import { ThemeButton } from "@/components/ThemePicker";
 import { WritingGoalBadge } from "@/components/Goals";
-import { KINDS, todayTitle } from "@/lib/writingKinds";
+import { todayTitle } from "@/lib/localized";
+import { intlLocale, useI18n, type Locale } from "@/lib/i18n";
+import { useWritingKinds } from "@/lib/localized";
 
 const AUTOSAVE_MS = 1500;
 
@@ -88,8 +90,8 @@ function clearBackup(key: string) {
   }
 }
 
-function clock(at: number) {
-  return new Date(at).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+function clock(at: number, locale: Locale) {
+  return new Date(at).toLocaleTimeString(intlLocale(locale), { hour: "2-digit", minute: "2-digit" });
 }
 
 // The writing screen. Like Medium or a Pages document: a calm sheet, a large
@@ -101,7 +103,7 @@ export default function ChapterForm({
   existingChapter,
   kind = "book",
   backHref,
-  backLabel = "Geri dön",
+  backLabel,
   eyebrow,
   intro,
   footer,
@@ -116,7 +118,9 @@ export default function ChapterForm({
   intro?: string;
   footer?: ReactNode;
 }) {
-  const cfg = KINDS[kind];
+  const cfg = useWritingKinds()[kind];
+  const { t, locale, num } = useI18n();
+  backLabel ??= t("Geri dön");
   const createChapter = useMutation(api.chapters.create);
   const updateChapter = useMutation(api.chapters.update);
   const updateBook = useMutation(api.books.update);
@@ -136,10 +140,10 @@ export default function ChapterForm({
   // A published text is never changed behind the reader's back: edits to it
   // are kept on this device until the writer chooses to update it.
   const liveEdit = existingChapter?.status === "published";
-  const fallbackTitle = `Başlıksız ${cfg.unit.toLocaleLowerCase("tr-TR")}`;
+  const fallbackTitle = t("Başlıksız {unit}", { unit: cfg.unit.toLocaleLowerCase(intlLocale(locale)) });
 
   const [initial] = useState<Snapshot>(() => ({
-    title: existingChapter?.title ?? (cfg.datedTitle ? todayTitle() : ""),
+    title: existingChapter?.title ?? (cfg.datedTitle ? todayTitle(locale) : ""),
     content: existingChapter?.content ?? cfg.template ?? "",
   }));
   const [title, setTitle] = useState(initial.title);
@@ -335,7 +339,7 @@ export default function ChapterForm({
       try {
         await updateBook({ bookId, visibility: "public" });
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Yazı herkese açılamadı.");
+        setError(t(err instanceof Error ? err.message : "Yazı herkese açılamadı."));
         return;
       }
     }
@@ -351,7 +355,7 @@ export default function ChapterForm({
       clearBackup(newKey);
       router.push(`/kitap/${bookId}/bolum/${chapterId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bir şeyler ters gitti.");
+      setError(t(err instanceof Error ? err.message : "Bir şeyler ters gitti."));
       setSubmitting(null);
     }
   }
@@ -373,33 +377,33 @@ export default function ChapterForm({
   const status: { tone: "ok" | "busy" | "pending" | "error" | "quiet"; label: string; hint: string } =
     (() => {
       if (saveState.kind === "saving") {
-        return { tone: "busy", label: "Kaydediliyor…", hint: "Taslağın sunucuya kaydediliyor." };
+        return { tone: "busy", label: t("Kaydediliyor…"), hint: t("Taslağın sunucuya kaydediliyor.") };
       }
       if (saveState.kind === "error") {
         return {
           tone: "error",
-          label: "Kaydedilemedi",
-          hint: "Bağlantını kontrol et. Metnin bu cihazda saklanıyor.",
+          label: t("Kaydedilemedi"),
+          hint: t("Bağlantını kontrol et. Metnin bu cihazda saklanıyor."),
         };
       }
       if (liveEdit && dirty) {
         return {
           tone: "pending",
-          label: "Yayına alınmadı",
-          hint: "Okurlar hâlâ eski metni görüyor; değişiklikler “Güncelle”ye basınca yayına girer.",
+          label: t("Yayına alınmadı"),
+          hint: t("Okurlar hâlâ eski metni görüyor; değişiklikler “Güncelle”ye basınca yayına girer."),
         };
       }
-      if (dirty) return { tone: "pending", label: "Düzenleniyor", hint: "Birazdan kendiliğinden kaydedilecek." };
+      if (dirty) return { tone: "pending", label: t("Düzenleniyor"), hint: t("Birazdan kendiliğinden kaydedilecek.") };
       if (saveState.kind === "saved") {
         return {
           tone: "ok",
-          label: `Kaydedildi · ${clock(saveState.at)}`,
-          hint: liveEdit ? "Yayındaki metin güncellendi." : "Taslak sunucuda ve bu cihazda.",
+          label: `${t("Kaydedildi")} · ${clock(saveState.at, locale)}`,
+          hint: liveEdit ? t("Yayındaki metin güncellendi.") : t("Taslak sunucuda ve bu cihazda."),
         };
       }
       return existingChapter
-        ? { tone: "ok", label: "Kaydedildi", hint: "Son hâli sunucuda." }
-        : { tone: "quiet", label: "Taslak", hint: "Yazmaya başladığında kendiliğinden kaydedilir." };
+        ? { tone: "ok", label: t("Kaydedildi"), hint: t("Son hâli sunucuda.") }
+        : { tone: "quiet", label: t("Taslak"), hint: t("Yazmaya başladığında kendiliğinden kaydedilir.") };
     })();
 
   const dot = {
@@ -451,16 +455,16 @@ export default function ChapterForm({
           <PaperPicker paper={paper} pages={pageLayout.pages} onChoose={choosePaper} />
           <WritingModeMenu modes={modes} onChange={changeModes} />
           <span className="hidden text-xs tabular-nums text-muted xl:inline">
-            {words.toLocaleString("tr-TR")} kelime
+            {t("{n} kelime", { n: num(words) })}
           </span>
           <button
             type="button"
             onClick={() => setNotesOpen(true)}
-            title="Notların"
+            title={t("Notların")}
             className="relative inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground"
           >
             <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-[2px] bg-caramel/70" />
-            <span className="hidden lg:inline">Notlar</span>
+            <span className="hidden lg:inline">{t("Notlar")}</span>
             {notes.length > 0 && (
               <span className="min-w-5 rounded-full bg-caramel-soft px-1.5 text-center text-[11px] font-semibold text-foreground">
                 {notes.length}
@@ -471,11 +475,11 @@ export default function ChapterForm({
             <button
               type="button"
               onClick={() => setWorldOpen(true)}
-              title="Bu yazının karakterleri, yerleri ve fazlası"
+              title={t("Bu yazının karakterleri, yerleri ve fazlası")}
               className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground"
             >
               <span aria-hidden="true" className="text-[13px] leading-none text-sapphire">✦</span>
-              <span className="hidden lg:inline">Evren</span>
+              <span className="hidden lg:inline">{t("Evren")}</span>
               {names.length > 0 && (
                 <span className="min-w-5 rounded-full bg-sapphire-soft px-1.5 text-center text-[11px] font-semibold text-foreground">
                   {names.length}
@@ -486,14 +490,14 @@ export default function ChapterForm({
           <button
             type="button"
             onClick={() => setHistoryOpen(true)}
-            title="Sürüm geçmişi"
-            aria-label="Sürüm geçmişi"
+            title={t("Sürüm geçmişi")}
+            aria-label={t("Sürüm geçmişi")}
             className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground"
           >
             <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M3.5 10a6.5 6.5 0 1 0 1.9-4.6M3.5 3.5v2.6h2.6M10 6.5V10l2.4 1.6" />
             </svg>
-            <span className="hidden xl:inline">Geçmiş</span>
+            <span className="hidden xl:inline">{t("Geçmiş")}</span>
           </button>
           <ThemeButton />
           {isOwner && book && <BookSettingsButton book={book} />}
@@ -502,10 +506,10 @@ export default function ChapterForm({
               type="button"
               onClick={() => void handleSubmit("draft")}
               disabled={submitting !== null}
-              title="Okurlardan gizle, taslağa çevir"
+              title={t("Okurlardan gizle, taslağa çevir")}
               className="hidden h-9 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground disabled:opacity-50 sm:inline-flex sm:items-center"
             >
-              {submitting === "draft" ? "Çevriliyor…" : "Taslağa çevir"}
+              {submitting === "draft" ? t("Çevriliyor…") : t("Taslağa çevir")}
             </button>
           )}
           <button
@@ -514,7 +518,7 @@ export default function ChapterForm({
             disabled={disabled}
             className="inline-flex h-9 shrink-0 items-center rounded-full bg-accent px-4 text-sm font-medium text-accent-contrast shadow-[0_8px_20px_-12px_rgba(38,66,139,0.9)] transition-colors hover:bg-accent-hover disabled:opacity-45"
           >
-            {submitting === "published" ? "Yayınlanıyor…" : liveEdit ? "Güncelle" : "Yayınla"}
+            {submitting === "published" ? t("Yayınlanıyor…") : liveEdit ? t("Güncelle") : t("Yayınla")}
           </button>
         </div>
       </header>
@@ -527,13 +531,13 @@ export default function ChapterForm({
               className="menu-pop flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-caramel/70 bg-caramel-soft px-4 py-2.5 text-sm text-foreground"
             >
               <span className="min-w-[12rem] flex-1">
-                Bu cihazda {clock(restorable.at)} saatinden kalma, kaydedilmemiş bir sürüm var.
+                {t("Bu cihazda {time} saatinden kalma, kaydedilmemiş bir sürüm var.", { time: clock(restorable.at, locale) })}
               </span>
               <button onClick={restore} className="font-medium underline underline-offset-4">
-                Geri yükle
+                {t("Geri yükle")}
               </button>
               <button onClick={discardBackup} className="text-muted underline underline-offset-4">
-                Yok say
+                {t("Yok say")}
               </button>
             </div>
           )}
@@ -611,7 +615,7 @@ export default function ChapterForm({
                 onNotesChange={setNotes}
                 names={names}
                 onAddName={isOwner ? addName : undefined}
-                placeholder="Yazmaya başla…"
+                placeholder={t("Yazmaya başla…")}
                 pageView={pageView}
                 modes={modes}
               />
@@ -626,9 +630,9 @@ export default function ChapterForm({
 
         <div className={paper ? "mx-auto max-w-[42rem]" : undefined}>
           <p className="mt-16 text-xs leading-relaxed text-muted/80">
-            Seç ya da sağ tıkla: biçim, not, karakter, mekan, ülke… · <kbd className="font-sans">##</kbd> ara
-            başlık · <kbd className="font-sans">&gt;</kbd> alıntı · <kbd className="font-sans">-</kbd> liste ·{" "}
-            <kbd className="font-sans">Ctrl+S</kbd> kaydet
+            {t("Seç ya da sağ tıkla: biçim, not, karakter, mekan, ülke…")} · <kbd className="font-sans">##</kbd>{" "}
+            {t("ara başlık")} · <kbd className="font-sans">&gt;</kbd> {t("alıntı")} · <kbd className="font-sans">-</kbd>{" "}
+            {t("liste")} · <kbd className="font-sans">Ctrl+S</kbd> {t("kaydet")}
           </p>
           {footer && <div className="mt-10 border-t border-border/70 pt-5">{footer}</div>}
         </div>
@@ -686,7 +690,7 @@ export default function ChapterForm({
       {(notesOpen || historyOpen || worldOpen) && (
         <button
           type="button"
-          aria-label="Kapat"
+          aria-label={t("Kapat")}
           onClick={() => {
             setNotesOpen(false);
             setHistoryOpen(false);

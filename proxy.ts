@@ -14,8 +14,13 @@ const PUBLIC_PAGES = [
   /^\/kitap\/[^/]+\/evren\/[^/]+$/,
 ];
 
+// Files for crawlers and link previews (WhatsApp, X…): never behind sign-in.
+const OPEN_FILES =
+  /\/(?:opengraph-image|twitter-image)(?:-[\w-]+)?$|^\/(?:icon\.svg|apple-icon|manifest\.webmanifest|sitemap\.xml|robots\.txt|llms(?:-full)?\.txt)$/;
+
 export default convexAuthNextjsProxy(async (request, { isAuthenticated }) => {
   const { pathname, searchParams } = request.nextUrl;
+  if (OPEN_FILES.test(pathname)) return undefined;
   const signedIn = await isAuthenticated();
 
   if (signedIn && (pathname === "/" || pathname === "/giris")) {

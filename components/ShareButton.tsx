@@ -4,6 +4,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { pillInactive } from "@/lib/ui";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
+import { useT } from "@/lib/i18n";
 
 export default function ShareButton({
   targetType,
@@ -16,6 +17,7 @@ export default function ShareButton({
 }) {
   const recordShare = useMutation(api.social.recordShare);
   const showToast = useToast();
+  const t = useT();
 
   async function handleShare() {
     try {
@@ -26,7 +28,7 @@ export default function ShareButton({
     }
     try {
       await navigator.clipboard.writeText(window.location.href);
-      showToast("Bağlantı kopyalandı.", "success");
+      showToast(t("Bağlantı kopyalandı."), "success");
     } catch {
       // panoya kopyalama desteklenmiyorsa sessizce geç
     }
@@ -34,7 +36,7 @@ export default function ShareButton({
 
   return (
     <button onClick={() => void handleShare()} className={pillInactive}>
-      ↗ Paylaş ({shareCount})
+      ↗ {t("Paylaş")} ({shareCount})
     </button>
   );
 }

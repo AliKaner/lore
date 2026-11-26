@@ -1,22 +1,27 @@
+"use client";
+
 import NewBookButton from "@/components/NewBookButton";
-import { KIND_ORDER, KINDS } from "@/lib/writingKinds";
+import { KIND_ORDER } from "@/lib/writingKinds";
+import { useWritingKinds } from "@/lib/localized";
+import { useT } from "@/lib/i18n";
 
 export default function ChooseKindPage() {
+  const t = useT();
+  const kinds = useWritingKinds();
   return (
     <main className="mx-auto max-w-5xl px-5 py-14 sm:px-8">
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sapphire">
-        Yeni yazı
+        {t("Yeni yazı")}
       </p>
       <h1 className="mt-3 font-display text-5xl font-normal leading-tight">
-        Bugün ne yazmak istiyorsun?
+        {t("Bugün ne yazmak istiyorsun?")}
       </h1>
       <p className="mt-3 max-w-xl text-muted">
-        Her tür kendi masasıyla gelir: şablonu, başlığı, kimin görebileceği ve
-        okurların neler yapabileceği ona göre ayarlanır.
+        {t("Her tür kendi masasıyla gelir: şablonu, başlığı, kimin görebileceği ve okurların neler yapabileceği ona göre ayarlanır.")}
       </p>
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {KIND_ORDER.map((kind) => {
-          const cfg = KINDS[kind];
+          const cfg = kinds[kind];
           return (
             <li key={kind}>
               <NewBookButton

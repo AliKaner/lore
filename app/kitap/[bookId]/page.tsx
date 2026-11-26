@@ -19,9 +19,10 @@ import NotFoundState from "@/components/NotFoundState";
 import ExportMenu from "@/components/ExportMenu";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonPrimary } from "@/lib/ui";
-import { kindConfig } from "@/lib/writingKinds";
+import { useEntityKinds, useKindConfig } from "@/lib/localized";
+import { useT } from "@/lib/i18n";
 import { useCommunityOpen } from "@/lib/community";
-import { ENTITY_KINDS, ENTITY_KIND_ORDER } from "@/convex/entityKinds";
+import { ENTITY_KIND_ORDER } from "@/convex/entityKinds";
 import { KindGlyph } from "@/components/entity/shared";
 
 export default function BookPage({
@@ -37,6 +38,9 @@ export default function BookPage({
   const setBookCover = useMutation(api.files.setBookCover);
   const showToast = useToast();
   const communityOpen = useCommunityOpen();
+  const t = useT();
+  const cfg = useKindConfig(book);
+  const entityKinds = useEntityKinds();
 
   if (book === undefined) {
     return (
@@ -62,7 +66,6 @@ export default function BookPage({
   }
 
   const isOwner = me?._id === book.ownerId;
-  const cfg = kindConfig(book);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
@@ -73,7 +76,7 @@ export default function BookPage({
         <BookCover
           storageId={book.coverStorageId}
           title={book.title}
-          placeholder="kapak yok"
+          placeholder={t("kapak yok")}
           className="h-32 w-24 rounded shrink-0"
         />
         <div className="flex-1 min-w-0">
@@ -93,7 +96,7 @@ export default function BookPage({
       {isOwner && (
         <div className="mb-6">
           <ImageUploader
-            label="Kitap kapağı"
+            label={t("Kitap kapağı")}
             storageId={book.coverStorageId}
             onUploaded={(storageId) => void handleCoverUpload(storageId)}
           />
@@ -117,14 +120,14 @@ export default function BookPage({
           href={`/kitap/${bookId}/bolum/${book.rootChapterId}`}
           className={`${buttonPrimary} mb-6`}
         >
-          Okumaya başla
+          {t("Okumaya başla")}
         </Link>
       ) : isOwner ? (
         <Link href={`/kitap/${bookId}/yaz`} className={`${buttonPrimary} mb-6`}>
           {cfg.firstUnitCta}
         </Link>
       ) : (
-        <p className="text-muted mb-6 text-sm">Henüz bir şey yazılmamış.</p>
+        <p className="text-muted mb-6 text-sm">{t("Henüz bir şey yazılmamış.")}</p>
       )}
 
       <h2 className="font-medium mb-2">{cfg.mapLabel}</h2>
@@ -136,12 +139,12 @@ export default function BookPage({
 
       {entities && entities.length > 0 && (
         <section className="mt-10">
-          <h2 className="font-medium mb-3">Evreni</h2>
+          <h2 className="font-medium mb-3">{t("Evreni")}</h2>
           <div className="flex flex-col gap-5">
             {ENTITY_KIND_ORDER.filter((kind) => entities.some((e) => e.kind === kind)).map((kind) => (
               <div key={kind}>
                 <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
-                  {ENTITY_KINDS[kind].plural}
+                  {entityKinds[kind].plural}
                 </p>
                 <ul className="flex flex-wrap gap-2">
                   {entities
@@ -176,7 +179,7 @@ export default function BookPage({
         <div className="mt-12 border-t border-border pt-4">
           <DeleteButton
             target={{ kind: "book", id: bookId }}
-            label="Bu yazıyı sil"
+            label={t("Bu yazıyı sil")}
             afterDelete={() => "/yazilarim"}
           />
         </div>

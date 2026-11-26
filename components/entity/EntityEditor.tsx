@@ -6,7 +6,6 @@ import type { FunctionReturnType } from "convex/server";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import {
-  ENTITY_KINDS,
   LIMITS,
   type EntityField,
   type EntitySection,
@@ -18,6 +17,8 @@ import DeleteButton from "@/components/DeleteButton";
 import Loading from "@/components/Loading";
 import NotFoundState from "@/components/NotFoundState";
 import { useToast } from "@/components/Toaster";
+import { useT } from "@/lib/i18n";
+import { useEntityKinds } from "@/lib/localized";
 
 type Entity = NonNullable<FunctionReturnType<typeof api.entities.get>>;
 type Draft = {
@@ -105,13 +106,14 @@ function LongText({
   placeholder?: string;
   label: string;
 }) {
+  const t = useT();
   return (
     <textarea
       value={value}
       aria-label={label}
       maxLength={LIMITS.longtext}
       onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder ?? "Yazmaya başla…"}
+      placeholder={placeholder ?? t("Yazmaya başla…")}
       rows={2}
       className={`${lineInput} min-h-[3.25rem] resize-none leading-relaxed [field-sizing:content]`}
     />
@@ -128,10 +130,11 @@ function Lifespan({
   onChange: (fields: Record<string, string>) => void;
 }) {
   const [mode, setMode] = useState<"age" | "birthYear">(birthYear && !age ? "birthYear" : "age");
+  const t = useT();
   const value = mode === "age" ? age : birthYear;
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <div role="radiogroup" aria-label="Yaşı ya da doğum yılı" className="inline-flex rounded-full bg-accent-soft/60 p-0.5 text-xs">
+      <div role="radiogroup" aria-label={t("Yaşı ya da doğum yılı")} className="inline-flex rounded-full bg-accent-soft/60 p-0.5 text-xs">
         {(["age", "birthYear"] as const).map((option) => (
           <button
             key={option}
@@ -148,18 +151,18 @@ function Lifespan({
               mode === option ? "bg-surface font-medium text-foreground shadow-sm" : "text-muted hover:text-foreground"
             }`}
           >
-            {option === "age" ? "Yaş" : "Doğum yılı"}
+            {option === "age" ? t("Yaş") : t("Doğum yılı")}
           </button>
         ))}
       </div>
       <input
         value={value}
-        aria-label={mode === "age" ? "Yaşı" : "Doğum yılı"}
+        aria-label={mode === "age" ? t("Yaşı") : t("Doğum yılı")}
         maxLength={LIMITS.text}
         onChange={(event) =>
           onChange(mode === "age" ? { age: event.target.value } : { birthYear: event.target.value })
         }
-        placeholder={mode === "age" ? "24" : "Ay Takvimi 318"}
+        placeholder={mode === "age" ? "24" : t("Ay Takvimi 318")}
         className={`${lineInput} max-w-[14rem] flex-1`}
       />
     </div>
@@ -179,6 +182,7 @@ function ImageSlot({
 }) {
   const [busy, setBusy] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const t = useT();
   async function take(file: File | undefined) {
     if (!file) return;
     setBusy(true);
@@ -195,14 +199,14 @@ function ImageSlot({
         <img src={image.url} alt={field.label} className="max-h-[28rem] w-full object-contain" />
         <figcaption className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
           <a href={image.url} target="_blank" rel="noreferrer" className="rounded-full bg-ink/80 px-3 py-1 text-xs text-on-ink backdrop-blur hover:bg-ink">
-            Büyüt
+            {t("Büyüt")}
           </a>
           <label className="cursor-pointer rounded-full bg-ink/80 px-3 py-1 text-xs text-on-ink backdrop-blur hover:bg-ink">
-            Değiştir
+            {t("Değiştir")}
             <input type="file" accept="image/*" className="sr-only" onChange={(event) => void take(event.target.files?.[0])} />
           </label>
           <button type="button" onClick={onRemove} className="rounded-full bg-ink/80 px-3 py-1 text-xs text-on-ink backdrop-blur hover:bg-red-800">
-            Kaldır
+            {t("Kaldır")}
           </button>
         </figcaption>
       </figure>
@@ -227,8 +231,8 @@ function ImageSlot({
       <svg viewBox="0 0 24 24" aria-hidden="true" className="h-7 w-7 text-muted" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round">
         <path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z M9 4v13.5 M15 6.5V20" />
       </svg>
-      <span className="text-sm font-medium">{busy ? "Yükleniyor…" : field.hint}</span>
-      <span className="text-xs text-muted">Sürükle bırak ya da tıkla · en fazla 10 MB</span>
+      <span className="text-sm font-medium">{busy ? t("Yükleniyor…") : field.hint}</span>
+      <span className="text-xs text-muted">{t("Sürükle bırak ya da tıkla · en fazla 10 MB")}</span>
       <input type="file" accept="image/*" className="sr-only" disabled={busy} onChange={(event) => void take(event.target.files?.[0])} />
     </label>
   );
@@ -251,6 +255,7 @@ function Gallery({
   const [dragging, setDragging] = useState(false);
   const pictures = entity.images.filter((image) => image.slot === null);
   const [portrait, ...rest] = pictures;
+  const t = useT();
 
   async function take(files: FileList | null | undefined) {
     if (!files || files.length === 0) return;
@@ -286,19 +291,19 @@ function Gallery({
           <img src={portrait.url} alt={entity.name} className="aspect-[4/5] w-full object-cover" />
           <div className="absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-gradient-to-t from-ink/60 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
             <a href={portrait.url} target="_blank" rel="noreferrer" className="rounded-full bg-ink/70 px-3 py-1 text-xs text-on-ink backdrop-blur hover:bg-ink">
-              Büyüt
+              {t("Büyüt")}
             </a>
             <button type="button" onClick={() => onRemove(portrait.storageId)} className="rounded-full bg-ink/70 px-3 py-1 text-xs text-on-ink backdrop-blur hover:bg-red-800">
-              Kaldır
+              {t("Kaldır")}
             </button>
           </div>
         </figure>
       ) : (
         <label className="flex aspect-[16/10] w-full cursor-pointer flex-col sm:aspect-[4/5] items-center justify-center gap-3 rounded-2xl border border-dashed border-border-hover bg-surface text-center transition-colors hover:border-accent hover:bg-accent-soft/30">
           <KindGlyph kind={entity.kind} size="lg" />
-          <span className="text-sm font-medium">{busy ? "Yükleniyor…" : "Görsel ekle"}</span>
+          <span className="text-sm font-medium">{busy ? t("Yükleniyor…") : t("Görsel ekle")}</span>
           <span className="px-6 text-xs leading-relaxed text-muted">
-            Birden fazla seçebilir ya da buraya sürükleyebilirsin. İlki kapak olur.
+            {t("Birden fazla seçebilir ya da buraya sürükleyebilirsin. İlki kapak olur.")}
           </span>
           {picker}
         </label>
@@ -314,10 +319,10 @@ function Gallery({
               )}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-ink/60 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                 <button type="button" onClick={() => onMakeCover(image.storageId)} className="text-[11px] font-medium text-on-ink hover:text-caramel">
-                  Kapak yap
+                  {t("Kapak yap")}
                 </button>
                 <button type="button" onClick={() => onRemove(image.storageId)} className="text-[11px] text-on-ink/80 hover:text-red-300">
-                  Kaldır
+                  {t("Kaldır")}
                 </button>
               </div>
             </li>
@@ -325,7 +330,7 @@ function Gallery({
           {pictures.length < LIMITS.images && (
             <li>
               <label
-                title="Görsel ekle"
+                title={t("Görsel ekle")}
                 className="flex aspect-square w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-border-hover text-xl text-muted transition-colors hover:border-accent hover:text-accent"
               >
                 {busy ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-accent" /> : "+"}
@@ -342,8 +347,9 @@ function Gallery({
 /* ---------- Editor ---------- */
 
 function SaveBadge({ state, error }: { state: SaveState; error: string | null }) {
+  const t = useT();
   if (state === "idle") return null;
-  const label = { saving: "Kaydediliyor…", saved: "Kaydedildi", error: error ?? "Kaydedilemedi" }[state];
+  const label = { saving: t("Kaydediliyor…"), saved: t("Kaydedildi"), error: t(error ?? "Kaydedilemedi") }[state];
   return (
     <span
       aria-live="polite"
@@ -383,7 +389,8 @@ function EditorBody({
   afterDelete?: () => string;
   onDeleted?: () => void;
 }) {
-  const config = ENTITY_KINDS[entity.kind];
+  const config = useEntityKinds()[entity.kind];
+  const t = useT();
   const mine = useQuery(api.entities.listMine, {});
   const myBooks = useQuery(api.books.listMine, compact ? "skip" : {});
   const setLinks = useMutation(api.entities.setLinks);
@@ -511,9 +518,9 @@ function EditorBody({
   const familyRows: [string, Chip[]][] = family
     ? (
         [
-          ["Kardeşleri", family.siblings],
-          ["Çocukları", family.children],
-          ["Büyükanne ve büyükbabaları", family.grandparents],
+          [t("Kardeşleri"), family.siblings],
+          [t("Çocukları"), family.children],
+          [t("Büyükanne ve büyükbabaları"), family.grandparents],
         ] as [string, Chip[]][]
       ).filter(([, chips]) => chips.length > 0)
     : [];
@@ -547,7 +554,7 @@ function EditorBody({
         </div>
         <input
           value={draft.name}
-          aria-label="Adı"
+          aria-label={t("Adı")}
           maxLength={LIMITS.name}
           onChange={(event) => {
             setDraft((d) => ({ ...d, name: event.target.value }));
@@ -561,7 +568,7 @@ function EditorBody({
         />
         <input
           value={draft.summary}
-          aria-label="Kısa açıklama"
+          aria-label={t("Kısa açıklama")}
           maxLength={LIMITS.summary}
           onChange={(event) => {
             setDraft((d) => ({ ...d, summary: event.target.value }));
@@ -587,7 +594,7 @@ function EditorBody({
                   >
                     <h2 className="font-display text-2xl">{section.title}</h2>
                     <span className="text-xs text-muted">
-                      {filled > 0 ? `${filled} alan dolu` : `${section.fields.length} alan`}
+                      {filled > 0 ? t("{n} alan dolu", { n: filled }) : t("{n} alan", { n: section.fields.length })}
                     </span>
                     <span
                       aria-hidden="true"
@@ -608,7 +615,7 @@ function EditorBody({
                     <div className="pt-1">{section.fields.map(renderField)}</div>
                     {isFamily && familyRows.length > 0 && (
                       <div className="mt-3 rounded-xl bg-accent-soft/40 px-4 py-3">
-                        <p className={`${eyebrow} text-muted`}>Ailenin geri kalanı</p>
+                        <p className={`${eyebrow} text-muted`}>{t("Ailenin geri kalanı")}</p>
                         {familyRows.map(([label, chips]) => (
                           <div key={label} className="mt-2 grid gap-x-6 sm:grid-cols-[9.5rem_1fr] sm:items-center">
                             <span className="text-sm text-muted">{label}</span>
@@ -628,23 +635,23 @@ function EditorBody({
           })}
 
           <section>
-            <h2 className="border-b border-border pb-2 font-display text-2xl">Kendi alanların</h2>
+            <h2 className="border-b border-border pb-2 font-display text-2xl">{t("Kendi alanların")}</h2>
             <div className="pt-1">
               {draft.custom.map((entry, index) => (
                 <div key={index} className="group grid grid-cols-1 gap-x-6 border-b border-border/70 py-1.5 sm:grid-cols-[10rem_1fr_auto] sm:items-baseline">
                   <input
                     value={entry.label}
-                    aria-label="Alanın adı"
+                    aria-label={t("Alanın adı")}
                     maxLength={LIMITS.customLabel}
                     onChange={(event) =>
                       setCustom(draft.custom.map((c, i) => (i === index ? { ...c, label: event.target.value } : c)))
                     }
-                    placeholder="Alan adı"
+                    placeholder={t("Alan adı")}
                     className="bg-transparent py-1.5 text-sm text-muted outline-none placeholder:text-muted/45 focus:text-foreground"
                   />
                   <input
                     value={entry.value}
-                    aria-label={entry.label || "Değer"}
+                    aria-label={entry.label || t("Değer")}
                     onChange={(event) =>
                       setCustom(draft.custom.map((c, i) => (i === index ? { ...c, value: event.target.value } : c)))
                     }
@@ -653,7 +660,7 @@ function EditorBody({
                   />
                   <button
                     type="button"
-                    aria-label="Alanı kaldır"
+                    aria-label={t("Alanı kaldır")}
                     onClick={() => setCustom(draft.custom.filter((_, i) => i !== index))}
                     className="justify-self-end px-1 text-sm text-muted opacity-0 transition-opacity hover:text-red-700 group-hover:opacity-100 focus:opacity-100"
                   >
@@ -667,7 +674,7 @@ function EditorBody({
                   onClick={() => setDraft((d) => ({ ...d, custom: [...d.custom, { label: "", value: "" }] }))}
                   className="mt-2 inline-flex h-8 items-center gap-1 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/70 hover:text-foreground"
                 >
-                  + Alan ekle
+                  {t("+ Alan ekle")}
                 </button>
               )}
             </div>
@@ -675,9 +682,9 @@ function EditorBody({
 
           {entity.incoming.length > 0 && (
             <section>
-              <h2 className="border-b border-border pb-2 font-display text-2xl">Bağlantıları</h2>
+              <h2 className="border-b border-border pb-2 font-display text-2xl">{t("Bağlantıları")}</h2>
               {entity.incoming.map((group) => (
-                <Row key={group.label} label={group.label}>
+                <Row key={group.label} label={t(group.label)}>
                   <div className="flex flex-wrap gap-1.5 py-1">
                     {group.items.map((chip) => (
                       <EntityChip key={chip._id} chip={chip} onOpen={() => onOpenEntity(chip._id)} />
@@ -690,9 +697,9 @@ function EditorBody({
 
           {!compact && (
             <section>
-              <h2 className="border-b border-border pb-2 font-display text-2xl">Yazılarında</h2>
+              <h2 className="border-b border-border pb-2 font-display text-2xl">{t("Yazılarında")}</h2>
               <p className="mt-2 text-sm text-muted">
-                Dahil olduğu yazılarda adı metinde vurgulanır, okurlar da bu sayfayı görebilir.
+                {t("Dahil olduğu yazılarda adı metinde vurgulanır, okurlar da bu sayfayı görebilir.")}
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {entity.books.map((book) => (
@@ -702,7 +709,7 @@ function EditorBody({
                     </a>
                     <button
                       type="button"
-                      aria-label={`${book.title} yazısından çıkar`}
+                      aria-label={t("{title} yazısından çıkar", { title: book.title })}
                       onClick={() => void run(() => detachFromBook({ bookId: book._id, entityId: entity._id }))}
                       className="inline-flex h-5 w-5 items-center justify-center rounded-full text-xs text-muted hover:bg-accent-soft hover:text-foreground"
                     >
@@ -713,14 +720,14 @@ function EditorBody({
                 {otherBooks.length > 0 && (
                   <select
                     value=""
-                    aria-label="Bir yazıya ekle"
+                    aria-label={t("Bir yazıya ekle")}
                     onChange={(event) => {
                       const id = event.target.value as Id<"books">;
                       if (id) void run(() => attachToBook({ bookId: id, entityId: entity._id }));
                     }}
                     className="h-8 rounded-full border border-dashed border-border-hover bg-transparent px-3 text-sm text-muted hover:text-foreground"
                   >
-                    <option value="">+ Bir yazıya ekle</option>
+                    <option value="">{t("+ Bir yazıya ekle")}</option>
                     {otherBooks.map((book) => (
                       <option key={book._id} value={book._id}>
                         {book.title}
@@ -735,7 +742,7 @@ function EditorBody({
           <div className="border-t border-border pt-4">
             <DeleteButton
               target={{ kind: "entity", id: entity._id }}
-              label={`Bu ${config.label.toLocaleLowerCase("tr-TR")} kaydını sil`}
+              label={t("Bu kaydı sil")}
               afterDelete={afterDelete}
               onDeleted={onDeleted}
             />
@@ -762,9 +769,10 @@ export default function EntityEditor({
   onDeleted?: () => void;
 }) {
   const entity = useQuery(api.entities.get, { entityId });
+  const t = useT();
   if (entity === undefined) return <Loading />;
   if (entity === null || !entity.canEdit) {
-    return <NotFoundState title="Bu kayıt bulunamadı" />;
+    return <NotFoundState title={t("Bu kayıt bulunamadı")} />;
   }
   return (
     <EditorBody

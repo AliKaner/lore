@@ -3,6 +3,7 @@
 import { useEffect, useEffectEvent, useState } from "react";
 import type { FlowWord } from "@/lib/editorExtensions";
 import { readPref, writePref } from "@/lib/readingPrefs";
+import { useT } from "@/lib/i18n";
 
 const MIN_WPM = 100;
 const MAX_WPM = 900;
@@ -27,9 +28,9 @@ function delayFor(word: FlowWord, wpm: number) {
   return (60_000 / wpm) * factor;
 }
 
-function minutes(words: number, wpm: number) {
+function minutes(words: number, wpm: number, t: (text: string, vars?: Record<string, number>) => string) {
   const value = words / wpm;
-  return value < 1 ? "1 dakikadan az" : `~${Math.round(value)} dk`;
+  return value < 1 ? t("1 dakikadan az") : t("~{n} dk", { n: Math.round(value) });
 }
 
 // Rapid serial visual presentation: one word at a time in a fixed spot, so
@@ -46,6 +47,7 @@ export default function SpeedReader({
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [wpm, setWpm] = useState(() => readPref("wpm", 300));
+  const t = useT();
   const last = words.length - 1;
   const finished = index >= last && !playing && index > 0;
 
@@ -107,15 +109,15 @@ export default function SpeedReader({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Hızlı okuma"
+      aria-label={t("Hızlı okuma")}
       className="fixed inset-0 z-50 flex flex-col bg-background text-foreground"
     >
       <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <p className="truncate text-sm text-muted">
-          <span className="font-medium text-foreground">Akış</span> · {title}
+          <span className="font-medium text-foreground">{t("Akış")}</span> · {title}
         </p>
         <button onClick={onClose} className="shrink-0 text-sm text-muted underline">
-          Kapat <span className="hidden sm:inline">(Esc)</span>
+          {t("Kapat")} <span className="hidden sm:inline">(Esc)</span>
         </button>
       </div>
 
@@ -134,11 +136,11 @@ export default function SpeedReader({
         </div>
         {!playing && index === 0 && (
           <p className="absolute bottom-6 text-center text-sm text-muted">
-            Gözünü karamel çizgilere sabitle. Boşluk tuşu başlatır ve durdurur.
+            {t("Gözünü karamel çizgilere sabitle. Boşluk tuşu başlatır ve durdurur.")}
           </p>
         )}
         {finished && (
-          <p className="absolute bottom-6 text-center text-sm text-muted">Bitti.</p>
+          <p className="absolute bottom-6 text-center text-sm text-muted">{t("Bitti.")}</p>
         )}
       </div>
 
@@ -150,17 +152,17 @@ export default function SpeedReader({
             max={Math.max(0, last)}
             value={index}
             onChange={(event) => setIndex(Number(event.target.value))}
-            aria-label="Metindeki yer"
+            aria-label={t("Metindeki yer")}
             className="w-full accent-[var(--caramel)]"
           />
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
             <span className="tabular-nums text-muted">
-              {index + 1} / {words.length} · kalan {minutes(last - index, wpm)}
+              {index + 1} / {words.length} · {t("kalan")} {minutes(last - index, wpm, t)}
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => jump(-10)}
-                aria-label="10 kelime geri"
+                aria-label={t("10 kelime geri")}
                 className="rounded-sm px-2 py-1 text-muted hover:text-foreground"
               >
                 ← 10
@@ -170,28 +172,28 @@ export default function SpeedReader({
                 autoFocus
                 className="min-w-28 rounded-sm bg-accent px-4 py-2 font-medium text-accent-contrast hover:bg-accent-hover"
               >
-                {playing ? "Durdur" : finished ? "Baştan" : index === 0 ? "Başlat" : "Devam"}
+                {playing ? t("Durdur") : finished ? t("Baştan") : index === 0 ? t("Başlat") : t("Devam")}
               </button>
               <button
                 onClick={() => jump(10)}
-                aria-label="10 kelime ileri"
+                aria-label={t("10 kelime ileri")}
                 className="rounded-sm px-2 py-1 text-muted hover:text-foreground"
               >
                 10 →
               </button>
             </div>
-            <div className="flex items-center gap-1" role="group" aria-label="Hız">
+            <div className="flex items-center gap-1" role="group" aria-label={t("Hız")}>
               <button
                 onClick={() => changeSpeed(-25)}
-                aria-label="Yavaşlat"
+                aria-label={t("Yavaşlat")}
                 className="h-8 w-8 rounded-sm border border-border hover:border-border-hover"
               >
                 −
               </button>
-              <span className="w-24 text-center tabular-nums">{wpm} kelime/dk</span>
+              <span className="w-24 text-center tabular-nums">{t("{n} kelime/dk", { n: wpm })}</span>
               <button
                 onClick={() => changeSpeed(25)}
-                aria-label="Hızlandır"
+                aria-label={t("Hızlandır")}
                 className="h-8 w-8 rounded-sm border border-border hover:border-border-hover"
               >
                 +

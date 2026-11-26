@@ -94,7 +94,7 @@ export const setGoals = mutation({
     const patch: Partial<Doc<"users">> = {};
     const check = (value: number, { min, max }: { min: number; max: number }) => {
       if (!Number.isInteger(value) || value < min || value > max) {
-        throw new Error(`Hedef ${min} ile ${max.toLocaleString("tr-TR")} arasında olmalı.`);
+        throw new Error("Bu hedef izin verilen aralığın dışında.");
       }
       return value;
     };

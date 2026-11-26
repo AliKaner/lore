@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { buttonPrimary, pillInactive } from "@/lib/ui";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
+import { useT } from "@/lib/i18n";
 
 export default function ReportButton({
   targetType,
@@ -15,6 +16,7 @@ export default function ReportButton({
 }) {
   const createReport = useMutation(api.reports.create);
   const showToast = useToast();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [sent, setSent] = useState(false);
@@ -36,13 +38,13 @@ export default function ReportButton({
   }
 
   if (sent) {
-    return <span className="text-sm text-muted">Bildirildi</span>;
+    return <span className="text-sm text-muted">{t("Bildirildi")}</span>;
   }
 
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} className={pillInactive}>
-        ⚑ Bildir
+        ⚑ {t("Bildir")}
       </button>
     );
   }
@@ -53,11 +55,11 @@ export default function ReportButton({
         autoFocus
         value={reason}
         onChange={(event) => setReason(event.target.value)}
-        placeholder="Neden bildiriyorsun?"
+        placeholder={t("Neden bildiriyorsun?")}
         className="flex-1 border border-border rounded px-2 py-1 text-sm"
       />
       <button disabled={submitting} className={buttonPrimary}>
-        {submitting ? "Gönderiliyor…" : "Gönder"}
+        {submitting ? t("Gönderiliyor…") : t("Gönder")}
       </button>
     </form>
   );

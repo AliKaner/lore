@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import type { Locale } from "@/lib/locale";
 
 // The current time, to the minute, as React-safe state: components can show
 // "2 saat önce" without calling Date.now() while rendering. On the server it
@@ -19,9 +20,18 @@ export function useNow() {
   return useSyncExternalStore(subscribe, snapshot, serverSnapshot);
 }
 
-const relative = new Intl.RelativeTimeFormat("tr", { numeric: "auto" });
+const formats = new Map<string, Intl.RelativeTimeFormat>();
+function relative(locale: Locale) {
+  const tag = locale === "en" ? "en" : "tr";
+  let format = formats.get(tag);
+  if (!format) {
+    format = new Intl.RelativeTimeFormat(tag, { numeric: "auto" });
+    formats.set(tag, format);
+  }
+  return format;
+}
 
-export function timeAgo(at: number, now: number) {
+export function timeAgo(at: number, now: number, locale: Locale = "tr") {
   if (!now) return "";
   const seconds = Math.round((at - now) / 1000);
   const steps: [Intl.RelativeTimeFormatUnit, number][] = [
@@ -33,7 +43,7 @@ export function timeAgo(at: number, now: number) {
     ["minute", 60],
   ];
   for (const [unit, size] of steps) {
-    if (Math.abs(seconds) >= size) return relative.format(Math.round(seconds / size), unit);
+    if (Math.abs(seconds) >= size) return relative(locale).format(Math.round(seconds / size), unit);
   }
-  return "az önce";
+  return locale === "en" ? "just now" : "az önce";
 }

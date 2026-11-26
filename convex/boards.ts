@@ -95,7 +95,7 @@ export const add = mutation({
     const userId = await requireUserId(ctx);
     if ((await viewableBook(ctx, args.bookId, userId)) === null) throw new Error("Yazı bulunamadı.");
     const existing = await boardOf(ctx, userId, args.bookId);
-    if (existing.length >= MAX_ITEMS) throw new Error(`Panolara en fazla ${MAX_ITEMS} kart sığar.`);
+    if (existing.length >= MAX_ITEMS) throw new Error("Panolar dolu; yeni kart için önce birini kaldır.");
     if (args.kind === "entity") {
       const entity = args.entityId ? await ctx.db.get(args.entityId) : null;
       if (!entity || entity.creatorId !== userId) throw new Error("Bu kayıt eklenemez.");

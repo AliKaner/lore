@@ -10,13 +10,15 @@ import SignInPrompt from "@/components/SignInPrompt";
 import EmptyState from "@/components/EmptyState";
 import SecureAccountNudge from "@/components/SecureAccountNudge";
 import { buttonPrimary } from "@/lib/ui";
-import { kindConfig } from "@/lib/writingKinds";
+import { useWritingKinds } from "@/lib/localized";
+import { useI18n } from "@/lib/i18n";
+import type { KindConfig } from "@/lib/writingKinds";
 import { GoalsCard } from "@/components/Goals";
 import { timeAgo, useNow } from "@/lib/useNow";
 
 type DeskBook = FunctionReturnType<typeof api.books.myDesk>[number];
 
-const number = (n: number) => n.toLocaleString("tr-TR");
+type I18n = ReturnType<typeof useI18n>;
 
 function greeting(now: number) {
   if (!now) return "Masana hoş geldin";
@@ -27,36 +29,49 @@ function greeting(now: number) {
   return "İyi akşamlar";
 }
 
+// The writing kinds in the reader's language, picked for a book.
+function useCfg() {
+  const kinds = useWritingKinds();
+  return (book: DeskBook): KindConfig => kinds[book.kind ?? "book"];
+}
+
 function continueHref(book: DeskBook) {
   return book.lastChapter
     ? `/kitap/${book._id}/bolum/${book.lastChapter._id}/duzenle`
     : `/kitap/${book._id}/yaz`;
 }
 
-function stats(book: DeskBook) {
+function stats(book: DeskBook, cfg: KindConfig, { t, num, lower, locale }: I18n) {
   const parts: string[] = [];
   const chapters = book.chapterCount ?? 0;
-  if (chapters > 0) parts.push(`${chapters} ${kindConfig(book).unit.toLocaleLowerCase("tr-TR")}`);
-  parts.push(`${number(book.wordCount ?? 0)} kelime`);
+  if (chapters > 0) {
+    // "3 bölüm" / "3 chapters".
+    const unit = lower(cfg.unit);
+    parts.push(`${chapters} ${locale === "en" && chapters !== 1 ? `${unit}s` : unit}`);
+  }
+  parts.push(t("{n} kelime", { n: num(book.wordCount ?? 0) }));
   return parts.join(" · ");
 }
 
 function Visibility({ book }: { book: DeskBook }) {
   const open = book.visibility === "public";
+  const { t } = useI18n();
   return (
     <span
       className={`inline-flex items-center gap-1.5 text-xs ${open ? "text-sapphire" : "text-muted"}`}
-      title={open ? "Bağlantısı olan herkes okuyabilir" : "Yalnızca sen görürsün"}
+      title={open ? t("Bağlantısı olan herkes okuyabilir") : t("Yalnızca sen görürsün")}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${open ? "bg-sapphire" : "bg-border-hover"}`} />
-      {open ? "Bağlantıyla açık" : "Gizli"}
+      {open ? t("Bağlantıyla açık") : t("Gizli")}
     </span>
   );
 }
 
 // The writing the writer was last in, front and centre.
 function ContinueCard({ book, now }: { book: DeskBook; now: number }) {
-  const cfg = kindConfig(book);
+  const cfg = useCfg()(book);
+  const i18n = useI18n();
+  const { t, locale } = i18n;
   return (
     <section className="relative overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_60px_-40px_rgba(15,25,57,0.45)]">
       <span
@@ -72,7 +87,7 @@ function ContinueCard({ book, now }: { book: DeskBook; now: number }) {
         />
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-caramel">
-            Kaldığın yerden devam et
+            {t("Kaldığın yerden devam et")}
           </p>
           <h2 className="mt-2 truncate font-display text-3xl leading-tight">
             <Link href={`/kitap/${book._id}`} className="hover:text-accent">
@@ -81,25 +96,25 @@ function ContinueCard({ book, now }: { book: DeskBook; now: number }) {
           </h2>
           {book.lastChapter ? (
             <p className="mt-2 text-[15px] text-foreground">
-              <span className="text-muted">Son çalıştığın: </span>
+              <span className="text-muted">{t("Son çalıştığın:")} </span>
               <span className="font-display italic">{book.lastChapter.title}</span>
               {book.lastChapter.status === "draft" && (
                 <span className="ml-2 rounded-full bg-caramel-soft px-2 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wider text-foreground/70">
-                  taslak
+                  {t("taslak")}
                 </span>
               )}
             </p>
           ) : (
-            <p className="mt-2 text-[15px] text-muted">Henüz bir şey yazılmamış.</p>
+            <p className="mt-2 text-[15px] text-muted">{t("Henüz bir şey yazılmamış.")}</p>
           )}
           <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
             <span>{cfg.label}</span>
             <span aria-hidden="true">·</span>
-            <span className="tabular-nums">{stats(book)}</span>
+            <span className="tabular-nums">{stats(book, cfg, i18n)}</span>
             {book.lastEditedAt && now > 0 && (
               <>
                 <span aria-hidden="true">·</span>
-                <span>{timeAgo(book.lastEditedAt, now)} düzenlendi</span>
+                <span>{t("{when} düzenlendi", { when: timeAgo(book.lastEditedAt, now, locale) })}</span>
               </>
             )}
           </p>
@@ -108,7 +123,7 @@ function ContinueCard({ book, now }: { book: DeskBook; now: number }) {
           href={continueHref(book)}
           className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 self-start rounded-full bg-accent px-7 text-[15px] font-medium text-accent-contrast shadow-[0_12px_28px_-14px_rgba(38,66,139,0.9)] transition-colors hover:bg-accent-hover sm:self-center"
         >
-          {book.lastChapter ? "Devam et" : "Yazmaya başla"}
+          {book.lastChapter ? t("Devam et") : t("Yazmaya başla")}
           <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
             →
           </span>
@@ -119,7 +134,9 @@ function ContinueCard({ book, now }: { book: DeskBook; now: number }) {
 }
 
 function DeskRow({ book, now }: { book: DeskBook; now: number }) {
-  const cfg = kindConfig(book);
+  const cfg = useCfg()(book);
+  const i18n = useI18n();
+  const { t, locale } = i18n;
   return (
     <li className="group flex items-center gap-4 px-4 py-4 transition-colors hover:bg-caramel-soft/30 sm:px-5">
       <BookCover
@@ -134,11 +151,11 @@ function DeskRow({ book, now }: { book: DeskBook; now: number }) {
           {book.title}
         </p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
-          <span className="tabular-nums">{stats(book)}</span>
+          <span className="tabular-nums">{stats(book, cfg, i18n)}</span>
           {book.lastEditedAt && now > 0 && (
             <>
               <span aria-hidden="true">·</span>
-              <span>{timeAgo(book.lastEditedAt, now)}</span>
+              <span>{timeAgo(book.lastEditedAt, now, locale)}</span>
             </>
           )}
           <span aria-hidden="true">·</span>
@@ -149,7 +166,7 @@ function DeskRow({ book, now }: { book: DeskBook; now: number }) {
         href={continueHref(book)}
         className="hidden shrink-0 rounded-full border border-border px-4 py-1.5 text-sm text-foreground transition-colors hover:border-accent hover:text-accent sm:inline-flex"
       >
-        {book.lastChapter ? "Devam et" : "Başla"}
+        {book.lastChapter ? t("Devam et") : t("Başla")}
       </Link>
     </li>
   );
@@ -159,6 +176,7 @@ export default function MyWritingsPage() {
   const me = useQuery(api.users.me);
   const books = useQuery(api.books.myDesk, me ? {} : "skip");
   const now = useNow();
+  const { t, num } = useI18n();
 
   const totalWords = (books ?? []).reduce((sum, b) => sum + (b.wordCount ?? 0), 0);
   const [first, ...rest] = books ?? [];
@@ -168,17 +186,17 @@ export default function MyWritingsPage() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sapphire">
-            {me?.username ? `${greeting(now)}, @${me.username}` : greeting(now)}
+            {me?.username ? `${t(greeting(now))}, @${me.username}` : t(greeting(now))}
           </p>
-          <h1 className="mt-2 font-display text-4xl leading-tight">Yazılarım</h1>
+          <h1 className="mt-2 font-display text-4xl leading-tight">{t("Yazılarım")}</h1>
           {books && books.length > 0 && (
             <p className="mt-1 text-sm tabular-nums text-muted">
-              {books.length} yazı · {number(totalWords)} kelime
+              {t("{n} yazı", { n: books.length })} · {t("{n} kelime", { n: num(totalWords) })}
             </p>
           )}
         </div>
         <Link href="/yaz" className={`${buttonPrimary} rounded-full px-5`}>
-          + Yeni yazı
+          {t("+ Yeni yazı")}
         </Link>
       </div>
 
@@ -189,23 +207,22 @@ export default function MyWritingsPage() {
       {me === undefined ? (
         <Loading />
       ) : me === null ? (
-        <SignInPrompt title="Yazılarını görmek için giriş yap" />
+        <SignInPrompt title={t("Yazılarını görmek için giriş yap")} />
       ) : books === undefined ? (
-        <Loading label="Yazıların yükleniyor…" />
+        <Loading label={t("Yazıların yükleniyor…")} />
       ) : books.length === 0 ? (
         <EmptyState
           art="blank"
-          eyebrow="Masan hazır"
-          title="İlk yazın burada başlayacak"
+          eyebrow={t("Masan hazır")}
+          title={t("İlk yazın burada başlayacak")}
           actions={
             <Link href="/yaz" className={`${buttonPrimary} px-6`}>
-              Bir tür seç, yazmaya başla
+              {t("Bir tür seç, yazmaya başla")}
             </Link>
           }
         >
           <p>
-            Roman, öykü, şiir, köşe yazısı, röportaj ya da günlük: her tür kendi
-            şablonuyla açılır. Yazdıkça taslağın kendiliğinden kaydedilir.
+            {t("Roman, öykü, şiir, köşe yazısı, röportaj ya da günlük: her tür kendi şablonuyla açılır. Yazdıkça taslağın kendiliğinden kaydedilir.")}
           </p>
         </EmptyState>
       ) : (
@@ -214,7 +231,7 @@ export default function MyWritingsPage() {
           {rest.length > 0 && (
             <>
               <h2 className="mb-3 mt-12 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                Diğer yazıların
+                {t("Diğer yazıların")}
               </h2>
               <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
                 {rest.map((book) => (
@@ -224,7 +241,7 @@ export default function MyWritingsPage() {
             </>
           )}
           <p className="mt-8 text-center text-xs text-muted">
-            Bir yazıyı okutmak için sayfasındaki “Paylaş” düğmesiyle bağlantısını gönder.
+            {t("Bir yazıyı okutmak için sayfasındaki “Paylaş” düğmesiyle bağlantısını gönder.")}
           </p>
         </>
       )}

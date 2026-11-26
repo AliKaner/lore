@@ -10,21 +10,23 @@ import { levelInfo } from "@/lib/levels";
 import { useCommunityOpen } from "@/lib/community";
 import Wordmark from "@/components/Wordmark";
 import { ThemeButton } from "@/components/ThemePicker";
+import { LanguageSwitch, useT } from "@/lib/i18n";
 
 const WRITING_SCREEN = /^\/kitap\/[^/]+((\/bolum\/[^/]+)?\/(yaz|duzenle)|\/yazdir)$/;
 
 function NavLinks() {
   const communityOpen = useCommunityOpen();
+  const t = useT();
   return (
     <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
-      <Link href="/yazilarim">Yazılarım</Link>
-      <Link href="/yaz">Yeni yazı</Link>
-      <Link href="/evren">Evren</Link>
+      <Link href="/yazilarim">{t("Yazılarım")}</Link>
+      <Link href="/yaz">{t("Yeni yazı")}</Link>
+      <Link href="/evren">{t("Evren")}</Link>
       {communityOpen && (
         <>
-          <Link href="/kesfet">Keşfet</Link>
-          <Link href="/kutuphanem">Kütüphanem</Link>
-          <Link href="/moderasyon">Moderasyon</Link>
+          <Link href="/kesfet">{t("Keşfet")}</Link>
+          <Link href="/kutuphanem">{t("Kütüphanem")}</Link>
+          <Link href="/moderasyon">{t("Moderasyon")}</Link>
         </>
       )}
     </nav>
@@ -36,6 +38,7 @@ function UserBadge() {
   const communityOpen = useCommunityOpen();
   const { signOut } = useAuthActions();
   const router = useRouter();
+  const t = useT();
   if (!me) return null;
   const { badge, title } = levelInfo(me.level, me.xp);
   return (
@@ -43,20 +46,20 @@ function UserBadge() {
       <Link
         href={`/profil/${me._id}`}
         className="font-medium"
-        title={communityOpen ? title : undefined}
+        title={communityOpen ? t(title) : undefined}
       >
         {communityOpen
-          ? `${badge} ${me.username ?? "Profilim"} · Seviye ${me.level}`
-          : (me.username ?? "Profilim")}
+          ? `${badge} ${me.username ?? t("Profilim")} · ${t("Seviye {n}", { n: me.level })}`
+          : (me.username ?? t("Profilim"))}
       </Link>
       <Link href="/hesap" className="text-muted hover:text-foreground">
-        Hesap
+        {t("Hesap")}
       </Link>
       <button
         onClick={() => void signOut().then(() => router.push("/"))}
         className="text-muted hover:text-foreground"
       >
-        Çıkış
+        {t("Çıkış")}
       </button>
     </div>
   );
@@ -65,6 +68,7 @@ function UserBadge() {
 export default function Header() {
   const pathname = usePathname();
   const { isAuthenticated } = useConvexAuth();
+  const t = useT();
   // The landing and sign-in pages carry their own wordmark, and the writing
   // screen has its own slim bar so nothing else competes with the text.
   if (pathname === "/" || pathname === "/giris" || WRITING_SCREEN.test(pathname)) return null;
@@ -80,6 +84,7 @@ export default function Header() {
         </Authenticated>
       </div>
       <div className="flex items-center gap-2 text-sm">
+        <LanguageSwitch />
         <ThemeButton />
         <AuthLoading>
           <span className="text-muted">…</span>
@@ -87,7 +92,7 @@ export default function Header() {
         <Unauthenticated>
           {pathname !== "/giris" && (
             <Link href="/giris" className="font-medium">
-              Giriş yap
+              {t("Giriş yap")}
             </Link>
           )}
         </Unauthenticated>

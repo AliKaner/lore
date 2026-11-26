@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useT } from "@/lib/i18n";
 
 type Tone = "error" | "success";
 type ToastEntry = { id: number; message: string; tone: Tone };
@@ -27,12 +28,14 @@ export function toastErrorMessage(err: unknown): string {
 
 export default function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastEntry[]>([]);
+  const t = useT();
 
+  // Messages are translated when shown, server errors included.
   const show = useCallback((message: string, tone: Tone = "error") => {
     const id = Date.now() + Math.random();
     setToasts((prev) => [...prev, { id, message, tone }]);
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 4000);
   }, []);
 
@@ -40,15 +43,15 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={show}>
       {children}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 px-4 sm:px-0">
-        {toasts.map((t) => (
+        {toasts.map((entry) => (
           <div
-            key={t.id}
+            key={entry.id}
             role="alert"
             className={`rounded px-4 py-2 text-sm text-white shadow-lg ${
-              t.tone === "error" ? "bg-red-600" : "bg-foreground"
+              entry.tone === "error" ? "bg-red-600" : "bg-foreground"
             }`}
           >
-            {t.message}
+            {t(entry.message)}
           </div>
         ))}
       </div>

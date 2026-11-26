@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
+import { useT } from "@/lib/i18n";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
@@ -23,13 +24,14 @@ export default function ImageUploader({
   const url = useQuery(api.files.getUrl, storageId ? { storageId } : "skip");
   const showToast = useToast();
   const [uploading, setUploading] = useState(false);
+  const t = useT();
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    if (!file.type.startsWith("image/")) return showToast("Bir görsel dosyası seç.");
-    if (file.size > MAX_BYTES) return showToast("Görsel 10 MB'tan büyük olamaz.");
+    if (!file.type.startsWith("image/")) return showToast(t("Bir görsel dosyası seç."));
+    if (file.size > MAX_BYTES) return showToast(t("Görsel 10 MB'tan büyük olamaz."));
     setUploading(true);
     try {
       const uploadUrl = await generateUploadUrl();
@@ -38,7 +40,7 @@ export default function ImageUploader({
         headers: { "Content-Type": file.type },
         body: file,
       });
-      if (!result.ok) throw new Error("Görsel yüklenemedi, tekrar dener misin?");
+      if (!result.ok) throw new Error(t("Görsel yüklenemedi, tekrar dener misin?"));
       const { storageId: newStorageId } = await result.json();
       onUploaded(newStorageId);
     } catch (err) {
@@ -73,7 +75,7 @@ export default function ImageUploader({
           }`}
         >
           {uploading && <span className="h-3 w-3 animate-spin rounded-full border-2 border-border border-t-accent" />}
-          {uploading ? "Yükleniyor…" : url ? "Değiştir" : "Görsel seç"}
+          {uploading ? t("Yükleniyor…") : url ? t("Değiştir") : t("Görsel seç")}
           <input
             type="file"
             accept="image/*"

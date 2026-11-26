@@ -13,6 +13,8 @@ import { createPortal } from "react-dom";
 import { getMarkRange, useEditorState, type Editor } from "@tiptap/react";
 import { sentenceRangeAt, wordRangeAt, type NameEntry } from "@/lib/editorExtensions";
 import { ENTITY_KINDS, ENTITY_KIND_ORDER, markStyleOf, type EntityKind } from "@/convex/entityKinds";
+import { useT } from "@/lib/i18n";
+import { useEntityKinds } from "@/lib/localized";
 
 type Mode = "actions" | "note" | "name" | "done";
 type Range = { from: number; to: number };
@@ -173,6 +175,8 @@ export default function SelectionMenu({
   const [nameText, setNameText] = useState("");
   const [detailText, setDetailText] = useState("");
   const [nameKind, setNameKind] = useState<EntityKind>("character");
+  const t = useT();
+  const kinds = useEntityKinds();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -425,12 +429,12 @@ export default function SelectionMenu({
       .extendMarkRange("authorNote")
       .setMark("authorNote", { note })
       .run();
-    finish(inNote ? "Not güncellendi" : "Not eklendi");
+    finish(inNote ? t("Not güncellendi") : t("Not eklendi"));
   }
 
   function removeNote() {
     editor.chain().focus().setTextSelection(menu!.range).extendMarkRange("authorNote").unsetMark("authorNote").run();
-    finish("Not kaldırıldı");
+    finish(t("Not kaldırıldı"));
   }
 
   async function saveName(kind: EntityKind) {
@@ -440,11 +444,11 @@ export default function SelectionMenu({
     setError(null);
     try {
       await onAddName(name, kind, detailText.trim() || undefined);
-      finish(`${name} ${ENTITY_KINDS[kind].label.toLocaleLowerCase("tr-TR")} olarak kaydedildi`);
+      finish(t("{name} kaydedildi: {kind}", { name, kind: kinds[kind].label }));
     } catch (err) {
       const message = err instanceof Error ? err.message : "";
       const match = /Uncaught Error: ([^\n]+)/u.exec(message);
-      setError(match ? match[1] : "Kaydedilemedi. Bağlantını kontrol edip tekrar dene.");
+      setError(t(match ? match[1] : "Kaydedilemedi. Bağlantını kontrol edip tekrar dene."));
     } finally {
       setBusy(false);
     }
@@ -467,28 +471,28 @@ export default function SelectionMenu({
       <div
         key={menu.mode === "actions" ? `a-${menu.range.from}-${menu.range.to}` : menu.mode}
         role={menu.mode === "actions" ? "toolbar" : "dialog"}
-        aria-label="Seçim araçları"
+        aria-label={t("Seçim araçları")}
         className="menu-pop relative rounded-xl bg-ink text-on-ink shadow-[0_22px_50px_-14px_rgba(15,25,57,0.6),0_0_0_1px_rgba(255,255,255,0.07)]"
         style={{ transformOrigin: above ? "50% 100%" : "0 0" }}
       >
         {menu.mode === "actions" && (
           <div className="flex items-center gap-0.5 p-1">
-            <MenuButton index={i++} label="Kalın" active={active.bold} onClick={() => format("bold")}>
-              <span className="w-3 text-center font-bold">K</span>
+            <MenuButton index={i++} label={t("Kalın")} active={active.bold} onClick={() => format("bold")}>
+              <span className="w-3 text-center font-bold">{t("K")}</span>
             </MenuButton>
-            <MenuButton index={i++} label="İtalik" active={active.italic} onClick={() => format("italic")}>
-              <span className="w-3 text-center italic">İ</span>
+            <MenuButton index={i++} label={t("İtalik")} active={active.italic} onClick={() => format("italic")}>
+              <span className="w-3 text-center italic">{t("İ")}</span>
             </MenuButton>
-            <MenuButton index={i++} label="Ara başlık" active={active.heading} onClick={() => format("heading")}>
-              <span className="font-display text-[15px] leading-none">Başlık</span>
+            <MenuButton index={i++} label={t("Ara başlık")} active={active.heading} onClick={() => format("heading")}>
+              <span className="font-display text-[15px] leading-none">{t("Başlık")}</span>
             </MenuButton>
-            <MenuButton index={i++} label="Alıntı" active={active.quote} onClick={() => format("quote")}>
+            <MenuButton index={i++} label={t("Alıntı")} active={active.quote} onClick={() => format("quote")}>
               <span className="font-display text-lg leading-none">“</span>
             </MenuButton>
             <Divider index={i++} />
-            <MenuButton index={i++} label={inNote ? "Notu düzenle" : "Not ekle"} active={inNote} onClick={() => enter("note", menu)}>
+            <MenuButton index={i++} label={inNote ? t("Notu düzenle") : t("Not ekle")} active={inNote} onClick={() => enter("note", menu)}>
               <NoteIcon />
-              {inNote ? "Notu düzenle" : "Not"}
+              {inNote ? t("Notu düzenle") : t("Not")}
             </MenuButton>
             {known ? (
               <span
@@ -498,20 +502,20 @@ export default function SelectionMenu({
               >
                 <span className={`h-1.5 w-1.5 rotate-45 ${markStyleOf(known.kind) === "character" ? "bg-caramel" : "bg-sapphire"}`} />
                 {known.name}
-                <span className="text-on-ink/45">· {ENTITY_KINDS[known.kind].label.toLocaleLowerCase("tr-TR")}</span>
+                <span className="text-on-ink/45">· {kinds[known.kind].label}</span>
               </span>
             ) : (
               canName && (
                 <>
-                  <MenuButton index={i++} label="Karakter olarak kaydet" onClick={() => enter("name", menu, "character")}>
+                  <MenuButton index={i++} label={t("Karakter olarak kaydet")} onClick={() => enter("name", menu, "character")}>
                     <PersonIcon />
-                    Karakter
+                    {t("Karakter")}
                   </MenuButton>
-                  <MenuButton index={i++} label="Mekan olarak kaydet" onClick={() => enter("name", menu, "place")}>
+                  <MenuButton index={i++} label={t("Mekan olarak kaydet")} onClick={() => enter("name", menu, "place")}>
                     <PlaceIcon />
-                    Mekan
+                    {t("Mekan")}
                   </MenuButton>
-                  <MenuButton index={i++} label="Ülke, ırk, silah… olarak kaydet" onClick={() => enter("name", menu, "country")}>
+                  <MenuButton index={i++} label={t("Ülke, ırk, silah… olarak kaydet")} onClick={() => enter("name", menu, "country")}>
                     <MoreIcon />
                   </MenuButton>
                 </>
@@ -520,9 +524,9 @@ export default function SelectionMenu({
             {menu.autoWord && (
               <>
                 <Divider index={i++} />
-                <MenuButton index={i++} label="Tüm cümleyi seç" onClick={selectSentence}>
+                <MenuButton index={i++} label={t("Tüm cümleyi seç")} onClick={selectSentence}>
                   <SentenceIcon />
-                  Cümle
+                  {t("Cümle")}
                 </MenuButton>
               </>
             )}
@@ -530,7 +534,7 @@ export default function SelectionMenu({
         )}
 
         {menu.mode === "note" && (
-          <FormShell eyebrow={inNote ? "Notu düzenle · yalnızca sen" : "Not ekle · yalnızca sen"} quote={excerpt(text)}>
+          <FormShell eyebrow={inNote ? t("Notu düzenle · yalnızca sen") : t("Not ekle · yalnızca sen")} quote={excerpt(text)}>
             <form
               className="mt-2.5"
               onSubmit={(event) => {
@@ -549,14 +553,14 @@ export default function SelectionMenu({
                     saveNote();
                   }
                 }}
-                placeholder="Kendine bir not… ör. 7. bölümde geri dönülecek"
+                placeholder={t("Kendine bir not… ör. 7. bölümde geri dönülecek")}
                 className={`${fieldClass} resize-none leading-snug`}
               />
               <div className="mt-2.5 flex items-center gap-2">
-                <span className="mr-auto text-[11px] text-on-ink/45">↵ kaydet · Esc geri</span>
+                <span className="mr-auto text-[11px] text-on-ink/45">{t("↵ kaydet · Esc geri")}</span>
                 {inNote && (
                   <button type="button" onClick={removeNote} className="rounded-lg px-2.5 py-1.5 text-[13px] text-on-ink/70 hover:bg-white/10 hover:text-on-ink">
-                    Kaldır
+                    {t("Kaldır")}
                   </button>
                 )}
                 <button
@@ -564,7 +568,7 @@ export default function SelectionMenu({
                   disabled={!noteText.trim()}
                   className="rounded-lg bg-caramel px-3.5 py-1.5 text-[13px] font-semibold text-on-caramel transition-opacity hover:opacity-90 disabled:opacity-40"
                 >
-                  Kaydet
+                  {t("Kaydet")}
                 </button>
               </div>
             </form>
@@ -572,8 +576,8 @@ export default function SelectionMenu({
         )}
 
         {menu.mode === "name" && (
-          <FormShell eyebrow={`Yeni ${ENTITY_KINDS[nameKind].label.toLocaleLowerCase("tr-TR")}`} quote={excerpt(text)}>
-            <div role="radiogroup" aria-label="Türü" className="mt-2.5 flex flex-wrap gap-1">
+          <FormShell eyebrow={t("Yeni: {kind}", { kind: kinds[nameKind].label })} quote={excerpt(text)}>
+            <div role="radiogroup" aria-label={t("Türü")} className="mt-2.5 flex flex-wrap gap-1">
               {ENTITY_KIND_ORDER.map((kind) => (
                 <button
                   key={kind}
@@ -589,7 +593,7 @@ export default function SelectionMenu({
                   }`}
                 >
                   <span aria-hidden="true" className="text-[10px] leading-none">{ENTITY_KINDS[kind].glyph}</span>
-                  {ENTITY_KINDS[kind].label}
+                  {kinds[kind].label}
                 </button>
               ))}
             </div>
@@ -604,27 +608,27 @@ export default function SelectionMenu({
                 autoFocus
                 value={nameText}
                 onChange={(event) => setNameText(event.target.value)}
-                aria-label="Ad"
-                placeholder="Ad"
+                aria-label={t("Ad")}
+                placeholder={t("Ad")}
                 className={`${fieldClass} font-medium`}
               />
               <input
                 value={detailText}
                 onChange={(event) => setDetailText(event.target.value)}
-                aria-label="Kısa açıklama"
-                placeholder={`${ENTITY_KINDS[nameKind].summaryPlaceholder} (isteğe bağlı)`}
+                aria-label={t("Kısa açıklama")}
+                placeholder={t("{text} (isteğe bağlı)", { text: kinds[nameKind].summaryPlaceholder })}
                 className={fieldClass}
               />
               {error && <p className="text-[12px] text-red-300">{error}</p>}
               <div className="mt-0.5 flex items-center gap-2">
-                <span className="mr-auto text-[11px] text-on-ink/45">Ayrıntılar sonra Evren’de</span>
+                <span className="mr-auto text-[11px] text-on-ink/45">{t("Ayrıntılar sonra Evren’de")}</span>
                 <button
                   type="submit"
                   disabled={busy || nameText.trim().length < 2}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-caramel px-3.5 py-1.5 text-[13px] font-semibold text-on-caramel transition-opacity hover:opacity-90 disabled:opacity-40"
                 >
                   {busy && <span className="h-3 w-3 animate-spin rounded-full border-2 border-on-caramel/30 border-t-on-caramel" />}
-                  Kaydet
+                  {t("Kaydet")}
                 </button>
               </div>
             </form>

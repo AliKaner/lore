@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import BranchField from "@/components/BranchField";
 import Wordmark from "@/components/Wordmark";
 import { safeNext } from "@/lib/safeNext";
+import { useT } from "@/lib/i18n";
 
 const delay = (seconds: number): CSSProperties => ({ animationDelay: `${seconds}s` });
 
@@ -19,10 +20,11 @@ const branchMask: CSSProperties = {
 // A page of the real editor, with the things that make it Booktion: names
 // the writer has cast, a private note, autosave and the word count.
 function EditorPreview() {
+  const t = useT();
   return (
     <div
       role="img"
-      aria-label="Booktion editörü: karakter ve mekan adları vurgulu, bir yazar notu açık"
+      aria-label={t("Booktion editörü: karakter ve mekan adları vurgulu, bir yazar notu açık")}
       className="anim-settle relative w-full max-w-[30rem] rounded-xl border border-border bg-surface shadow-[0_30px_80px_-40px_rgba(15,25,57,0.45)]"
       style={delay(0.15)}
     >
@@ -31,32 +33,32 @@ function EditorPreview() {
         <span className="h-2.5 w-2.5 rounded-full bg-border" />
         <span className="h-2.5 w-2.5 rounded-full bg-border" />
         <span className="ml-3 truncate text-xs text-muted">
-          <span className="font-semibold uppercase tracking-[0.12em] text-sapphire">Roman</span>
-          {" · "}Kuzey Limanı · 3. bölüm
+          <span className="font-semibold uppercase tracking-[0.12em] text-sapphire">{t("Roman")}</span>
+          {" · "}{t("Kuzey Limanı")} · {t("3. bölüm")}
         </span>
       </div>
       <div className="flex items-center gap-1 border-b border-border px-3 py-1.5 text-xs text-muted">
-        <span className="rounded-sm px-1.5 py-0.5 font-bold text-foreground">K</span>
-        <span className="rounded-sm px-1.5 py-0.5 italic text-foreground">İ</span>
-        <span className="rounded-sm px-1.5 py-0.5 font-display text-foreground">Başlık</span>
+        <span className="rounded-sm px-1.5 py-0.5 font-bold text-foreground">{t("K")}</span>
+        <span className="rounded-sm px-1.5 py-0.5 italic text-foreground">{t("İ")}</span>
+        <span className="rounded-sm px-1.5 py-0.5 font-display text-foreground">{t("Başlık")}</span>
         <span className="mx-1 h-4 w-px bg-border" />
         <span className="inline-flex items-center gap-1 rounded-sm bg-accent-soft px-1.5 py-0.5 text-accent">
-          <span className="inline-block h-2 w-2 rounded-[2px] bg-caramel/70" /> Not
+          <span className="inline-block h-2 w-2 rounded-[2px] bg-caramel/70" /> {t("Not")}
         </span>
-        <span className="px-1.5 py-0.5">+ Karakter</span>
+        <span className="px-1.5 py-0.5">+ {t("Karakter")}</span>
       </div>
       <div className="relative px-6 pb-5 pt-5">
-        <h3 className="font-display text-2xl text-foreground">Sis</h3>
+        <h3 className="font-display text-2xl text-foreground">{t("Sis")}</h3>
         <p className="mt-3 text-[15px] leading-7 text-foreground">
-          Sabah sisi <span className="name-mark name-place">Kuzey Limanı</span> üzerine
-          çöktüğünde <span className="name-mark name-character">Selin</span> iskelenin
-          ucunda bekliyordu.{" "}
-          <span className="author-note">Babasının teknesi üç gündür dönmemişti</span> ve
-          kimse ona doğrudan bir şey söylemiyordu.
+          {t("Sabah sisi")} <span className="name-mark name-place">{t("Kuzey Limanı")}</span>
+          {t(" üzerine çöktüğünde")} <span className="name-mark name-character">Selin</span>{" "}
+          {t("iskelenin ucunda bekliyordu.")}{" "}
+          <span className="author-note">{t("Babasının teknesi üç gündür dönmemişti")}</span>{" "}
+          {t("ve kimse ona doğrudan bir şey söylemiyordu.")}
         </p>
         <p className="mt-3 text-[15px] leading-7 text-foreground">
-          <span className="name-mark name-character">Selin Aras</span>, haritalarını
-          katlayıp çantasına koydu
+          <span className="name-mark name-character">Selin Aras</span>
+          {t(", haritalarını katlayıp çantasına koydu")}
           <span className="anim-blink ml-px inline-block h-[1.1em] w-px translate-y-[3px] bg-foreground" />
         </p>
 
@@ -65,37 +67,38 @@ function EditorPreview() {
           style={delay(1.1)}
         >
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-            Notun · yalnızca sen
+            {t("Notun · yalnızca sen")}
           </p>
           <p className="mt-1 text-[13px] leading-snug text-foreground">
-            Tekne batmadı. 7. bölümde ortaya çıkacak.
+            {t("Tekne batmadı. 7. bölümde ortaya çıkacak.")}
           </p>
         </div>
       </div>
       <div className="flex items-center justify-between border-t border-border px-4 py-2 text-[11px] text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#4f9d69]" /> Taslak kaydedildi · 14:32
+          <span className="h-1.5 w-1.5 rounded-full bg-[#4f9d69]" /> {t("Taslak kaydedildi")} · 14:32
         </span>
-        <span className="tabular-nums">1.284 kelime</span>
+        <span className="tabular-nums">{t("1.284 kelime")}</span>
       </div>
     </div>
   );
 }
 
 function SpeedPreview() {
+  const t = useT();
   return (
     <div
       aria-hidden="true"
       className="anim-pop absolute -bottom-24 -left-8 hidden w-48 rounded-lg border border-border bg-surface px-4 py-3 shadow-[0_16px_40px_-24px_rgba(15,25,57,0.5)] xl:block"
       style={delay(1.4)}
     >
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Akış ile oku</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">{t("Akış ile oku")}</p>
       <p className="mt-1.5 grid grid-cols-[1fr_auto_1fr] font-display text-2xl leading-none">
         <span className="text-right">li</span>
         <span className="text-caramel">m</span>
         <span>anı</span>
       </p>
-      <p className="mt-1.5 text-center text-[11px] tabular-nums text-muted">320 kelime/dk</p>
+      <p className="mt-1.5 text-center text-[11px] tabular-nums text-muted">{t("{n} kelime/dk", { n: 320 })}</p>
     </div>
   );
 }
@@ -128,12 +131,13 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
+  const t = useT();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     if (username.trim().length === 0) {
-      setError("Önce bir kullanıcı adı yaz.");
+      setError(t("Önce bir kullanıcı adı yaz."));
       inputRef.current?.focus();
       return;
     }
@@ -141,8 +145,8 @@ export default function SignInPage() {
     if (result.status !== "complete") {
       setError(
         typeof result.userError?.error === "string"
-          ? result.userError.error
-          : "Giriş tamamlanamadı. Cihazının onay penceresini kapatmış olabilirsin; tekrar dene.",
+          ? t(result.userError.error)
+          : t("Giriş tamamlanamadı. Cihazının onay penceresini kapatmış olabilirsin; tekrar dene."),
       );
       return;
     }
@@ -153,7 +157,7 @@ export default function SignInPage() {
     <main className="grid min-h-screen lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
       {/* The desk: what's waiting on the other side. */}
       <section
-        aria-label="Booktion'da yazmak"
+        aria-label={t("Booktion'da yazmak")}
         className="relative hidden overflow-hidden border-r border-border bg-[linear-gradient(180deg,var(--surface)_0%,var(--caramel-soft)_100%)] lg:flex lg:flex-col"
       >
         <BranchField
@@ -180,8 +184,8 @@ export default function SignInPage() {
 
         <div className="relative bg-[linear-gradient(to_top,var(--caramel-soft)_45%,transparent)] px-10 pb-10 pt-16 xl:px-14">
           <p className="anim-rise max-w-md font-display text-[1.7rem] leading-snug text-foreground" style={delay(0.3)}>
-            Romanın, köşe yazın, günlüğün —{" "}
-            <em className="text-accent">her birinin kendi masası var.</em>
+            {t("Romanın, köşe yazın, günlüğün —")}{" "}
+            <em className="text-accent">{t("her birinin kendi masası var.")}</em>
           </p>
         </div>
       </section>
@@ -193,29 +197,28 @@ export default function SignInPage() {
             <Wordmark />
           </Link>
           <Link href="/" className="text-sm text-muted underline-offset-4 hover:text-foreground hover:underline">
-            ← Booktion&apos;u tanı
+            ← {t("Booktion'u tanı")}
           </Link>
         </div>
 
         <div className="flex flex-1 items-center justify-center py-12">
           <div className="w-full max-w-[24rem]">
             <p className="anim-rise text-xs font-semibold uppercase tracking-[0.16em] text-sapphire">
-              {next ? "Kaldığın yere dönmek için" : "Giriş ya da kayıt"}
+              {next ? t("Kaldığın yere dönmek için") : t("Giriş ya da kayıt")}
             </p>
             <h1
               className="anim-rise mt-3 font-display text-[2.6rem] leading-[1.05] text-foreground sm:text-5xl"
               style={delay(0.06)}
             >
-              Masana hoş geldin.
+              {t("Masana hoş geldin.")}
             </h1>
             <p className="anim-rise mt-4 leading-relaxed text-muted" style={delay(0.12)}>
-              Kullanıcı adını yaz; gerisini cihazın halleder. Hesabın yoksa aynı
-              adımda açılır.
+              {t("Kullanıcı adını yaz; gerisini cihazın halleder. Hesabın yoksa aynı adımda açılır.")}
             </p>
 
             <form onSubmit={handleSubmit} noValidate className="anim-rise mt-9" style={delay(0.18)}>
               <label htmlFor="username" className="text-sm font-medium text-foreground">
-                Kullanıcı adı
+                {t("Kullanıcı adı")}
               </label>
               <div
                 className={`mt-2 flex h-12 items-center rounded-md border bg-surface transition-[border-color,box-shadow] focus-within:border-accent focus-within:shadow-[0_0_0_4px_var(--accent-soft)] ${
@@ -257,11 +260,11 @@ export default function SignInPage() {
                 {pending ? (
                   <>
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-contrast/30 border-t-accent-contrast" />
-                    Cihazının onayı bekleniyor…
+                    {t("Cihazının onayı bekleniyor…")}
                   </>
                 ) : (
                   <>
-                    Devam et
+                    {t("Devam et")}
                     <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
                       →
                     </span>
@@ -273,9 +276,8 @@ export default function SignInPage() {
             <div className="anim-rise mt-8 flex items-start gap-3 rounded-md border border-border bg-surface/70 px-4 py-3" style={delay(0.24)}>
               <PasskeyGlyph />
               <p className="text-[13px] leading-relaxed text-muted">
-                <span className="font-medium text-foreground">Passkey ile giriş.</span>{" "}
-                Parmak izi, yüz tanıma ya da ekran kilidi — hatırlanacak bir
-                şifre yok, çalınacak bir şifre de yok.
+                <span className="font-medium text-foreground">{t("Passkey ile giriş.")}</span>{" "}
+                {t("Parmak izi, yüz tanıma ya da ekran kilidi — hatırlanacak bir şifre yok, çalınacak bir şifre de yok.")}
               </p>
             </div>
 
@@ -283,7 +285,7 @@ export default function SignInPage() {
               {promises.map((line) => (
                 <li key={line} className="flex items-start gap-2.5 text-sm text-muted">
                   <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rotate-45 bg-caramel" />
-                  {line}
+                  {t(line)}
                 </li>
               ))}
             </ul>
@@ -294,7 +296,7 @@ export default function SignInPage() {
           {promises.map((line) => (
             <li key={line} className="inline-flex items-center gap-2">
               <span aria-hidden="true" className="h-1.5 w-1.5 rotate-45 bg-caramel" />
-              {line}
+              {t(line)}
             </li>
           ))}
         </ul>

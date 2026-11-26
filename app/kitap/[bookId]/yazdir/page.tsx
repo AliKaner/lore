@@ -10,7 +10,8 @@ import { ChapterReader } from "@/components/Editor";
 import Loading from "@/components/Loading";
 import NotFoundState from "@/components/NotFoundState";
 import { chaptersIn } from "@/lib/exportFormats";
-import { KINDS } from "@/lib/writingKinds";
+import { useWritingKinds } from "@/lib/localized";
+import { useT } from "@/lib/i18n";
 
 // A book-like, print-ready page: a title page, then each chapter on its own
 // page. The browser's "Save as PDF" turns it into the PDF export.
@@ -18,6 +19,8 @@ export default function PrintPage({ params }: { params: Promise<{ bookId: Id<"bo
   const { bookId } = use(params);
   const scope = useSearchParams().get("kapsam") === "tum" ? "all" : "main";
   const data = useQuery(api.exports.bookForExport, { bookId });
+  const t = useT();
+  const kinds = useWritingKinds();
 
   if (data === undefined) {
     return (
@@ -35,23 +38,23 @@ export default function PrintPage({ params }: { params: Promise<{ bookId: Id<"bo
   }
 
   const chapters = chaptersIn(data, scope);
-  const kind = KINDS[data.book.kind]?.label;
+  const kind = kinds[data.book.kind]?.label;
 
   return (
     <div className="print-book bg-background print:bg-white">
       <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-surface/90 px-4 py-3 backdrop-blur print:hidden sm:px-6">
         <Link href={`/kitap/${bookId}`} className="text-sm text-muted hover:text-foreground">
-          ← Yazıya dön
+          ← {t("Yazıya dön")}
         </Link>
         <p className="hidden text-sm text-muted sm:block">
-          Yazdır penceresinde hedef olarak <b className="font-medium text-foreground">“PDF olarak kaydet”i</b> seç.
+          {t("Yazdır penceresinde hedef olarak “PDF olarak kaydet”i seç.")}
         </p>
         <button
           type="button"
           onClick={() => window.print()}
           className="inline-flex h-9 items-center rounded-full bg-accent px-4 text-sm font-medium text-accent-contrast hover:bg-accent-hover"
         >
-          PDF olarak kaydet
+          {t("PDF olarak kaydet")}
         </button>
       </div>
 
@@ -68,7 +71,7 @@ export default function PrintPage({ params }: { params: Promise<{ bookId: Id<"bo
         {chapters.map((chapter) => (
           <section key={chapter._id} className="print-chapter mt-24 print:mt-0">
             <h2 className="mb-10 text-center font-display text-3xl">
-              {!chapter.onMainLine && <span className="block text-xs uppercase tracking-[0.18em] text-muted">Dal</span>}
+              {!chapter.onMainLine && <span className="block text-xs uppercase tracking-[0.18em] text-muted">{t("Dal")}</span>}
               {chapter.title}
             </h2>
             <div className="text-[1.05rem] leading-[1.85] [text-align:justify] [hyphens:auto]" lang="tr">

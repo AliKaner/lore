@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PAPERS, type Paper, type PaperId } from "@/lib/paper";
+import { useT } from "@/lib/i18n";
 
 // A little sheet in the paper's proportions.
 function SheetIcon({ paper, active }: { paper: Paper | null; active?: boolean }) {
@@ -36,6 +37,7 @@ export default function PaperPicker({
   onChoose: (id: PaperId | null) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   const boxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,25 +65,25 @@ export default function PaperPicker({
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
-        title="Sayfa görünümü"
+        title={t("Sayfa görünümü")}
         onClick={() => setOpen((o) => !o)}
         className={`inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-sm transition-colors ${
           open || paper ? "bg-accent-soft/70 text-foreground" : "text-muted hover:bg-accent-soft/60 hover:text-foreground"
         }`}
       >
         <SheetIcon paper={paper} />
-        <span className="hidden sm:inline">{paper ? paper.label : "Sayfa"}</span>
-        {paper && <span className="hidden text-xs tabular-nums text-muted xl:inline">· {pages} sayfa</span>}
+        <span className="hidden sm:inline">{paper ? paper.label : t("Sayfa")}</span>
+        {paper && <span className="hidden text-xs tabular-nums text-muted xl:inline">· {t("{n} sayfa", { n: pages })}</span>}
       </button>
       {open && (
         <div
           role="menu"
-          aria-label="Sayfa görünümü"
+          aria-label={t("Sayfa görünümü")}
           className="menu-pop absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-border bg-surface p-1.5 shadow-[0_24px_50px_-24px_rgba(15,25,57,0.45)]"
           style={{ transformOrigin: "100% 0" }}
         >
           <p className="px-2.5 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
-            Sayfa görünümü
+            {t("Sayfa görünümü")}
           </p>
           <button
             type="button"
@@ -93,8 +95,8 @@ export default function PaperPicker({
             }`}
           >
             <SheetIcon paper={null} active={paper === null} />
-            <span className="flex-1">Serbest</span>
-            <span className="text-xs text-muted">ekran genişliği</span>
+            <span className="flex-1">{t("Serbest")}</span>
+            <span className="text-xs text-muted">{t("ekran genişliği")}</span>
           </button>
           <div className="my-1 h-px bg-border" />
           {PAPERS.map((option) => (
@@ -110,14 +112,14 @@ export default function PaperPicker({
             >
               <SheetIcon paper={option} active={paper?.id === option.id} />
               <span className="w-7 font-medium">{option.label}</span>
-              <span className="flex-1 truncate text-xs text-muted">{option.note}</span>
+              <span className="flex-1 truncate text-xs text-muted">{t(option.note)}</span>
               <span className="text-[11px] tabular-nums text-muted">
                 {option.width}×{option.height}
               </span>
             </button>
           ))}
           <p className="px-2.5 pb-1.5 pt-2 text-[11px] leading-snug text-muted">
-            Her sayfa, o boyutta basılınca bir sayfa eder: kenar boşlukları ve yazı boyu ona göre.
+            {t("Her sayfa, o boyutta basılınca bir sayfa eder: kenar boşlukları ve yazı boyu ona göre.")}
           </p>
         </div>
       )}

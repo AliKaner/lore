@@ -8,6 +8,8 @@ import { ENTITY_KINDS, ENTITY_KIND_ORDER, type EntityKind } from "@/convex/entit
 import EntityEditor from "@/components/entity/EntityEditor";
 import { KindGlyph, errorText, eyebrow } from "@/components/entity/shared";
 import { useToast } from "@/components/Toaster";
+import { useT } from "@/lib/i18n";
+import { useEntityKinds } from "@/lib/localized";
 
 const lower = (text: string) => text.toLocaleLowerCase("tr-TR");
 
@@ -32,6 +34,8 @@ export default function EntityDrawer({
   const createEntity = useMutation(api.entities.create);
   const attachToBook = useMutation(api.entities.attachToBook);
   const showToast = useToast();
+  const t = useT();
+  const kinds = useEntityKinds();
   const [innerId, setInnerId] = useState<Id<"entities"> | null>(null);
   const openId = openIdProp !== undefined ? openIdProp : innerId;
   const setOpenId = onOpenId ?? setInnerId;
@@ -70,7 +74,7 @@ export default function EntityDrawer({
 
   return (
     <aside
-      aria-label="Evren"
+      aria-label={t("Evren")}
       aria-hidden={!open}
       inert={!open}
       className={`fixed inset-y-0 right-0 z-50 flex w-[min(40rem,100vw)] flex-col border-l border-border bg-background transition-[translate,visibility,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
@@ -80,12 +84,12 @@ export default function EntityDrawer({
       <div className="flex items-center justify-between border-b border-border bg-surface px-5 py-4">
         {openId ? (
           <button type="button" onClick={() => setOpenId(null)} className="text-sm text-muted hover:text-foreground">
-            ← Bu yazının evreni
+            ← {t("Bu yazının evreni")}
           </button>
         ) : (
           <div>
-            <p className={`${eyebrow} text-caramel`}>Bu yazının</p>
-            <h2 className="font-display text-2xl">Evreni</h2>
+            <p className={`${eyebrow} text-caramel`}>{t("Bu yazının")}</p>
+            <h2 className="font-display text-2xl">{t("Evreni")}</h2>
           </div>
         )}
         <div className="flex items-center gap-1">
@@ -96,13 +100,13 @@ export default function EntityDrawer({
               rel="noreferrer"
               className="rounded-full px-3 py-1.5 text-xs text-muted hover:bg-accent-soft/60 hover:text-foreground"
             >
-              Tam sayfa ↗
+              {t("Tam sayfa ↗")}
             </a>
           )}
           <button
             type="button"
             onClick={onClose}
-            aria-label="Evreni kapat"
+            aria-label={t("Evreni kapat")}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full text-muted hover:bg-accent-soft/60 hover:text-foreground"
           >
             ✕
@@ -125,7 +129,7 @@ export default function EntityDrawer({
         ) : (
           <div className="flex flex-col gap-8 px-5 py-5">
             <form onSubmit={create} className="rounded-2xl border border-border bg-surface p-4">
-              <p className={`${eyebrow} text-muted`}>Yeni ekle</p>
+              <p className={`${eyebrow} text-muted`}>{t("Yeni ekle")}</p>
               <div className="mt-2.5 flex flex-wrap gap-1">
                 {ENTITY_KIND_ORDER.map((kind) => (
                   <button
@@ -138,7 +142,7 @@ export default function EntityDrawer({
                     }`}
                   >
                     <span aria-hidden="true" className="text-[10px]">{ENTITY_KINDS[kind].glyph}</span>
-                    {ENTITY_KINDS[kind].label}
+                    {kinds[kind].label}
                   </button>
                 ))}
               </div>
@@ -146,27 +150,27 @@ export default function EntityDrawer({
                 <input
                   value={newName}
                   onChange={(event) => setNewName(event.target.value)}
-                  placeholder={ENTITY_KINDS[newKind].namePlaceholder}
-                  aria-label="Adı"
+                  placeholder={kinds[newKind].namePlaceholder}
+                  aria-label={t("Adı")}
                   className="h-10 min-w-0 flex-1 rounded-xl border border-border bg-background px-3 font-display text-lg outline-none focus:border-accent"
                 />
                 <button
                   disabled={!newName.trim()}
                   className="h-10 rounded-xl bg-accent px-4 text-sm font-medium text-accent-contrast hover:bg-accent-hover disabled:opacity-40"
                 >
-                  Ekle
+                  {t("Ekle")}
                 </button>
               </div>
             </form>
 
             {inBook === undefined ? null : inBook.length === 0 ? (
               <p className="px-1 text-sm leading-relaxed text-muted">
-                Henüz bir şey yok. Yukarıdan ekle ya da metinde bir adı seçip sağ tıkla.
+                {t("Henüz bir şey yok. Yukarıdan ekle ya da metinde bir adı seçip sağ tıkla.")}
               </p>
             ) : (
               ENTITY_KIND_ORDER.filter((kind) => inBook.some((e) => e.kind === kind)).map((kind) => (
                 <section key={kind}>
-                  <h3 className={`${eyebrow} px-1 text-muted`}>{ENTITY_KINDS[kind].plural}</h3>
+                  <h3 className={`${eyebrow} px-1 text-muted`}>{kinds[kind].plural}</h3>
                   <ul className="mt-2">
                     {inBook
                       .filter((e) => e.kind === kind)
@@ -200,13 +204,13 @@ export default function EntityDrawer({
 
             {(mine?.length ?? 0) > (inBook?.length ?? 0) && (
               <section className="border-t border-border pt-6">
-                <h3 className={`${eyebrow} px-1 text-muted`}>Evreninden ekle</h3>
+                <h3 className={`${eyebrow} px-1 text-muted`}>{t("Evreninden ekle")}</h3>
                 <input
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Başka bir yazıdaki karakter, ülke…"
-                  aria-label="Evreninde ara"
+                  placeholder={t("Başka bir yazıdaki karakter, ülke…")}
+                  aria-label={t("Evreninde ara")}
                   className="mt-2 h-9 w-full rounded-full border border-border bg-surface px-4 text-sm outline-none focus:border-accent"
                 />
                 <ul className="mt-2">
@@ -221,7 +225,7 @@ export default function EntityDrawer({
                         }
                         className="rounded-full px-3 py-1 text-xs text-accent hover:bg-accent-soft/60"
                       >
-                        + Bu yazıya ekle
+                        {t("+ Bu yazıya ekle")}
                       </button>
                     </li>
                   ))}

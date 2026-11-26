@@ -376,7 +376,7 @@ export const addImage = mutation({
       }
       images = images.filter((image) => image.slot !== args.slot);
     } else if (images.filter((image) => image.slot === undefined).length >= LIMITS.images) {
-      throw new Error(`En fazla ${LIMITS.images} görsel eklenebilir.`);
+      throw new Error("Görsel sınırına ulaştın; yenisi için birini kaldır.");
     }
     images = [...images, { storageId: args.storageId, slot: args.slot }];
     await ctx.db.patch(entity._id, { images, updatedAt: Date.now() });

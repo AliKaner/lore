@@ -9,11 +9,12 @@ import BackupButton from "@/components/BackupButton";
 import { ThemeGrid } from "@/components/ThemePicker";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { passkeyErrorMessage } from "@/lib/passkeyErrors";
+import { intlLocale, useI18n, useT, type Locale } from "@/lib/i18n";
 
 type Passkey = { passkeyId: string; credentialId: string; name?: string; createdAt: number };
 
-function dateLabel(at: number) {
-  return new Date(at).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+function dateLabel(at: number, locale: Locale) {
+  return new Date(at).toLocaleDateString(intlLocale(locale), { day: "numeric", month: "long", year: "numeric" });
 }
 
 function KeyIcon() {
@@ -28,9 +29,10 @@ function PasskeyRow({ passkey, index, canRemove }: { passkey: Passkey; index: nu
   const rename = useMutation(api.auth.renamePasskey);
   const { removePasskey, pending } = useRemovePasskey(api.auth);
   const showToast = useToast();
+  const { t, locale } = useI18n();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(passkey.name ?? "");
-  const label = passkey.name?.trim() || `Giriş anahtarı ${index + 1}`;
+  const label = passkey.name?.trim() || t("Giriş anahtarı {n}", { n: index + 1 });
 
   async function saveName() {
     setEditing(false);
@@ -46,7 +48,7 @@ function PasskeyRow({ passkey, index, canRemove }: { passkey: Passkey; index: nu
 
   async function remove() {
     const result = await removePasskey(passkey.passkeyId);
-    if (result.success) showToast("Anahtar kaldırıldı.", "success");
+    if (result.success) showToast(t("Anahtar kaldırıldı."), "success");
     else showToast(passkeyErrorMessage(result.userError));
   }
 
@@ -66,13 +68,13 @@ function PasskeyRow({ passkey, index, canRemove }: { passkey: Passkey; index: nu
               if (event.key === "Enter") void saveName();
               if (event.key === "Escape") setEditing(false);
             }}
-            placeholder="ör. iPhone, iş bilgisayarı"
+            placeholder={t("ör. iPhone, iş bilgisayarı")}
             className="w-full rounded-md border border-border bg-surface px-2.5 py-1.5 text-[15px] outline-none focus:border-accent"
           />
         ) : (
           <p className="truncate text-[15px] font-medium text-foreground">{label}</p>
         )}
-        <p className="mt-0.5 text-xs text-muted">Eklendi: {dateLabel(passkey.createdAt)}</p>
+        <p className="mt-0.5 text-xs text-muted">{t("Eklendi: {date}", { date: dateLabel(passkey.createdAt, locale) })}</p>
       </div>
       {!editing && (
         <button
@@ -80,17 +82,17 @@ function PasskeyRow({ passkey, index, canRemove }: { passkey: Passkey; index: nu
           onClick={() => setEditing(true)}
           className="text-sm text-muted underline-offset-4 hover:text-foreground hover:underline"
         >
-          Adlandır
+          {t("Adlandır")}
         </button>
       )}
       <button
         type="button"
         onClick={() => void remove()}
         disabled={!canRemove || pending}
-        title={canRemove ? "Bu anahtarı kaldır" : "Son anahtarın kaldırılamaz"}
+        title={canRemove ? t("Bu anahtarı kaldır") : t("Son anahtarın kaldırılamaz")}
         className="text-sm text-muted underline-offset-4 hover:text-red-700 hover:underline disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:no-underline"
       >
-        {pending ? "Kaldırılıyor…" : "Kaldır"}
+        {pending ? t("Kaldırılıyor…") : t("Kaldır")}
       </button>
     </li>
   );
@@ -101,10 +103,11 @@ export default function AccountPage() {
   const passkeys = useQuery(api.auth.listPasskeys);
   const { addPasskey, pending } = useAddPasskey(api.auth);
   const showToast = useToast();
+  const t = useT();
 
   async function add() {
     const result = await addPasskey();
-    if (result.success) showToast("Yeni giriş anahtarı eklendi. Artık iki yoldan girebilirsin.", "success");
+    if (result.success) showToast(t("Yeni giriş anahtarı eklendi. Artık iki yoldan girebilirsin."), "success");
     else showToast(passkeyErrorMessage(result.userError));
   }
 
@@ -121,11 +124,11 @@ export default function AccountPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sapphire">Hesap</p>
-      <h1 className="mt-2 font-display text-4xl leading-tight">Hesap ve güvenlik</h1>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sapphire">{t("Hesap")}</p>
+      <h1 className="mt-2 font-display text-4xl leading-tight">{t("Hesap ve güvenlik")}</h1>
       {me?.username && (
         <p className="mt-2 text-muted">
-          Kullanıcı adın: <span className="font-medium text-foreground">@{me.username}</span>
+          {t("Kullanıcı adın:")} <span className="font-medium text-foreground">@{me.username}</span>
         </p>
       )}
 
@@ -142,21 +145,21 @@ export default function AccountPage() {
         <div>
           <p className="font-medium text-foreground">
             {safe
-              ? `Hesabın güvende: ${list.length} farklı yoldan girebilirsin.`
-              : "Hesabına yalnızca tek bir cihazla girebiliyorsun."}
+              ? t("Hesabın güvende: {n} farklı yoldan girebilirsin.", { n: list.length })
+              : t("Hesabına yalnızca tek bir cihazla girebiliyorsun.")}
           </p>
           <p className="mt-1 text-sm leading-relaxed text-muted">
             {safe
-              ? "Bir cihazını kaybetsen bile diğeriyle girip kaybolanı buradan kaldırabilirsin."
-              : "Booktion'da şifre yok; giriş anahtarın cihazında saklanıyor. O cihazı kaybedersen hesabına ve yazılarına bir daha giremezsin. İkinci bir cihaz ya da güvenlik anahtarı ekle."}
+              ? t("Bir cihazını kaybetsen bile diğeriyle girip kaybolanı buradan kaldırabilirsin.")
+              : t("Booktion'da şifre yok; giriş anahtarın cihazında saklanıyor. O cihazı kaybedersen hesabına ve yazılarına bir daha giremezsin. İkinci bir cihaz ya da güvenlik anahtarı ekle.")}
           </p>
         </div>
       </div>
 
       {/* Colour theme */}
       <section className="mt-10">
-        <h2 className="font-display text-2xl">Renk teması</h2>
-        <p className="mt-1 mb-4 text-sm text-muted">Bütün sayfalarda ve yazma ekranında geçerli; hesabınla her cihaza gelir.</p>
+        <h2 className="font-display text-2xl">{t("Renk teması")}</h2>
+        <p className="mt-1 mb-4 text-sm text-muted">{t("Bütün sayfalarda ve yazma ekranında geçerli; hesabınla her cihaza gelir.")}</p>
         <ThemeGrid />
       </section>
 
@@ -164,8 +167,8 @@ export default function AccountPage() {
       <section className="mt-12">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="font-display text-2xl">Giriş anahtarların</h2>
-            <p className="mt-1 text-sm text-muted">Her biri hesabına giren bir cihaz ya da anahtar.</p>
+            <h2 className="font-display text-2xl">{t("Giriş anahtarların")}</h2>
+            <p className="mt-1 text-sm text-muted">{t("Her biri hesabına giren bir cihaz ya da anahtar.")}</p>
           </div>
           <button
             type="button"
@@ -173,7 +176,7 @@ export default function AccountPage() {
             disabled={pending}
             className="inline-flex h-10 items-center gap-2 rounded-full bg-accent px-5 text-sm font-medium text-accent-contrast shadow-[0_10px_24px_-14px_rgba(38,66,139,0.9)] hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60"
           >
-            {pending ? "Cihazının onayı bekleniyor…" : "+ Cihaz ya da anahtar ekle"}
+            {pending ? t("Cihazının onayı bekleniyor…") : t("+ Cihaz ya da anahtar ekle")}
           </button>
         </div>
 
@@ -185,30 +188,27 @@ export default function AccountPage() {
 
         <details className="mt-4 rounded-xl border border-border px-5 py-4 text-sm">
           <summary className="cursor-pointer select-none font-medium text-foreground">
-            Telefonumu nasıl eklerim?
+            {t("Telefonumu nasıl eklerim?")}
           </summary>
           <ol className="mt-3 list-decimal space-y-1.5 pl-5 leading-relaxed text-muted">
-            <li>Bu sayfada “Cihaz ya da anahtar ekle”ye bas ve önce bu cihazla onay ver.</li>
+            <li>{t("Bu sayfada “Cihaz ya da anahtar ekle”ye bas ve önce bu cihazla onay ver.")}</li>
             <li>
-              Açılan pencerede “Başka bir cihaz kullan” ya da “Telefon veya tablet”i seç; ekranda bir
-              QR kodu çıkar.
+              {t("Açılan pencerede “Başka bir cihaz kullan” ya da “Telefon veya tablet”i seç; ekranda bir QR kodu çıkar.")}
             </li>
-            <li>Telefonunun kamerasıyla QR kodu okut ve telefonda onay ver.</li>
-            <li>Bitti: artık telefonunla da girebilirsin. Ona burada bir ad verebilirsin.</li>
+            <li>{t("Telefonunun kamerasıyla QR kodu okut ve telefonda onay ver.")}</li>
+            <li>{t("Bitti: artık telefonunla da girebilirsin. Ona burada bir ad verebilirsin.")}</li>
           </ol>
           <p className="mt-3 leading-relaxed text-muted">
-            iCloud Anahtar Zinciri ya da Google Şifre Yöneticisi kullanıyorsan anahtarın aynı hesaptaki
-            cihazlarına zaten eşitlenir; yine de ayrı bir cihaz eklemek en sağlam yoldur.
+            {t("iCloud Anahtar Zinciri ya da Google Şifre Yöneticisi kullanıyorsan anahtarın aynı hesaptaki cihazlarına zaten eşitlenir; yine de ayrı bir cihaz eklemek en sağlam yoldur.")}
           </p>
         </details>
       </section>
 
       {/* Backup */}
       <section className="mt-12">
-        <h2 className="font-display text-2xl">Yazılarının yedeği</h2>
+        <h2 className="font-display text-2xl">{t("Yazılarının yedeği")}</h2>
         <p className="mt-1 text-sm leading-relaxed text-muted">
-          Bütün yazılarını, her biri ayrı bir Markdown dosyası olarak tek bir ZIP içinde indir.
-          Notların ve taslakların da dahil; ne olursa olsun metnin sende kalır.
+          {t("Bütün yazılarını, her biri ayrı bir Markdown dosyası olarak tek bir ZIP içinde indir. Notların ve taslakların da dahil; ne olursa olsun metnin sende kalır.")}
         </p>
         <div className="mt-4">
           <BackupButton />

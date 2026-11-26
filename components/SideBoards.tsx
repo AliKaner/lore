@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { KindGlyph, errorText, useImageUpload } from "@/components/entity/shared";
 import { useToast } from "@/components/Toaster";
+import { useT } from "@/lib/i18n";
 
 type Card = FunctionReturnType<typeof api.boards.list>[number];
 type Side = "left" | "right";
@@ -74,26 +75,27 @@ function useDebounced<T>(save: (value: T) => void, delay = 600) {
 function CardTools({ card, side }: { card: Card; side: Side }) {
   const move = useMutation(api.boards.move);
   const remove = useMutation(api.boards.remove);
+  const t = useT();
   const button =
     "inline-flex h-6 w-6 items-center justify-center rounded-full text-xs text-muted hover:bg-accent-soft hover:text-foreground";
   return (
     <div className="absolute right-1.5 top-1.5 z-10 flex gap-0.5 rounded-full bg-surface/95 opacity-0 shadow-sm backdrop-blur transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-      <button type="button" className={button} title="Yukarı" aria-label="Yukarı taşı" onClick={() => void move({ itemId: card._id, to: "up" })}>
+      <button type="button" className={button} title={t("Yukarı")} aria-label={t("Yukarı taşı")} onClick={() => void move({ itemId: card._id, to: "up" })}>
         ↑
       </button>
-      <button type="button" className={button} title="Aşağı" aria-label="Aşağı taşı" onClick={() => void move({ itemId: card._id, to: "down" })}>
+      <button type="button" className={button} title={t("Aşağı")} aria-label={t("Aşağı taşı")} onClick={() => void move({ itemId: card._id, to: "down" })}>
         ↓
       </button>
       <button
         type="button"
         className={button}
-        title={side === "left" ? "Sağ panoya taşı" : "Sol panoya taşı"}
-        aria-label={side === "left" ? "Sağ panoya taşı" : "Sol panoya taşı"}
+        title={side === "left" ? t("Sağ panoya taşı") : t("Sol panoya taşı")}
+        aria-label={side === "left" ? t("Sağ panoya taşı") : t("Sol panoya taşı")}
         onClick={() => void move({ itemId: card._id, to: side === "left" ? "right" : "left" })}
       >
         {side === "left" ? "→" : "←"}
       </button>
-      <button type="button" className={`${button} hover:text-red-700`} title="Kaldır" aria-label="Kartı kaldır" onClick={() => void remove({ itemId: card._id })}>
+      <button type="button" className={`${button} hover:text-red-700`} title={t("Kaldır")} aria-label={t("Kartı kaldır")} onClick={() => void remove({ itemId: card._id })}>
         ✕
       </button>
     </div>
@@ -103,6 +105,7 @@ function CardTools({ card, side }: { card: Card; side: Side }) {
 function NoteCard({ card }: { card: Card }) {
   const update = useMutation(api.boards.update);
   const [text, setText] = useState(card.text);
+  const t = useT();
   const save = useDebounced((value: string) => void update({ itemId: card._id, text: value }));
   return (
     <div className="rounded-xl border border-caramel/40 bg-caramel-soft/70 px-3.5 pb-3 pt-3">
@@ -113,8 +116,8 @@ function NoteCard({ card }: { card: Card }) {
           setText(event.target.value);
           save(event.target.value);
         }}
-        placeholder="Not al… (ör. Selin denizden korkar)"
-        aria-label="Not"
+        placeholder={t("Not al… (ör. Selin denizden korkar)")}
+        aria-label={t("Not")}
         rows={2}
         className="w-full resize-none bg-transparent text-sm leading-relaxed outline-none [field-sizing:content] placeholder:text-muted/60"
       />
@@ -127,6 +130,7 @@ function ChecklistCard({ card }: { card: Card }) {
   const [title, setTitle] = useState(card.title);
   const [items, setItems] = useState(card.items);
   const [draft, setDraft] = useState("");
+  const t = useT();
   const saveTitle = useDebounced((value: string) => void update({ itemId: card._id, title: value }));
   const saveItems = useDebounced((value: Card["items"]) => void update({ itemId: card._id, items: value }), 300);
 
@@ -145,8 +149,8 @@ function ChecklistCard({ card }: { card: Card }) {
             setTitle(event.target.value);
             saveTitle(event.target.value);
           }}
-          placeholder="Yapılacaklar"
-          aria-label="Liste başlığı"
+          placeholder={t("Yapılacaklar")}
+          aria-label={t("Liste başlığı")}
           className="min-w-0 flex-1 bg-transparent font-display text-lg leading-tight outline-none placeholder:text-foreground/70"
         />
         {items.length > 0 && <span className="shrink-0 text-[11px] tabular-nums text-muted">{done}/{items.length}</span>}
@@ -164,12 +168,12 @@ function ChecklistCard({ card }: { card: Card }) {
             <input
               value={check.text}
               onChange={(event) => change(items.map((c, i) => (i === index ? { ...c, text: event.target.value } : c)))}
-              aria-label="Madde"
+              aria-label={t("Madde")}
               className={`min-w-0 flex-1 bg-transparent text-sm outline-none ${check.done ? "text-muted line-through" : ""}`}
             />
             <button
               type="button"
-              aria-label="Maddeyi sil"
+              aria-label={t("Maddeyi sil")}
               onClick={() => change(items.filter((_, i) => i !== index))}
               className="text-xs text-muted opacity-0 group-hover/check:opacity-100 focus:opacity-100 hover:text-red-700"
             >
@@ -191,8 +195,8 @@ function ChecklistCard({ card }: { card: Card }) {
         <input
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="Madde ekle, ↵"
-          aria-label="Yeni madde"
+          placeholder={t("Madde ekle, ↵")}
+          aria-label={t("Yeni madde")}
           className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted/60"
         />
       </form>
@@ -202,8 +206,9 @@ function ChecklistCard({ card }: { card: Card }) {
 
 function EntityCard({ card, onOpenEntity }: { card: Card; onOpenEntity: (id: Id<"entities">) => void }) {
   const entity = card.entity;
+  const t = useT();
   if (!entity) {
-    return <div className="rounded-xl border border-dashed border-border px-3.5 py-3 text-sm text-muted">Bu kayıt silinmiş.</div>;
+    return <div className="rounded-xl border border-dashed border-border px-3.5 py-3 text-sm text-muted">{t("Bu kayıt silinmiş.")}</div>;
   }
   return (
     <button
@@ -218,7 +223,7 @@ function EntityCard({ card, onOpenEntity }: { card: Card; onOpenEntity: (id: Id<
       <div className="px-3.5 py-3">
         <p className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
           <KindGlyph kind={entity.kind} />
-          {entity.kindLabel}
+          {t(entity.kindLabel)}
         </p>
         <p className="mt-1 font-display text-xl leading-tight">{entity.name}</p>
         {entity.summary && <p className="mt-1 text-[13px] italic leading-snug text-muted">{entity.summary}</p>}
@@ -226,7 +231,7 @@ function EntityCard({ card, onOpenEntity }: { card: Card; onOpenEntity: (id: Id<
           <dl className="mt-2.5 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[12px]">
             {entity.facts.map((fact) => (
               <div key={fact.label} className="contents">
-                <dt className="text-muted">{fact.label}</dt>
+                <dt className="text-muted">{t(fact.label)}</dt>
                 <dd className="truncate">{fact.value}</dd>
               </div>
             ))}
@@ -258,6 +263,7 @@ function AddMenu({ bookId, side }: { bookId: Id<"books">; side: Side }) {
   const [busy, setBusy] = useState(false);
   const mine = useQuery(api.entities.listMine, mode === "entity" ? {} : "skip");
   const boxRef = useRef<HTMLDivElement>(null);
+  const t = useT();
 
   useEffect(() => {
     if (mode === "closed") return;
@@ -293,23 +299,23 @@ function AddMenu({ bookId, side }: { bookId: Id<"books">; side: Side }) {
         onClick={() => setMode(mode === "closed" ? "menu" : "closed")}
         className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border-hover py-2 text-sm text-muted transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
       >
-        {busy ? "Ekleniyor…" : "+ Panoya ekle"}
+        {busy ? t("Ekleniyor…") : t("+ Panoya ekle")}
       </button>
       {mode !== "closed" && (
         <div className="menu-pop absolute inset-x-0 bottom-full z-20 mb-2 rounded-xl border border-border bg-surface p-1.5 shadow-[0_20px_40px_-20px_rgba(15,25,57,0.45)]" style={{ transformOrigin: "50% 100%" }}>
           {mode === "menu" ? (
             <>
               <button type="button" className={option} onClick={() => void run(() => add({ bookId, side, kind: "note" }))}>
-                <span aria-hidden="true" className="h-3 w-3 rounded-[3px] bg-caramel/70" /> Not
+                <span aria-hidden="true" className="h-3 w-3 rounded-[3px] bg-caramel/70" /> {t("Not")}
               </button>
               <button type="button" className={option} onClick={() => void run(() => add({ bookId, side, kind: "checklist" }))}>
-                <span aria-hidden="true" className="text-xs">☑</span> Yapılacaklar
+                <span aria-hidden="true" className="text-xs">☑</span> {t("Yapılacaklar")}
               </button>
               <button type="button" className={option} onClick={() => setMode("entity")}>
-                <span aria-hidden="true" className="text-xs text-sapphire">✦</span> Evrenden bir kayıt
+                <span aria-hidden="true" className="text-xs text-sapphire">✦</span> {t("Evrenden bir kayıt")}
               </button>
               <label className={`${option} cursor-pointer`}>
-                <span aria-hidden="true" className="text-xs">▧</span> Görsel
+                <span aria-hidden="true" className="text-xs">▧</span> {t("Görsel")}
                 <input
                   type="file"
                   accept="image/*"
@@ -328,12 +334,12 @@ function AddMenu({ bookId, side }: { bookId: Id<"books">; side: Side }) {
                 autoFocus
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Karakter, yer, ülke ara…"
-                aria-label="Evreninde ara"
+                placeholder={t("Karakter, yer, ülke ara…")}
+                aria-label={t("Evreninde ara")}
                 className="mb-1 h-8 w-full rounded-lg border border-border bg-background px-2.5 text-sm outline-none focus:border-accent"
               />
               {mine === undefined ? null : matches.length === 0 ? (
-                <p className="px-2.5 py-1.5 text-xs text-muted">Evreninde böyle bir kayıt yok.</p>
+                <p className="px-2.5 py-1.5 text-xs text-muted">{t("Evreninde böyle bir kayıt yok.")}</p>
               ) : (
                 matches.map((entity) => (
                   <button
@@ -372,18 +378,19 @@ function Board({
   onOpenEntity: (id: Id<"entities">) => void;
   onHide: () => void;
 }) {
+  const t = useT();
   return (
     <aside
-      aria-label={side === "left" ? "Sol pano" : "Sağ pano"}
+      aria-label={side === "left" ? t("Sol pano") : t("Sağ pano")}
       className={`fixed bottom-4 top-[4.75rem] z-30 flex flex-col gap-3 ${side === "left" ? "left-4" : "right-4"}`}
       style={{ width }}
     >
       <div className="flex items-center justify-between px-1">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
-          {side === "left" ? "Sol pano" : "Sağ pano"}
+          {side === "left" ? t("Sol pano") : t("Sağ pano")}
         </p>
         <button type="button" onClick={onHide} className="text-[11px] text-muted hover:text-foreground">
-          Panoları gizle
+          {t("Panoları gizle")}
         </button>
       </div>
       <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-1 pb-1 [scrollbar-width:thin]">
@@ -399,8 +406,8 @@ function Board({
         {cards.length === 0 && (
           <p className="px-1 text-xs leading-relaxed text-muted/80">
             {side === "left"
-              ? "Notlarını, bölüm planını buraya koy."
-              : "Karakterlerin, haritan, ilham görsellerin burada dursun."}
+              ? t("Notlarını, bölüm planını buraya koy.")
+              : t("Karakterlerin, haritan, ilham görsellerin burada dursun.")}
           </p>
         )}
       </div>
@@ -425,6 +432,7 @@ export default function SideBoards({
   onOpenEntity: (id: Id<"entities">) => void;
 }) {
   const [hidden, setHidden] = useBoardsHidden();
+  const t = useT();
   const cards = useQuery(api.boards.list, hidden ? "skip" : { bookId });
   const room = (viewportWidth - contentWidth) / 2 - 48;
   if (room < MIN_WIDTH) return null;
@@ -435,7 +443,7 @@ export default function SideBoards({
         onClick={() => setHidden(false)}
         className="fixed left-0 top-1/2 z-30 -translate-y-1/2 rounded-r-lg border border-l-0 border-border bg-surface px-1.5 py-3 text-[11px] text-muted shadow-sm [writing-mode:vertical-rl] hover:text-foreground"
       >
-        Panoları göster
+        {t("Panoları göster")}
       </button>
     );
   }

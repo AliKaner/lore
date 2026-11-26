@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { pillBase, pillInactive } from "@/lib/ui";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
+import { useT } from "@/lib/i18n";
 
 // Shows the change at once; Convex replaces it with the server's answer.
 // Lives outside the component: it runs when the mutation is called, not
@@ -46,6 +47,7 @@ export default function FavoriteButton({
 }) {
   const favorites = useQuery(api.social.listMyFavorites, { targetType });
   const showToast = useToast();
+  const t = useT();
   const toggleFavorite = useMutation(api.social.toggleFavorite).withOptimisticUpdate(
     optimisticToggle,
   );
@@ -66,7 +68,7 @@ export default function FavoriteButton({
         isFavorited ? `${pillBase} border-amber-500 bg-amber-500 text-white` : pillInactive
       }
     >
-      {isFavorited ? "★ Favoride" : "☆ Favorile"}
+      {isFavorited ? t("★ Favoride") : t("☆ Favorile")}
     </button>
   );
 }

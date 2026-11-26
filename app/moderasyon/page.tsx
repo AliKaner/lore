@@ -7,6 +7,7 @@ import { buttonLink, buttonSecondary, card, cardList } from "@/lib/ui";
 import SignInPrompt from "@/components/SignInPrompt";
 import Loading from "@/components/Loading";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
+import { useT } from "@/lib/i18n";
 
 export default function ModerationPage() {
   const me = useQuery(api.users.me);
@@ -14,6 +15,7 @@ export default function ModerationPage() {
   const resolve = useMutation(api.reports.resolve);
   const hideBranch = useMutation(api.chapters.hideBranch);
   const showToast = useToast();
+  const t = useT();
 
   async function handleResolve(reportId: Id<"reports">) {
     try {
@@ -26,7 +28,7 @@ export default function ModerationPage() {
   async function handleHideBranch(chapterId: Id<"chapters">) {
     try {
       await hideBranch({ chapterId });
-      showToast("Dal gizlendi.", "success");
+      showToast(t("Dal gizlendi."), "success");
     } catch (err) {
       showToast(toastErrorMessage(err));
     }
@@ -34,25 +36,25 @@ export default function ModerationPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-semibold mb-2">Moderasyon</h1>
+      <h1 className="text-2xl font-semibold mb-2">{t("Moderasyon")}</h1>
       <p className="text-muted text-sm mb-6">
-        Kitaplarındaki bölümler veya kitapların hakkında yapılan bildirimler.
+        {t("Kitaplarındaki bölümler veya kitapların hakkında yapılan bildirimler.")}
       </p>
 
       {me === undefined ? (
         <Loading />
       ) : me === null ? (
-        <SignInPrompt title="Bildirimlerini görmek için giriş yap" />
+        <SignInPrompt title={t("Bildirimlerini görmek için giriş yap")} />
       ) : reports === undefined ? (
         <Loading />
       ) : reports.length === 0 ? (
-        <p className="text-muted text-sm">Açık bildirim yok.</p>
+        <p className="text-muted text-sm">{t("Açık bildirim yok.")}</p>
       ) : (
         <ul className={cardList}>
           {reports.map((report) => (
             <li key={report._id} className={card}>
               <p className="text-sm text-muted mb-1">
-                {report.targetType === "book" ? "Kitap" : "Bölüm"} bildirimi
+                {report.targetType === "book" ? t("Kitap bildirimi") : t("Bölüm bildirimi")}
               </p>
               <p className="text-sm mb-3">{report.reason}</p>
               <div className="flex flex-wrap gap-2">
@@ -63,14 +65,14 @@ export default function ModerationPage() {
                     }
                     className={buttonSecondary}
                   >
-                    Dalı gizle
+                    {t("Dalı gizle")}
                   </button>
                 )}
                 <button
                   onClick={() => void handleResolve(report._id)}
                   className={buttonLink}
                 >
-                  Çözüldü işaretle
+                  {t("Çözüldü işaretle")}
                 </button>
               </div>
             </li>

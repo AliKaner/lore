@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
+import { useT } from "@/lib/i18n";
 
 type Chapter = Doc<"chapters">;
 
@@ -59,6 +60,7 @@ function NodeCard({
   bookId: Id<"books">;
 }) {
   const { chapter, depth, y } = node;
+  const t = useT();
   return (
     <Link
       href={`/kitap/${bookId}/bolum/${chapter._id}`}
@@ -71,10 +73,10 @@ function NodeCard({
         borderColor: chapter.isCanonical ? "var(--accent)" : "var(--border)",
       }}
     >
-      <span className="truncate font-medium">{chapter.title || "(başlıksız bölüm)"}</span>
+      <span className="truncate font-medium">{chapter.title || t("(başlıksız bölüm)")}</span>
       {(chapter.isCanonical || chapter.status === "draft") && (
         <span className="text-xs text-muted">
-          {chapter.isCanonical ? "ana hat" : "taslak"}
+          {chapter.isCanonical ? t("ana hat") : t("taslak")}
         </span>
       )}
     </Link>
@@ -89,9 +91,10 @@ export default function ChapterTree({
   bookId: Id<"books">;
 }) {
   const { nodes, edges, width, height, isEmpty } = layoutTree(chapters);
+  const t = useT();
 
   if (isEmpty) {
-    return <p className="text-muted text-sm">Henüz bölüm yok.</p>;
+    return <p className="text-muted text-sm">{t("Henüz bölüm yok.")}</p>;
   }
 
   return (

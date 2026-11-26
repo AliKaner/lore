@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { ENTITY_KINDS, type EntityField } from "@/convex/entityKinds";
+import type { EntityField } from "@/convex/entityKinds";
 import { EntityChip, KindGlyph, eyebrow, type Chip } from "@/components/entity/shared";
 import FavoriteButton from "@/components/FavoriteButton";
 import Loading from "@/components/Loading";
 import NotFoundState from "@/components/NotFoundState";
 import { useCommunityOpen } from "@/lib/community";
+import { useT } from "@/lib/i18n";
+import { useEntityKinds } from "@/lib/localized";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -32,11 +34,13 @@ export default function EntityView({
   const entity = useQuery(api.entities.get, { entityId, bookId });
   const book = useQuery(api.books.get, { bookId });
   const communityOpen = useCommunityOpen();
+  const t = useT();
+  const kinds = useEntityKinds();
 
   if (entity === undefined) return <Loading />;
-  if (entity === null) return <NotFoundState title="Bu kayıt bulunamadı" />;
+  if (entity === null) return <NotFoundState title={t("Bu kayıt bulunamadı")} />;
 
-  const config = ENTITY_KINDS[entity.kind];
+  const config = kinds[entity.kind];
   const hrefFor = (id: Id<"entities">) => `/kitap/${bookId}/evren/${id}`;
   const chips = (list: Chip[]) => (
     <div className="flex flex-wrap gap-1.5">
@@ -64,7 +68,7 @@ export default function EntityView({
         const { age, birthYear } = entity!.fields;
         if (!age && !birthYear) return null;
         return (
-          <Row key={field.key} label={age ? "Yaşı" : "Doğum yılı"}>
+          <Row key={field.key} label={age ? t("Yaşı") : t("Doğum yılı")}>
             {age || birthYear}
           </Row>
         );
@@ -95,9 +99,9 @@ export default function EntityView({
   const familyRows: [string, Chip[]][] = family
     ? (
         [
-          ["Kardeşleri", family.siblings],
-          ["Çocukları", family.children],
-          ["Büyükanne ve büyükbabaları", family.grandparents],
+          [t("Kardeşleri"), family.siblings],
+          [t("Çocukları"), family.children],
+          [t("Büyükanne ve büyükbabaları"), family.grandparents],
         ] as [string, Chip[]][]
       ).filter(([, list]) => list.length > 0)
     : [];
@@ -173,7 +177,7 @@ export default function EntityView({
 
           {entity.custom.length > 0 && (
             <section>
-              <h2 className="border-b border-border pb-2 font-display text-2xl">Diğer</h2>
+              <h2 className="border-b border-border pb-2 font-display text-2xl">{t("Diğer")}</h2>
               <dl>
                 {entity.custom.map((entry, index) => (
                   <Row key={index} label={entry.label}>
@@ -186,10 +190,10 @@ export default function EntityView({
 
           {entity.incoming.length > 0 && (
             <section>
-              <h2 className="border-b border-border pb-2 font-display text-2xl">Bağlantıları</h2>
+              <h2 className="border-b border-border pb-2 font-display text-2xl">{t("Bağlantıları")}</h2>
               <dl>
                 {entity.incoming.map((group) => (
-                  <Row key={group.label} label={group.label}>
+                  <Row key={group.label} label={t(group.label)}>
                     {chips(group.items)}
                   </Row>
                 ))}

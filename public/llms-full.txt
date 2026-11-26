@@ -1,0 +1,57 @@
+# Booktion — full guide for AI assistants
+
+Booktion (https://booktions.com) is a writing platform: "a desk for every kind of writing" (Turkish: "Her yazıya kendi masası"). It is built for writers who work in Turkish or English.
+
+## Kinds of writing
+
+Each kind has its own template and words:
+
+- Book (Kitap): novels and long narratives. Chapters branch; a story map shows every path. Readers can open their own branch.
+- Short story (Öykü): read in one sitting; readers can write other endings.
+- Poetry (Şiir): a poetry collection; each poem on its own page; readers answer with a "nazire" (a reply poem).
+- Essay (Deneme): a single-author piece that follows one thought.
+- Column (Köşe yazısı): the writer's own column; each piece opens with a standfirst.
+- Interview (Röportaj): question–answer template with the guest introduced at the top.
+- Journal: a daily page opening with three questions.
+- Diary (Günlük): dated pages that stay private unless shared.
+
+## Writing screen
+
+- Autosave to the server and the device; nothing is lost on a closed tab.
+- Version history: earlier states of a chapter can be previewed and restored.
+- Private author notes pinned to any passage, visible only to the author.
+- A floating toolbar on selection or right-click: bold, italic, heading, quote, note, and "save as character / place / country / race / group / building / weapon / item".
+- Page view: A5, B5, A4, B4, A3 or B3. The text is laid out on real paper sizes with matching margins and type; a line that doesn't fit moves to the next page, so one page on screen is one printed page.
+- Side boards on the left and right of the page: notes, checklists, pinned world entries and pictures.
+- Writing modes: typewriter (the current line stays at the same height while the text scrolls up), focus (other paragraphs fade), and typing sounds (silent, typewriter, mechanical keyboard, soft keys, pencil) with a volume control.
+- Nine colour themes: Booktion (follows the system), Strawberry, Frog, Horse, Sky, Dark, Rose, Fire and Pinky.
+
+## World (Evren)
+
+A writer's world is a set of linked entries:
+
+- Character: age or year of birth, gender, title, role; father and mother (siblings, children and grandparents are worked out automatically); spouse; race, country, groups, home; physical traits (height, weight, build, eyes, hair, skin, distinguishing marks); personality, goals, backstory; any number of pictures; custom fields.
+- Place, Country / kingdom (government, ruler, capital, population, founding, language, faith, map, peoples, allies, enemies, purpose, history), Race / people, Group (guild, order, army, dynasty), Building (with a plan), Weapon, Item.
+- Entries can be shared across several writings. In a writing, their names are highlighted in the text; readers can open the entries that belong to that writing.
+
+## Reading
+
+- Chapter-by-chapter reading with previous/next, a story map, bionic reading and a "flow" speed-reading mode.
+- Daily reading goals counted from active reading time.
+
+## Goals
+
+- Daily writing goal in words and reading goal in minutes, with streaks and the last seven days.
+
+## Privacy and accounts
+
+- Sign-in with passkeys (no passwords). A second device or security key can be added; all writing can be downloaded as a zip backup.
+- Private writings and diaries are visible only to their author. A writing opened "by link" can be read by anyone with the link but is not listed in search engines.
+
+## Export
+
+- Word (.docx), PDF (print-ready) and Markdown, with or without branches off the main line.
+
+## Community
+
+- Discovery, likes, comments, favourites and reader levels open once the platform has 100 writings; until then writings are shared by link.

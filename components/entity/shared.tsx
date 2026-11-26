@@ -4,6 +4,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ENTITY_KINDS, markStyleOf, type EntityKind } from "@/convex/entityKinds";
+import { useT } from "@/lib/i18n";
 
 export type Chip = { _id: Id<"entities">; kind: EntityKind; name: string };
 
@@ -48,6 +49,7 @@ export function EntityChip({
   );
   const bodyClass =
     "inline-flex min-w-0 items-center gap-1.5 rounded-full py-0.5 pl-0.5 pr-2.5 text-sm transition-colors";
+  const t = useT();
   return (
     <span className="group inline-flex max-w-full items-center rounded-full border border-border bg-surface hover:border-border-hover">
       {href ? (
@@ -65,7 +67,7 @@ export function EntityChip({
         <button
           type="button"
           onClick={onRemove}
-          aria-label={`${chip.name} bağlantısını kaldır`}
+          aria-label={t("{name} bağlantısını kaldır", { name: chip.name })}
           className="-ml-1 mr-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs text-muted hover:bg-accent-soft hover:text-foreground"
         >
           ✕
@@ -80,16 +82,17 @@ const MAX_BYTES = 10 * 1024 * 1024;
 // Uploads one picture to Convex storage and returns its id.
 export function useImageUpload() {
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const t = useT();
   return async (file: File): Promise<Id<"_storage">> => {
-    if (!file.type.startsWith("image/")) throw new Error(`${file.name} bir görsel değil.`);
-    if (file.size > MAX_BYTES) throw new Error(`${file.name} 10 MB'tan büyük.`);
+    if (!file.type.startsWith("image/")) throw new Error(t("{name} bir görsel değil.", { name: file.name }));
+    if (file.size > MAX_BYTES) throw new Error(t("{name} 10 MB'tan büyük.", { name: file.name }));
     const uploadUrl = await generateUploadUrl();
     const result = await fetch(uploadUrl, {
       method: "POST",
       headers: { "Content-Type": file.type },
       body: file,
     });
-    if (!result.ok) throw new Error("Görsel yüklenemedi, tekrar dener misin?");
+    if (!result.ok) throw new Error(t("Görsel yüklenemedi, tekrar dener misin?"));
     const { storageId } = (await result.json()) as { storageId: Id<"_storage"> };
     return storageId;
   };
@@ -99,5 +102,6 @@ export function errorText(err: unknown) {
   const message = err instanceof Error ? err.message : "";
   const match = /Uncaught Error: ([^\n]+)/u.exec(message);
   if (match) return match[1];
+  // Shown through the toaster (or t), which translates it.
   return message && !message.includes("[CONVEX") ? message : "Kaydedilemedi. Bağlantını kontrol edip tekrar dene.";
 }

@@ -135,12 +135,3 @@ export const KINDS: Record<WritingKind, KindConfig> = {
 export function kindConfig(book: { kind?: WritingKind }): KindConfig {
   return KINDS[book.kind ?? "book"];
 }
-
-export function todayTitle(): string {
-  return new Intl.DateTimeFormat("tr-TR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    weekday: "long",
-  }).format(new Date());
-}

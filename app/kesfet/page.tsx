@@ -9,7 +9,9 @@ import type { WritingKind } from "@/convex/writingKinds";
 import BookCover from "@/components/BookCover";
 import Loading from "@/components/Loading";
 import { buttonLink, cardHover, cardList } from "@/lib/ui";
-import { KIND_ORDER, KINDS, kindConfig } from "@/lib/writingKinds";
+import { KIND_ORDER } from "@/lib/writingKinds";
+import { useKindConfig, useWritingKinds } from "@/lib/localized";
+import { useT } from "@/lib/i18n";
 
 function KindFilter({
   value,
@@ -18,12 +20,14 @@ function KindFilter({
   value: WritingKind | undefined;
   onChange: (kind: WritingKind | undefined) => void;
 }) {
+  const t = useT();
+  const kinds = useWritingKinds();
   const options: { kind: WritingKind | undefined; label: string }[] = [
-    { kind: undefined, label: "Tümü" },
-    ...KIND_ORDER.map((kind) => ({ kind, label: KINDS[kind].label })),
+    { kind: undefined, label: t("Tümü") },
+    ...KIND_ORDER.map((kind) => ({ kind, label: kinds[kind].label })),
   ];
   return (
-    <div role="group" aria-label="Türe göre filtrele" className="mb-6 flex flex-wrap gap-2">
+    <div role="group" aria-label={t("Türe göre filtrele")} className="mb-6 flex flex-wrap gap-2">
       {options.map((option) => {
         const active = option.kind === value;
         return (
@@ -46,18 +50,20 @@ function KindFilter({
 }
 
 function BookCard({ book }: { book: Doc<"books"> }) {
+  const t = useT();
+  const cfg = useKindConfig(book);
   return (
     <li className={cardHover}>
       <Link href={`/kitap/${book._id}`} className="flex gap-3">
         <BookCover
           storageId={book.coverStorageId}
           title={book.title}
-          placeholder="kapak yok"
+          placeholder={t("kapak yok")}
           className="h-20 w-14 rounded shrink-0"
         />
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sapphire">
-            {kindConfig(book).label}
+            {cfg.label}
           </p>
           <h2 className="font-medium">{book.title}</h2>
           {book.description && (
@@ -80,6 +86,7 @@ export default function Home() {
     community?.open ? (kind ? { kind } : {}) : "skip",
     { initialNumItems: 20 },
   );
+  const t = useT();
 
   if (community === undefined) {
     return (
@@ -91,17 +98,15 @@ export default function Home() {
   if (!community.open) {
     return (
       <main className="mx-auto max-w-xl px-4 py-16">
-        <h1 className="text-3xl font-semibold">Keşfet yakında açılıyor</h1>
+        <h1 className="text-3xl font-semibold">{t("Keşfet yakında açılıyor")}</h1>
         <p className="mt-3 text-muted">
-          Keşfet, beğeniler, yorumlar ve okur dalları Booktion&apos;da{" "}
-          {community.threshold} yazı olduğunda açılacak. O zamana kadar bir
-          yazı yalnızca yazarının paylaştığı bağlantıyla okunur.
+          {t("Keşfet, beğeniler, yorumlar ve okur dalları Booktion'da {n} yazı olduğunda açılacak. O zamana kadar bir yazı yalnızca yazarının paylaştığı bağlantıyla okunur.", { n: community.threshold })}
         </p>
         <p className="mt-2 text-sm text-muted">
-          Şu an {community.bookCount}/{community.threshold}.
+          {t("Şu an {count}/{total}.", { count: community.bookCount, total: community.threshold })}
         </p>
         <Link href="/yaz" className="mt-6 inline-block underline">
-          Sen de bir yazı başlat
+          {t("Sen de bir yazı başlat")}
         </Link>
       </main>
     );
@@ -109,31 +114,28 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="text-2xl font-semibold mb-1">Keşfet</h1>
+      <h1 className="text-2xl font-semibold mb-1">{t("Keşfet")}</h1>
       <p className="text-muted mb-6 text-sm">
-        Herkese açık kitaplar, öyküler, şiirler, köşe yazıları ve
-        röportajlar. Oku, beğen, yorum yap — kurmacada istediğin yerden kendi
-        dalını yaz.
+        {t("Herkese açık kitaplar, öyküler, şiirler, köşe yazıları ve röportajlar. Oku, beğen, yorum yap — kurmacada istediğin yerden kendi dalını yaz.")}
       </p>
       <KindFilter value={kind} onChange={setKind} />
       <Unauthenticated>
         <p className="text-muted mb-6 text-sm">
-          Okumak için hesaba gerek yok.{" "}
+          {t("Okumak için hesaba gerek yok.")}{" "}
           <Link href="/giris" className="underline">
-            Giriş yap
+            {t("Giriş yap")}
           </Link>{" "}
-          — beğenmek, yorum yapmak veya kendi hikayeni yazmak istediğinde
-          gerekecek.
+          {t("— beğenmek, yorum yapmak veya kendi hikayeni yazmak istediğinde gerekecek.")}
         </p>
       </Unauthenticated>
 
       {status === "LoadingFirstPage" ? (
-        <Loading label="Kitaplar yükleniyor…" />
+        <Loading label={t("Kitaplar yükleniyor…")} />
       ) : results.length === 0 ? (
         <p className="text-muted">
-          Burada henüz bir şey yok.{" "}
+          {t("Burada henüz bir şey yok.")}{" "}
           <Link href="/yaz" className="underline">
-            İlkini sen yaz
+            {t("İlkini sen yaz")}
           </Link>
           .
         </p>
@@ -147,7 +149,7 @@ export default function Home() {
 
       {status === "CanLoadMore" && (
         <button onClick={() => loadMore(20)} className={`${buttonLink} mt-6`}>
-          Daha fazla göster
+          {t("Daha fazla göster")}
         </button>
       )}
     </main>

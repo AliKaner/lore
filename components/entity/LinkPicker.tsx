@@ -2,8 +2,10 @@
 
 import { useId, useMemo, useRef, useState } from "react";
 import type { Id } from "@/convex/_generated/dataModel";
-import { ENTITY_KINDS, type EntityKind, type LinkField } from "@/convex/entityKinds";
+import type { EntityKind, LinkField } from "@/convex/entityKinds";
 import { EntityChip, KindGlyph, type Chip } from "@/components/entity/shared";
+import { useT } from "@/lib/i18n";
+import { useEntityKinds } from "@/lib/localized";
 
 const lower = (text: string) => text.toLocaleLowerCase("tr-TR");
 
@@ -36,6 +38,8 @@ export default function LinkPicker({
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
+  const t = useT();
+  const kinds = useEntityKinds();
 
   const options = useMemo<Option[]>(() => {
     const q = lower(query.trim());
@@ -97,7 +101,7 @@ export default function LinkPicker({
           className="inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-sm text-muted transition-colors hover:bg-accent-soft/70 hover:text-foreground"
         >
           <span aria-hidden="true">+</span>
-          {value.length === 0 ? "Seç ya da oluştur" : "Ekle"}
+          {value.length === 0 ? t("Seç ya da oluştur") : t("Ekle")}
         </button>
       )}
       {searching && (
@@ -108,7 +112,7 @@ export default function LinkPicker({
             role="combobox"
             aria-expanded={options.length > 0}
             aria-controls={listId}
-            aria-label={`${field.label} ara`}
+            aria-label={t("{label} ara", { label: field.label })}
             value={query}
             disabled={busy}
             onChange={(event) => {
@@ -132,7 +136,7 @@ export default function LinkPicker({
                 setSearching(false);
               }
             }}
-            placeholder={`${field.kinds.map((k) => ENTITY_KINDS[k].label).join(", ")} ara…`}
+            placeholder={t("{kinds} ara…", { kinds: field.kinds.map((k) => kinds[k].label).join(", ") })}
             className="h-8 w-full rounded-full border border-border-hover bg-surface px-3 text-sm outline-none focus:border-accent"
           />
           {options.length > 0 && (
@@ -156,13 +160,13 @@ export default function LinkPicker({
                       <>
                         <KindGlyph kind={option.chip.kind} />
                         <span className="truncate">{option.chip.name}</span>
-                        <span className="ml-auto text-xs text-muted">{ENTITY_KINDS[option.chip.kind].label}</span>
+                        <span className="ml-auto text-xs text-muted">{kinds[option.chip.kind].label}</span>
                       </>
                     ) : (
                       <>
                         <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center">+</span>
                         <span className="truncate">
-                          “{option.name}” adında yeni {lower(ENTITY_KINDS[option.kind].label)}
+                          {t("“{name}” adında yeni: {kind}", { name: option.name, kind: kinds[option.kind].label })}
                         </span>
                       </>
                     )}

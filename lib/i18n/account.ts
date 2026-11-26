@@ -98,4 +98,11 @@ export const ACCOUNT: Record<string, Entry> = {
   "Şifre yok — cihazının kilidiyle girersin": "No password — you sign in with your device's lock",
   "Yazdıkça taslağın kendiliğinden kaydedilir": "Your draft saves itself as you write",
   "Notların ve gizli yazıların yalnızca sana görünür": "Your notes and private writing are visible only to you",
+  "Bu kullanıcı adı alınmış. Senin hesabınsa bu cihazda anahtarın yok; başka bir ad dene.": "That username is taken. If it is yours, this device doesn't have its key; try another name.",
+  "Kullanıcı adı çok kısa.": "The username is too short.",
+  "Kullanıcı adı çok uzun.": "The username is too long.",
+  "Kullanıcı adında kullanılamayan karakterler var.": "The username has characters that can't be used.",
+  "Kullanıcı adının başında ya da sonunda boşluk olamaz.": "The username can't start or end with a space.",
+  "Cihazınla bağlantı kurulamadı. Tekrar dene.": "Couldn't talk to your device. Try again.",
+  "Giriş şu an yapılamıyor. Biraz sonra tekrar dene.": "Sign-in isn't available right now. Try again in a little while.",
 };

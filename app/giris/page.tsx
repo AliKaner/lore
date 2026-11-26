@@ -9,6 +9,7 @@ import BranchField from "@/components/BranchField";
 import Wordmark from "@/components/Wordmark";
 import { safeNext } from "@/lib/safeNext";
 import { useT } from "@/lib/i18n";
+import { passkeyErrorMessage } from "@/lib/passkeyErrors";
 
 const delay = (seconds: number): CSSProperties => ({ animationDelay: `${seconds}s` });
 
@@ -144,8 +145,9 @@ export default function SignInPage() {
     const result = await signIn({ username: username.trim() });
     if (result.status !== "complete") {
       setError(
-        typeof result.userError?.error === "string"
-          ? t(result.userError.error)
+        // A readable message, never a raw code like OTHER_ERROR.
+        result.userError
+          ? t(passkeyErrorMessage(result.userError))
           : t("Giriş tamamlanamadı. Cihazının onay penceresini kapatmış olabilirsin; tekrar dene."),
       );
       return;

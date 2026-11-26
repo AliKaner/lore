@@ -253,7 +253,7 @@ export default function ChapterForm({
         setSavedChapterId(id);
         clearBackup(newKey);
         // Reloading now reopens this draft instead of starting a new one.
-        window.history.replaceState(null, "", `/kitap/${bookId}/bolum/${id}/duzenle`);
+        window.history.replaceState(null, "", `/book/${bookId}/chapter/${id}/edit`);
       }
       setSaved(snapshot);
       setSaveState({ kind: "saved", at: Date.now() });
@@ -353,7 +353,7 @@ export default function ChapterForm({
       const chapterId = await persist(status);
       clearBackup(backupKey(bookId, chapterId, parentChapterId));
       clearBackup(newKey);
-      router.push(`/kitap/${bookId}/bolum/${chapterId}`);
+      router.push(`/book/${bookId}/chapter/${chapterId}`);
     } catch (err) {
       setError(t(err instanceof Error ? err.message : "Bir şeyler ters gitti."));
       setSubmitting(null);
@@ -672,7 +672,7 @@ export default function ChapterForm({
             if (isOwner) {
               setWorldEntity(id);
               setWorldOpen(true);
-            } else window.open(`/evren/${id}`, "_blank");
+            } else window.open(`/world/${id}`, "_blank");
           }}
         />
       )}

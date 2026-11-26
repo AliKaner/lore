@@ -516,8 +516,8 @@ const faqs: { q: string; a: string; only?: "open" | "closed" }[] = [
     a: "Hayır. Okurların dal açabildiği türler yalnızca kurmaca ve şiir: kitap, öykü ve şiir. Deneme, köşe yazısı, röportaj, journal ve günlükte yalnızca yazar yazar; okurlar okur, beğenir ve yorum yapar.",
   },
   {
-    q: "Şifre neden yok?",
-    a: "Booktion geçiş anahtarı (passkey) kullanır. Bir kullanıcı adı seçersin, cihazının parmak izi, yüz tanıma ya da ekran kilidiyle girersin. Hesabın yoksa ilk girişte açılır.",
+    q: "Nasıl giriş yaparım?",
+    a: "Bir kullanıcı adı ve şifre seçip hesabını açarsın; sonra aynı bilgilerle her cihazdan girersin. E-posta ya da telefon numarası istemiyoruz.",
   },
 ];
 
@@ -557,11 +557,11 @@ export default async function Landing() {
           </nav>
           <div className="flex items-center gap-5 text-sm">
             <LanguageSwitch />
-            <Link href="/giris" className="hidden text-muted hover:text-foreground sm:inline">
+            <Link href="/sign-in" className="hidden text-muted hover:text-foreground sm:inline">
               {t("Giriş yap")}
             </Link>
             <Link
-              href="/giris"
+              href="/sign-in"
               className="inline-flex h-10 items-center rounded-sm bg-accent px-4 font-medium text-accent-contrast hover:bg-accent-hover"
             >
               {t("Ücretsiz başla")}
@@ -615,11 +615,11 @@ export default async function Landing() {
               className="anim-rise mt-10 flex flex-wrap justify-center gap-3"
               style={{ animationDelay: "0.7s" }}
             >
-              <Link href="/giris" className={ctaPrimary}>
+              <Link href="/sign-in" className={ctaPrimary}>
                 {t("Ücretsiz yazmaya başla")}
               </Link>
               {community.open ? (
-                <Link href="/kesfet" className={ctaSecondary}>
+                <Link href="/discover" className={ctaSecondary}>
                   {t("Okumaya göz at")}
                 </Link>
               ) : (
@@ -629,7 +629,7 @@ export default async function Landing() {
               )}
             </div>
             <p className="anim-rise mt-5 text-sm text-muted" style={{ animationDelay: "0.8s" }}>
-              {t("Ücretsiz · Şifre yok, kredi kartı yok · Okumak her zaman ücretsiz")}
+              {t("Ücretsiz · Kredi kartı yok · Okumak her zaman ücretsiz")}
             </p>
             <div
               className="anim-rise mt-10 w-full max-w-3xl overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_14%,black_86%,transparent)]"
@@ -855,7 +855,7 @@ export default async function Landing() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/giris" className={`${ctaPrimary} mt-auto`}>
+                <Link href="/sign-in" className={`${ctaPrimary} mt-auto`}>
                   {t("Ücretsiz yazmaya başla")}
                 </Link>
               </div>
@@ -928,7 +928,7 @@ export default async function Landing() {
             <h2 className="max-w-3xl font-display text-5xl leading-[1.02] font-normal sm:text-7xl">
               {t("İlk sayfanı bu akşam yaz.")}
             </h2>
-            <Link href="/giris" className={ctaPrimary}>
+            <Link href="/sign-in" className={ctaPrimary}>
               {t("Ücretsiz yazmaya başla")}
             </Link>
           </div>
@@ -940,9 +940,9 @@ export default async function Landing() {
           <Wordmark className="text-2xl" />
           <nav aria-label={t("Alt bağlantılar")} className="flex flex-wrap gap-6 text-sm text-muted">
             {community.open && (
-              <Link href="/kesfet" className="hover:text-foreground">{t("Keşfet")}</Link>
+              <Link href="/discover" className="hover:text-foreground">{t("Keşfet")}</Link>
             )}
-            <Link href="/giris" className="hover:text-foreground">{t("Giriş yap")}</Link>
+            <Link href="/sign-in" className="hover:text-foreground">{t("Giriş yap")}</Link>
             <a href="#sss" className="hover:text-foreground">{t("SSS")}</a>
           </nav>
           <span className="text-sm text-muted">© 2026 Booktion</span>

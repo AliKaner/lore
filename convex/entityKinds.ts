@@ -82,7 +82,7 @@ export const ENTITY_KINDS: Record<EntityKind, EntityKindConfig> = {
   character: {
     label: "Karakter",
     plural: "Karakterler",
-    slug: "karakter",
+    slug: "character",
     glyph: "✦",
     namePlaceholder: "Adı",
     summaryPlaceholder: "Tek cümlede kim?",
@@ -165,7 +165,7 @@ export const ENTITY_KINDS: Record<EntityKind, EntityKindConfig> = {
   place: {
     label: "Mekan",
     plural: "Mekanlar",
-    slug: "mekan",
+    slug: "place",
     glyph: "◆",
     namePlaceholder: "Mekanın adı",
     summaryPlaceholder: "Tek cümlede nasıl bir yer?",
@@ -199,7 +199,7 @@ export const ENTITY_KINDS: Record<EntityKind, EntityKindConfig> = {
   country: {
     label: "Ülke / krallık",
     plural: "Ülkeler",
-    slug: "ulke",
+    slug: "country",
     glyph: "♜",
     namePlaceholder: "Ülkenin adı",
     summaryPlaceholder: "Tek cümlede nasıl bir ülke?",
@@ -250,7 +250,7 @@ export const ENTITY_KINDS: Record<EntityKind, EntityKindConfig> = {
   race: {
     label: "Irk / halk",
     plural: "Irklar",
-    slug: "irk",
+    slug: "race",
     glyph: "❖",
     namePlaceholder: "Irkın adı",
     summaryPlaceholder: "Tek cümlede kimler?",
@@ -277,7 +277,7 @@ export const ENTITY_KINDS: Record<EntityKind, EntityKindConfig> = {
   group: {
     label: "Topluluk",
     plural: "Topluluklar",
-    slug: "topluluk",
+    slug: "group",
     glyph: "⚑",
     namePlaceholder: "Topluluğun adı",
     summaryPlaceholder: "Tek cümlede ne yaparlar?",
@@ -305,7 +305,7 @@ export const ENTITY_KINDS: Record<EntityKind, EntityKindConfig> = {
   building: {
     label: "Yapı",
     plural: "Yapılar",
-    slug: "yapi",
+    slug: "building",
     glyph: "⌂",
     namePlaceholder: "Yapının adı",
     summaryPlaceholder: "Tek cümlede nasıl bir yapı?",
@@ -339,7 +339,7 @@ export const ENTITY_KINDS: Record<EntityKind, EntityKindConfig> = {
   weapon: {
     label: "Silah",
     plural: "Silahlar",
-    slug: "silah",
+    slug: "weapon",
     glyph: "⚔",
     namePlaceholder: "Silahın adı",
     summaryPlaceholder: "Tek cümlede nasıl bir silah?",
@@ -361,7 +361,7 @@ export const ENTITY_KINDS: Record<EntityKind, EntityKindConfig> = {
   item: {
     label: "Eşya",
     plural: "Eşyalar",
-    slug: "esya",
+    slug: "item",
     glyph: "◈",
     namePlaceholder: "Eşyanın adı",
     summaryPlaceholder: "Tek cümlede ne?",
@@ -391,8 +391,21 @@ export const ENTITY_KIND_ORDER: EntityKind[] = [
   "item",
 ];
 
+// Slugs used in links before URLs were in English; old bookmarks still work.
+const LEGACY_SLUGS: Record<string, EntityKind> = {
+  karakter: "character",
+  mekan: "place",
+  ulke: "country",
+  irk: "race",
+  topluluk: "group",
+  yapi: "building",
+  silah: "weapon",
+  esya: "item",
+};
+
 export function kindFromSlug(slug: string | null | undefined): EntityKind | null {
-  return ENTITY_KIND_ORDER.find((kind) => ENTITY_KINDS[kind].slug === slug) ?? null;
+  if (!slug) return null;
+  return ENTITY_KIND_ORDER.find((kind) => ENTITY_KINDS[kind].slug === slug) ?? LEGACY_SLUGS[slug] ?? null;
 }
 
 export function fieldsOf(kind: EntityKind): EntityField[] {

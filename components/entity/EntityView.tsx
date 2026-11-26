@@ -41,7 +41,7 @@ export default function EntityView({
   if (entity === null) return <NotFoundState title={t("Bu kayıt bulunamadı")} />;
 
   const config = kinds[entity.kind];
-  const hrefFor = (id: Id<"entities">) => `/kitap/${bookId}/evren/${id}`;
+  const hrefFor = (id: Id<"entities">) => `/book/${bookId}/world/${id}`;
   const chips = (list: Chip[]) => (
     <div className="flex flex-wrap gap-1.5">
       {list.map((chip) => (
@@ -143,7 +143,7 @@ export default function EntityView({
             {book && (
               <>
                 <span className="text-muted">·</span>
-                <Link href={`/kitap/${bookId}`} className="normal-case tracking-normal text-muted hover:text-foreground">
+                <Link href={`/book/${bookId}`} className="normal-case tracking-normal text-muted hover:text-foreground">
                   {book.title}
                 </Link>
               </>

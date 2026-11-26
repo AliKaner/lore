@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Booktion",
     description:
       "Her yazıya kendi masası: roman, öykü, şiir, köşe yazısı, röportaj ve günlük için yazı platformu.",
-    start_url: "/yazilarim",
+    start_url: "/my-writing",
     display: "standalone",
     background_color: "#f4f6fb",
     theme_color: "#0f1939",

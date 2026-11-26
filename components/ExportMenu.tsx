@@ -106,7 +106,7 @@ export default function ExportMenu({ bookId }: { bookId: Id<"books"> }) {
               badge="pdf"
               title="PDF"
               detail={t("Baskıya hazır sayfa; “PDF olarak kaydet”")}
-              href={`/kitap/${bookId}/yazdir${scope === "all" ? "?kapsam=tum" : ""}`}
+              href={`/book/${bookId}/print${scope === "all" ? "?scope=all" : ""}`}
             />
             <Row badge="md" title="Markdown" detail={t("Düz metin; her yerde açılır")} busy={busy === "md"} onClick={() => void run("md")} />
             <label className="mt-1 flex cursor-pointer items-center gap-2 border-t border-border px-3 pb-1 pt-3 text-xs text-muted">

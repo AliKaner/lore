@@ -12,21 +12,21 @@ import Wordmark from "@/components/Wordmark";
 import { ThemeButton } from "@/components/ThemePicker";
 import { LanguageSwitch, useT } from "@/lib/i18n";
 
-const WRITING_SCREEN = /^\/kitap\/[^/]+((\/bolum\/[^/]+)?\/(yaz|duzenle)|\/yazdir)$/;
+const WRITING_SCREEN = /^\/book\/[^/]+((\/chapter\/[^/]+)?\/(write|edit)|\/print)$/;
 
 function NavLinks() {
   const communityOpen = useCommunityOpen();
   const t = useT();
   return (
     <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
-      <Link href="/yazilarim">{t("Yazılarım")}</Link>
-      <Link href="/yaz">{t("Yeni yazı")}</Link>
-      <Link href="/evren">{t("Evren")}</Link>
+      <Link href="/my-writing">{t("Yazılarım")}</Link>
+      <Link href="/new">{t("Yeni yazı")}</Link>
+      <Link href="/world">{t("Evren")}</Link>
       {communityOpen && (
         <>
-          <Link href="/kesfet">{t("Keşfet")}</Link>
-          <Link href="/kutuphanem">{t("Kütüphanem")}</Link>
-          <Link href="/moderasyon">{t("Moderasyon")}</Link>
+          <Link href="/discover">{t("Keşfet")}</Link>
+          <Link href="/library">{t("Kütüphanem")}</Link>
+          <Link href="/moderation">{t("Moderasyon")}</Link>
         </>
       )}
     </nav>
@@ -44,7 +44,7 @@ function UserBadge() {
   return (
     <div className="flex items-center gap-3 text-sm">
       <Link
-        href={`/profil/${me._id}`}
+        href={`/profile/${me._id}`}
         className="font-medium"
         title={communityOpen ? t(title) : undefined}
       >
@@ -52,7 +52,7 @@ function UserBadge() {
           ? `${badge} ${me.username ?? t("Profilim")} · ${t("Seviye {n}", { n: me.level })}`
           : (me.username ?? t("Profilim"))}
       </Link>
-      <Link href="/hesap" className="text-muted hover:text-foreground">
+      <Link href="/account" className="text-muted hover:text-foreground">
         {t("Hesap")}
       </Link>
       <button
@@ -71,11 +71,11 @@ export default function Header() {
   const t = useT();
   // The landing and sign-in pages carry their own wordmark, and the writing
   // screen has its own slim bar so nothing else competes with the text.
-  if (pathname === "/" || pathname === "/giris" || WRITING_SCREEN.test(pathname)) return null;
+  if (pathname === "/" || pathname === "/sign-in" || WRITING_SCREEN.test(pathname)) return null;
   return (
     <header className="flex flex-col gap-2 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-        <Link href={isAuthenticated ? "/yazilarim" : "/"} className="text-2xl">
+        <Link href={isAuthenticated ? "/my-writing" : "/"} className="text-2xl">
           <Wordmark />
         </Link>
         {/* The desk's pages are for signed-in writers only. */}
@@ -90,8 +90,8 @@ export default function Header() {
           <span className="text-muted">…</span>
         </AuthLoading>
         <Unauthenticated>
-          {pathname !== "/giris" && (
-            <Link href="/giris" className="font-medium">
+          {pathname !== "/sign-in" && (
+            <Link href="/sign-in" className="font-medium">
               {t("Giriş yap")}
             </Link>
           )}

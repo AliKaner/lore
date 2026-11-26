@@ -14,7 +14,7 @@ import { themeValidator } from "./themes";
 export const createUser = internalMutation({
   args: {
     method: v.object({
-      name: v.literal("usernamePasskey"),
+      name: v.literal("usernamePassword"),
       profile: v.object({}),
     }),
   },

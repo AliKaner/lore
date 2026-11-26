@@ -35,7 +35,7 @@ export default function ErrorPage({ error, retry }: { error: unknown; retry: () 
                 {t("Tekrar dene")}
               </button>
               <Link
-                href="/yazilarim"
+                href="/my-writing"
                 className="text-sm text-muted underline underline-offset-4 hover:text-foreground"
               >
                 {t("Yazılarıma dön")}

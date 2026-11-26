@@ -3,9 +3,9 @@ import authCore from "@convex-dev/auth/test";
 import authUsername from "@convex-dev/auth/components/username/test";
 import schema from "./schema";
 
-// Minted directly on the auth core component, bypassing any real sign-in
-// ceremony (passkeys need a real/virtual authenticator we don't have in
-// tests). This is the same internal mutation every sign-in method calls
+// Minted directly on the auth core component, bypassing a real sign-in
+// (no password needed in tests). This is the same internal mutation every
+// sign-in method calls
 // after it verifies the user; see @convex-dev/auth's component/public.ts.
 const SESSION_TTL = {
   accessTokenTtlSeconds: 3600,

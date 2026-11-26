@@ -100,8 +100,7 @@ export const LANDING: Record<string, Entry> = {
   "Ücretsiz yazmaya başla": "Start writing for free",
   "Okumaya göz at": "Browse what to read",
   "Yazı türlerine bak": "See the kinds of writing",
-  "Ücretsiz · Şifre yok, kredi kartı yok · Okumak her zaman ücretsiz":
-    "Free · No password, no credit card · Reading is always free",
+  "Ücretsiz · Kredi kartı yok · Okumak her zaman ücretsiz": "Free · No credit card · Reading is always free",
   "Ana hat seçildi": "Main line chosen",
   "Bölüm 3 · Dönüş": "Chapter 3 · Return",
   // Kinds section
@@ -186,9 +185,9 @@ export const LANDING: Record<string, Entry> = {
   "Köşe yazıma ya da röportajıma başkası ekleme yapabilir mi?": "Can someone else add to my column or interview?",
   "Hayır. Okurların dal açabildiği türler yalnızca kurmaca ve şiir: kitap, öykü ve şiir. Deneme, köşe yazısı, röportaj, journal ve günlükte yalnızca yazar yazar; okurlar okur, beğenir ve yorum yapar.":
     "No. Readers can branch only in fiction and poetry: books, stories and poems. In essays, columns, interviews, journals and diaries only the author writes; readers read, like and comment.",
-  "Şifre neden yok?": "Why is there no password?",
-  "Booktion geçiş anahtarı (passkey) kullanır. Bir kullanıcı adı seçersin, cihazının parmak izi, yüz tanıma ya da ekran kilidiyle girersin. Hesabın yoksa ilk girişte açılır.":
-    "Booktion uses passkeys. You pick a username and sign in with your device's fingerprint, face or screen lock. If you don't have an account, it's created on your first sign-in.",
+  "Nasıl giriş yaparım?": "How do I sign in?",
+  "Bir kullanıcı adı ve şifre seçip hesabını açarsın; sonra aynı bilgilerle her cihazdan girersin. E-posta ya da telefon numarası istemiyoruz.":
+    "You pick a username and a password to open your account, then sign in with them on any device. We don't ask for an email or a phone number.",
   // Closing
   "İlk sayfanı bu akşam yaz.": "Write your first page tonight.",
   "Alt bağlantılar": "Footer links",

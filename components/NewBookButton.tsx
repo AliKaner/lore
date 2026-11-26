@@ -28,7 +28,7 @@ export default function NewBookButton({
 
   async function handleClick() {
     if (me === null) {
-      router.push("/giris");
+      router.push("/sign-in");
       return;
     }
     if (me === undefined || creating) return;
@@ -39,7 +39,7 @@ export default function NewBookButton({
         kind,
         visibility: "private",
       });
-      router.push(`/kitap/${bookId}/yaz`);
+      router.push(`/book/${bookId}/write`);
     } catch (err) {
       showToast(toastErrorMessage(err));
       setCreating(false);

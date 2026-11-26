@@ -45,7 +45,7 @@ A writer's world is a set of linked entries:
 
 ## Privacy and accounts
 
-- Sign-in with passkeys (no passwords). A second device or security key can be added; all writing can be downloaded as a zip backup.
+- Sign-in with a username and password (no email needed); the password can be changed on the account page. All writing can be downloaded as a zip backup.
 - Private writings and diaries are visible only to their author. A writing opened "by link" can be read by anyone with the link but is not listed in search engines.
 
 ## Export

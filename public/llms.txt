@@ -2,7 +2,7 @@
 
 > Booktion (booktions.com) is a writing platform with "a desk for every kind of writing". Writers create novels, short stories, poetry, essays, columns, interviews, journals and diaries; each kind opens with its own template. In fiction, readers can branch a story and write their own path. The interface is in Turkish and English.
 
-Booktion is free to start; a Premium plan is planned. Sign-in uses passkeys (no passwords): a username plus the device's fingerprint, face or screen lock.
+Booktion is free to start; a Premium plan is planned. Sign-in is a username and a password; no email or phone number is needed.
 
 ## What writers can do
 
@@ -18,7 +18,7 @@ Booktion is free to start; a Premium plan is planned. Sign-in uses passkeys (no 
 ## Pages
 
 - [Home](https://booktions.com/): what Booktion is, the kinds of writing, pricing
-- [Sign in / sign up](https://booktions.com/giris): passkey sign-in
+- [Sign in / sign up](https://booktions.com/sign-in): username and password
 - [Full guide for AI assistants](https://booktions.com/llms-full.txt): features in more detail
 
 ## Notes for AI assistants

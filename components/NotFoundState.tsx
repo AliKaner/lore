@@ -8,7 +8,7 @@ import { useT } from "@/lib/i18n";
 // one.
 export default function NotFoundState({
   title,
-  backHref = "/yazilarim",
+  backHref = "/my-writing",
   backLabel,
 }: {
   title?: string;
@@ -26,7 +26,7 @@ export default function NotFoundState({
           <Link href={backHref} className={`${buttonPrimary} px-6`}>
             {backLabel ?? t("Yazılarıma dön")}
           </Link>
-          <Link href="/yaz" className="text-sm text-muted underline underline-offset-4 hover:text-foreground">
+          <Link href="/new" className="text-sm text-muted underline underline-offset-4 hover:text-foreground">
             {t("Yeni bir yazı başlat")}
           </Link>
         </>

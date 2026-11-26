@@ -3,15 +3,15 @@ import { safeNext } from "@/lib/safeNext";
 
 // Pages a signed-out visitor may open. Everything else is the writer's desk
 // and sends them to sign in first. Reading a writing through a shared link
-// (`/kitap/<id>` and its chapters) stays open — that's how writings are
+// (`/book/<id>` and its chapters) stays open — that's how writings are
 // shared while the community is closed; Convex still hides private ones.
 const PUBLIC_PAGES = [
   /^\/$/,
-  /^\/giris$/,
-  /^\/kesfet$/,
-  /^\/kitap\/[^/]+$/,
-  /^\/kitap\/[^/]+\/bolum\/[^/]+$/,
-  /^\/kitap\/[^/]+\/evren\/[^/]+$/,
+  /^\/sign-in$/,
+  /^\/discover$/,
+  /^\/book\/[^/]+$/,
+  /^\/book\/[^/]+\/chapter\/[^/]+$/,
+  /^\/book\/[^/]+\/world\/[^/]+$/,
 ];
 
 // Files for crawlers and link previews (WhatsApp, X…): never behind sign-in.
@@ -23,13 +23,13 @@ export default convexAuthNextjsProxy(async (request, { isAuthenticated }) => {
   if (OPEN_FILES.test(pathname)) return undefined;
   const signedIn = await isAuthenticated();
 
-  if (signedIn && (pathname === "/" || pathname === "/giris")) {
-    const target = pathname === "/giris" ? safeNext(searchParams.get("next")) : "/yazilarim";
+  if (signedIn && (pathname === "/" || pathname === "/sign-in")) {
+    const target = pathname === "/sign-in" ? safeNext(searchParams.get("next")) : "/my-writing";
     return nextjsProxyRedirect(request, target);
   }
 
   if (!signedIn && !PUBLIC_PAGES.some((page) => page.test(pathname))) {
-    return nextjsProxyRedirect(request, `/giris?next=${encodeURIComponent(pathname)}`);
+    return nextjsProxyRedirect(request, `/sign-in?next=${encodeURIComponent(pathname)}`);
   }
 
   return undefined;

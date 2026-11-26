@@ -704,7 +704,7 @@ function EditorBody({
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {entity.books.map((book) => (
                   <span key={book._id} className="inline-flex items-center gap-1 rounded-full border border-border py-0.5 pl-3 pr-1 text-sm">
-                    <a href={`/kitap/${book._id}`} className="hover:text-accent">
+                    <a href={`/book/${book._id}`} className="hover:text-accent">
                       {book.title}
                     </a>
                     <button

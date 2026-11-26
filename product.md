@@ -30,7 +30,7 @@ Dört alanda üçer seçenek karşılaştırıldı (bkz. yayınlanmış mockup);
   "leaf'e sıra ver, üst düğüm çocuklarının ortalaması" yerleşim algoritması).
   Ürünün "dallanma" vaadini en net gösteren seçenek. Çok dallı kitaplarda
   yatay scroll gerekiyor — bilerek kabul edildi.
-- **Yazma akışı → Tür seç, anında yaz.** "Yeni yazı" (`/yaz`) önce yazı türünü
+- **Yazma akışı → Tür seç, anında yaz.** "Yeni yazı" (`/new`) önce yazı türünü
   sorar; bir türe tıklanınca (`components/NewBookButton.tsx`) form olmadan
   o türün "Başlıksız …" gizli yazısı oluşur ve editöre düşülür. Başlık,
   açıklama ve görünürlük (`components/BookTitleEditor.tsx`) editörün üstünde
@@ -51,9 +51,9 @@ Dört alanda üçer seçenek karşılaştırıldı (bkz. yayınlanmış mockup);
 - [x] Bir kitabın tüm bölüm ağacını görme (hikaye haritası)
 - [x] Bir bölümün "resmi hat" (ana dal) olarak işaretlenmesi — kitap sahibi
       bölüm sayfasındaki "ana hat yap" butonunu kullanıyor
-- [x] Var olan bir bölümü düzenleme — `/duzenle` ekranı, sadece yazarı girebiliyor
+- [x] Var olan bir bölümü düzenleme — `/edit` ekranı, sadece yazarı girebiliyor
 - [x] Otomatik kayıt (`components/ChapterForm.tsx`): yazmaya başlanınca 1,5 sn
-      sonra taslak sunucuya kaydedilir, adres `/duzenle`'ye döner (yenilemek
+      sonra taslak sunucuya kaydedilir, adres `/edit`'ye döner (yenilemek
       taslağı açar). Kaydedilmemiş metin ayrıca cihazda (localStorage) tutulur;
       geri gelince "Geri yükle / Yok say" sorulur. Sekmeyi kapatırken uyarı,
       Ctrl/Cmd+S ile kaydetme. Yayındaki bir metin otomatik değişmez —
@@ -111,7 +111,7 @@ etiketler, şablonlar ve başlıklar `lib/writingKinds.ts` içinde.
 
 ### Landing Page
 
-- [x] `/` artık tanıtım sayfası (giriş yapmış kullanıcı `/yazilarim`'e
+- [x] `/` artık tanıtım sayfası (giriş yapmış kullanıcı `/my-writing`'e
       yönlenir). Rakip araştırmasına göre (Ulysses, Novlr, bibisco, Sudowrite,
       Novelcrafter, Dabble, Reedsy, Wattpad, Substack): gerçek ürün arayüzü
       gösteren hero, yazı türleri ızgarası, Ulysses tarzı "… için" kullanım
@@ -147,8 +147,8 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       "Kapak yap" ile değişir. Alan görselleri (harita, plan) ayrı tutulur.
 - [x] **Kendi alanların**: her kayda yazarın istediği kadar serbest alan.
 - [x] **Otomatik kayıt**: yazmayı bırakınca kaydedilir, "Kaydedildi" işareti.
-- [x] **Sayfalar**: `/evren` (tür sekmeleri, arama, kapaklı kartlar,
-      "Yeni ekle"), `/evren/[id]` (düzenleme), `/kitap/[id]/evren/[id]`
+- [x] **Sayfalar**: `/world` (tür sekmeleri, arama, kapaklı kartlar,
+      "Yeni ekle"), `/world/[id]` (düzenleme), `/book/[id]/world/[id]`
       (okur görünümü: yalnızca doldurulan alanlar, yalnızca o yazıya dahil
       kayıtlara bağlantılar). `/karakterler` ve `/mekanlar` buraya yönlenir.
 - [x] **Yazarken**: seçim araç çubuğunda Karakter, Mekan ve "···" (diğer
@@ -250,8 +250,8 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
 > gizli (`books.communityStatus`, `lib/community.ts`). O zamana kadar
 > Keşfet, Kütüphanem, Moderasyon, beğeni, yorum, favori, bildirme, başkalarının
 > dal açması ve okur seviyeleri görünmüyor; bir yazı yalnızca paylaşılan
-> bağlantıyla (`/kitap/<id>`) okunuyor. Giriş yapan kullanıcı "Yazılarım"
-> (`/yazilarim`) sayfasına düşüyor. 100'e ulaşınca hepsi kendiliğinden açılıyor.
+> bağlantıyla (`/book/<id>`) okunuyor. Giriş yapan kullanıcı "Yazılarım"
+> (`/my-writing`) sayfasına düşüyor. 100'e ulaşınca hepsi kendiliğinden açılıyor.
 > Gizleme yalnızca arayüzde; backend fonksiyonları aynı. Eşiğe yalnızca en az
 > bir bölümü olan yazılar sayılır (`by_root_chapter` index'i) — tür seçince
 > açılan boş "Başlıksız" yazılar sayılmaz.
@@ -272,7 +272,7 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
 - [x] Favori evren kayıtları (karakter, ülke…)
 - [x] Favori mekanlar
 - [x] Moderasyon — kitap/bölüm bildirme (`ReportButton`), kitap sahibi için
-      `/moderasyon` ekranı: bildirimi çözüldü işaretleme, uygunsuz bir dalı
+      `/moderation` ekranı: bildirimi çözüldü işaretleme, uygunsuz bir dalı
       gizleme (taslağa düşürme)
 
 ### Okuyucu Tarafı
@@ -321,24 +321,26 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
 
 ### Güven
 
-- [x] **Hesap kurtarma = ikinci cihaz** (`/hesap`): giriş anahtarlarının
-      listesi, adlandırma, kaldırma (son anahtar kaldırılamaz) ve "Cihaz ya da
-      anahtar ekle" (telefon QR ile eklenir). @convex-dev/auth'un kendi passkey
-      yönetimi kullanılıyor (`convex/auth.ts`). Tek cihazı olan yazara
-      Yazılarım'da "Hesabını güvenceye al" hatırlatması (7 gün ertelenebilir).
-      Kurtarma kodu bilinçli olarak yok: kütüphane, uygulama kodunun kendi
-      başına oturum açmasını yasaklıyor; e-posta ile kurtarma ileride
-      `email-magic-link` yöntemiyle eklenebilir
+- [x] **Kullanıcı adı + şifre ile giriş** (`convex/auth.ts`,
+      @convex-dev/auth `username-password` yöntemi). `/sign-in`'de "Giriş yap" /
+      "Hesap aç" sekmeleri; yeni şifre en az 10 karakter ve çok yaygın şifreler
+      reddedilir. `/account`'ta şifre değiştirme (diğer cihazlardaki oturumları
+      kapatma seçeneğiyle). Passkey ve cihaz/anahtar yönetimi kaldırıldı.
+      E-posta ile şifre sıfırlama yok; ileride `email-password` yöntemiyle
+      eklenebilir
+- [x] **İngilizce adresler**: `/book/…/chapter/…/write`, `/world`,
+      `/my-writing`, `/sign-in`… Eski Türkçe adresler (`/kitap`, `/evren`,
+      `/giris`…) `next.config.ts` içinde kalıcı yönlendirmeyle yenisine gider
 - [x] **Sürüm geçmişi** (`convex/versions.ts`, yazma ekranında "Geçmiş"):
       metin değişmeden önceki hali saklanır — en fazla 10 dakikada bir, her
       yayında mutlaka; bölüm başına son 50 sürüm. Önizle → "Bu sürüme dön"
       editörü doldurur, hiçbir şey kaydedilmeden üzerine yazılmaz. Yalnızca
       yazarı görür; bölüm silinince sürümleri de silinir
 - [x] **Dışa aktarma** (yazı sayfasında "Dışa aktar", yalnızca sahibi):
-      Word (.docx, `docx` paketi), PDF (`/kitap/<id>/yazdir` kitap gibi baskı
+      Word (.docx, `docx` paketi), PDF (`/book/<id>/print` kitap gibi baskı
       sayfası → "PDF olarak kaydet"), Markdown; isteğe bağlı dallar dahil. Yazar
       notları bu dosyalara girmez
-- [x] **Tam yedek** (`/hesap`): bütün yazılar, tüm dallar, taslaklar ve
+- [x] **Tam yedek** (`/account`): bütün yazılar, tüm dallar, taslaklar ve
       notlar (dipnot olarak) ayrı Markdown dosyaları hâlinde tek ZIP
 
 ## Version 2
@@ -360,8 +362,7 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       tür filtresi, köşe yazısı/şiir dal kuralları ve backfill dahil): kitap/bölüm
       yetkilendirme (dallanma kuralı, taslak görünürlüğü, düzenleme/ana hat/
       gizleme), karakter/mekan paketleme, like/yorum/favori/paylaşım, okuma
-      ilerlemesi + seviye hesaplama, moderasyon. Passkey girişi gerçek bir
-      WebAuthn seremonisi istediği için, testler girişi `@convex-dev/auth`'un
+      ilerlemesi + seviye hesaplama, moderasyon. Testler girişi `@convex-dev/auth`'un
       kendi iç `_internal_dangerous_signIn` fonksiyonuyla taklit ediyor
       (`convex/testUtils.test.ts`) — bu üçüncü taraf paketin iç detayına
       bağımlı, versiyon güncellemesinde kırılabilir.
@@ -382,9 +383,9 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
 - [x] Anlık geri bildirim: beğeni ve favori artık optimistic update ile
       tıklandığı an değişiyor, sunucu cevabını beklemiyor.
 - [x] Giriş duvarı (`proxy.ts`): girişsiz ziyaretçi yalnızca landing (`/`),
-      giriş (`/giris`), Keşfet ve paylaşılan okuma bağlantılarını
-      (`/kitap/<id>`, `/kitap/<id>/bolum/<id>`) açabilir; geri kalan her sayfa
-      sunucuda `/giris?next=…`'e yönlenir. Oturum kontrolü Convex'e sorulur
+      giriş (`/sign-in`), Keşfet ve paylaşılan okuma bağlantılarını
+      (`/book/<id>`, `/book/<id>/chapter/<id>`) açabilir; geri kalan her sayfa
+      sunucuda `/sign-in?next=…`'e yönlenir. Oturum kontrolü Convex'e sorulur
       (`api.auth.isAuthenticated`). Girişsizken üst menüde yalnızca logo (→ `/`)
       ve "Giriş yap" görünür; çıkış yapınca landing'e dönülür
 - [x] Boş durumlar (`components/EmptyState.tsx`): giriş gereken sayfalar,

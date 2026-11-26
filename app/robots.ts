@@ -5,16 +5,14 @@ import { SITE_URL } from "@/lib/site";
 // guide; the writer's desk and private screens are off limits. Shared
 // writings also say "noindex" themselves.
 const PRIVATE = [
-  "/yazilarim",
-  "/yaz",
-  "/hesap",
-  "/evren",
-  "/karakterler",
-  "/mekanlar",
-  "/kutuphanem",
-  "/moderasyon",
-  "/profil/",
-  "/kitap/",
+  "/my-writing",
+  "/new",
+  "/account",
+  "/world",
+  "/library",
+  "/moderation",
+  "/profile/",
+  "/book/",
   "/auth/",
 ];
 

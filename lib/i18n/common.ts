@@ -20,7 +20,8 @@ export const COMMON: Record<string, Entry> = {
   "Hesabınla devam et": "Continue with your account",
   "Devam etmek için giriş yap": "Sign in to continue",
   "Booktion'u tanı": "Get to know Booktion",
-  "Yazıların, taslakların ve notların hesabına bağlı. Şifre yok: kullanıcı adını yaz, cihazının parmak izi, yüz tanıma ya da ekran kilidiyle gir. Hesabın yoksa aynı adımda açılır.": "Your writing, drafts and notes belong to your account. No password: type your username and sign in with your device's fingerprint, face or screen lock. If you don't have an account, it's created in the same step.",
+  "Yazıların, taslakların ve notların hesabına bağlı. Kullanıcı adın ve şifrenle gir; hesabın yoksa bir dakikada açılır.":
+    "Your writings, drafts and notes belong to your account. Sign in with your username and password; if you don't have an account, it takes a minute to open one.",
   "Yükleniyor…": "Loading…",
   "Silindi.": "Deleted.",
   "Geri alınamaz.": "This can't be undone.",

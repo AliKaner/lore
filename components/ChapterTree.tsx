@@ -63,7 +63,7 @@ function NodeCard({
   const t = useT();
   return (
     <Link
-      href={`/kitap/${bookId}/bolum/${chapter._id}`}
+      href={`/book/${bookId}/chapter/${chapter._id}`}
       className="absolute flex flex-col justify-center rounded-lg border bg-surface px-3 py-2 text-sm leading-tight hover:border-border-hover"
       style={{
         left: depth * COL_WIDTH,

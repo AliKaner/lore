@@ -15,7 +15,7 @@ export default function SignInPrompt({
 }) {
   const pathname = usePathname();
   const t = useT();
-  const next = pathname && pathname !== "/giris" ? `?next=${encodeURIComponent(pathname)}` : "";
+  const next = pathname && pathname !== "/sign-in" ? `?next=${encodeURIComponent(pathname)}` : "";
   return (
     <EmptyState
       art="locked"
@@ -23,7 +23,7 @@ export default function SignInPrompt({
       title={title ?? t("Devam etmek için giriş yap")}
       actions={
         <>
-          <Link href={`/giris${next}`} className={`${buttonPrimary} px-6`}>
+          <Link href={`/sign-in${next}`} className={`${buttonPrimary} px-6`}>
             {t("Giriş yap")}
           </Link>
           <Link href="/" className="text-sm text-muted underline underline-offset-4 hover:text-foreground">
@@ -33,7 +33,7 @@ export default function SignInPrompt({
       }
     >
       <p>
-        {t("Yazıların, taslakların ve notların hesabına bağlı. Şifre yok: kullanıcı adını yaz, cihazının parmak izi, yüz tanıma ya da ekran kilidiyle gir. Hesabın yoksa aynı adımda açılır.")}
+        {t("Yazıların, taslakların ve notların hesabına bağlı. Kullanıcı adın ve şifrenle gir; hesabın yoksa bir dakikada açılır.")}
       </p>
     </EmptyState>
   );

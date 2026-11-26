@@ -9,7 +9,7 @@ import { KINDS } from "@/lib/writingKinds";
 import { THEMES } from "@/lib/themes";
 import { PAPERS } from "@/lib/paper";
 import { SOUNDS } from "@/lib/writingModes";
-import { PASSKEY_MESSAGES } from "@/lib/passkeyErrors";
+import { AUTH_MESSAGES, AUTH_FALLBACK } from "@/lib/authErrors";
 
 const root = path.resolve(__dirname, "..");
 
@@ -89,8 +89,8 @@ describe("English", () => {
     collect(THEMES);
     collect(PAPERS.map((p) => ({ note: p.note })));
     collect(SOUNDS);
-    collect(PASSKEY_MESSAGES);
-    labels.push("Bir sorun oldu. Tekrar dene.");
+    collect(AUTH_MESSAGES);
+    labels.push(AUTH_FALLBACK);
     expect(missing(labels.filter((l) => /\p{L}/u.test(l) && !/^[A-Z]\d$/u.test(l)))).toEqual([]);
     expect(stringsIn([]).length).toBe(0);
   });

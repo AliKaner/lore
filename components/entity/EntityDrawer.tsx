@@ -95,7 +95,7 @@ export default function EntityDrawer({
         <div className="flex items-center gap-1">
           {openId && (
             <a
-              href={`/evren/${openId}`}
+              href={`/world/${openId}`}
               target="_blank"
               rel="noreferrer"
               className="rounded-full px-3 py-1.5 text-xs text-muted hover:bg-accent-soft/60 hover:text-foreground"

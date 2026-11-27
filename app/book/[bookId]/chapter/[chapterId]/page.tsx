@@ -213,7 +213,7 @@ export default function ChapterPage({
         </span>
       </div>
 
-      <div ref={readerRef}>
+      <div ref={readerRef} className={book?.kind === "poetry" ? "poem-reading" : undefined}>
         <ChapterReader
           key={chapterId}
           content={chapter.content}

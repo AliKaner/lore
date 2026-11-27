@@ -122,6 +122,12 @@ export default function WritingModeMenu({
             title={t("Yazım denetimi")}
             hint={t("Sözlükte olmayan kelimelerin altı dalgalı çizilir; tıklayınca öneriler çıkar. Karakter adları işaretlenmez.")}
           />
+          <Toggle
+            on={modes.poetry}
+            onChange={(poetry) => onChange({ poetry })}
+            title={t("Şiir yardımcısı")}
+            hint={t("Şiirlerde her dizenin hecesini ve uyağını, kıtanın uyak düzenini gösterir.")}
+          />
           <div className="my-1.5 h-px bg-border" />
           <p className="px-2.5 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">{t("Yazma sesi")}</p>
           <div role="radiogroup" aria-label={t("Yazma sesi")}>

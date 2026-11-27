@@ -291,4 +291,6 @@ export const WRITING: Record<string, Entry> = {
   "Bu öneri artık açık değil.": "This suggestion is no longer open.",
   "Bu öneriyi yalnızca bölümün yazarı ya da yazının sahibi birleştirir.": "Only the chapter's author or the writing's owner can merge this suggestion.",
   "Bu öneriyi kapatamazsın.": "You can't close this suggestion.",
+  "Şiir yardımcısı": "Poetry aid",
+  "Şiirlerde her dizenin hecesini ve uyağını, kıtanın uyak düzenini gösterir.": "In poems, shows each line's syllables and rhyme, and each stanza's rhyme scheme.",
 };

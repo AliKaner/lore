@@ -109,7 +109,9 @@ export default function BookPage({
           <h1 className="mt-3 font-display text-4xl leading-[1.05] tracking-tight sm:text-6xl">{book.title}</h1>
           {book.classic && (
             <p className="mt-3 text-lg">
-              {book.classic.author}
+              <Link href={`/profile/${book.ownerId}`} className="underline decoration-border-hover underline-offset-4 hover:text-accent">
+                {book.classic.author}
+              </Link>
               {book.classic.year && <span className="text-muted"> · {book.classic.year}</span>}
             </p>
           )}

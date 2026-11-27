@@ -215,4 +215,5 @@ export const COMMON: Record<string, Entry> = {
   "1 gün": "1 day",
   "Son bir yılda {n} kelime, 1 gün": "{n} words over 1 day in the past year",
   "Tevfik Fikret portresi · Wikimedia Commons, kamu malı": "Portrait of Tevfik Fikret · Wikimedia Commons, public domain",
+  "Kitapları": "Books",
 };

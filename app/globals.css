@@ -483,6 +483,54 @@ h1, h2, h3 {
   cursor: pointer;
 }
 
+/* Poetry aid: syllables and rhyme letter after each line, rhymes tinted,
+   redif underlined, the stanza's scheme below it. */
+.writing-surface .poem-meta {
+  margin-left: 0.6em;
+  font-family: var(--font-sans);
+  font-size: 0.62em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  white-space: nowrap;
+}
+.writing-surface .poem-meta b {
+  margin-left: 0.35em;
+  padding: 0 0.4em;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.writing-surface .poem-stanza {
+  display: block;
+  margin-top: 0.3em;
+  font-family: var(--font-sans);
+  font-size: 0.62em;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  user-select: none;
+}
+.writing-surface .poem-rhyme.poem-a, .writing-surface .poem-meta b.poem-a { background: color-mix(in srgb, var(--caramel) 30%, transparent); }
+.writing-surface .poem-rhyme.poem-b, .writing-surface .poem-meta b.poem-b { background: color-mix(in srgb, var(--sapphire) 28%, transparent); }
+.writing-surface .poem-rhyme.poem-c, .writing-surface .poem-meta b.poem-c { background: color-mix(in srgb, #c0587a 28%, transparent); }
+.writing-surface .poem-rhyme.poem-d, .writing-surface .poem-meta b.poem-d { background: color-mix(in srgb, #4f8f6a 30%, transparent); }
+.writing-surface .poem-rhyme.poem-e, .writing-surface .poem-meta b.poem-e { background: color-mix(in srgb, #8a6bd1 28%, transparent); }
+.writing-surface .poem-redif {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+.pagination-measuring .poem-meta,
+.pagination-measuring .poem-stanza {
+  display: none;
+}
+
+/* Poems read with room around each stanza. */
+.poem-reading .ProseMirror p {
+  margin-bottom: 1.5em;
+  line-height: 1.95;
+}
+
 /* Word completion: the rest of the word, faint, after the caret. */
 .completion-ghost {
   color: var(--muted);

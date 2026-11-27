@@ -6,6 +6,8 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import ImageUploader from "@/components/ImageUploader";
 import BookCover from "@/components/BookCover";
+import StoredImage from "@/components/StoredImage";
+import ClassicShelf from "@/components/ClassicShelf";
 import Loading from "@/components/Loading";
 import NotFoundState from "@/components/NotFoundState";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
@@ -86,23 +88,30 @@ export default function ProfilePage({
   return (
     <main className="mx-auto max-w-2xl">
       <div className="relative h-40 bg-border">
-        <BookCover
+        <StoredImage
           storageId={profile.wallpaperStorageId}
-          title={t("Duvar kağıdı")}
+          alt={t("Duvar kağıdı")}
           className="h-40 w-full"
+          fallback={<div className="h-40 w-full bg-[linear-gradient(135deg,var(--accent-soft),var(--caramel-soft))]" />}
         />
-        <BookCover
+        <StoredImage
           storageId={profile.avatarStorageId}
-          title={profile.username ?? t("Yazar")}
-          placeholder="pp"
-          className="absolute -bottom-8 left-4 h-20 w-20 rounded-full border-4 border-white"
+          alt={profile.username ?? t("Yazar")}
+          className="absolute -bottom-8 left-4 h-20 w-20 rounded-full border-4 border-surface"
+          fallback={
+            <span className="absolute -bottom-8 left-4 inline-flex h-20 w-20 items-center justify-center rounded-full border-4 border-surface bg-ink font-display text-3xl text-on-ink">
+              {(profile.classicAuthor ?? profile.username ?? "?").slice(0, 1).toLocaleUpperCase("tr-TR")}
+            </span>
+          }
         />
       </div>
 
       <div className="px-4 pt-12 pb-10">
         <h1 className="text-2xl font-semibold mb-1">
-          {profile.username ?? t("Yazar")}
+          {profile.classicAuthor ?? profile.username ?? t("Yazar")}
         </h1>
+        {profile.classicAuthor && profile.username && <p className="-mt-1 mb-2 text-sm text-muted">@{profile.username}</p>}
+        {profile.classicAuthor && <ClassicShelf author={profile.classicAuthor} />}
         {communityOpen ? (
           <>
             <p className="text-muted mb-1">

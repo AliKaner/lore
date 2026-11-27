@@ -12,6 +12,7 @@ import { Focus, Placeholder } from "@tiptap/extensions";
 import { keyKind, playKey, preloadSound } from "@/lib/typingSounds";
 import { loadWords, type Lang } from "@/lib/completion";
 import { SpellCheck } from "@/lib/spellExtension";
+import { PoetryAid } from "@/lib/poetryExtension";
 import SpellMenu from "@/components/SpellMenu";
 import type { WritingModes } from "@/lib/writingModes";
 import { useEffect, useEffectEvent, useImperativeHandle, useRef, type Ref, type RefObject } from "react";
@@ -318,6 +319,7 @@ export function ChapterEditor({
   pageView,
   modes,
   lang,
+  poetry,
   ref,
 }: {
   content: string;
@@ -330,6 +332,8 @@ export function ChapterEditor({
   pageView?: PageView;
   modes?: WritingModes;
   lang?: Lang;
+  // A poem: show syllables, rhymes and stanza schemes.
+  poetry?: boolean;
   ref?: Ref<ChapterEditorHandle>;
 }) {
   const menuRef = useRef<SelectionMenuHandle>(null);
@@ -343,6 +347,7 @@ export function ChapterEditor({
       Pagination,
       WordCompletion,
       SpellCheck,
+      PoetryAid,
       Focus.configure({ className: "has-focus", mode: "shallowest" }),
       Placeholder.configure({ placeholder }),
     ],
@@ -359,6 +364,10 @@ export function ChapterEditor({
   useTypingSounds(editor, modes?.sound ?? "none", modes?.volume ?? 0);
   useCompletion(editor, lang, modes?.complete ?? false, names);
   useSpellCheck(editor, lang, modes?.spell ?? false, names);
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) return;
+    editor.commands.setPoetryAid({ enabled: !!poetry && (modes?.poetry ?? true), lang: lang ?? "tr" });
+  }, [editor, poetry, modes?.poetry, lang]);
 
   useEffect(() => {
     return () => editor?.destroy();

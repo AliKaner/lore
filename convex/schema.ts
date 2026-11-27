@@ -18,7 +18,10 @@ export default defineSchema({
     tzOffset: v.optional(v.number()),
     xp: v.number(),
     level: v.number(),
-  }),
+    // An account that stands for the author of public-domain books (no
+    // sign-in): the classics on the shelf belong to it.
+    classicAuthor: v.optional(v.string()),
+  }).index("by_classic_author", ["classicAuthor"]),
 
   books: defineTable({
     title: v.string(),

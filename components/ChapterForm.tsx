@@ -693,6 +693,7 @@ export default function ChapterForm({
                 pageView={pageView}
                 modes={modes}
                 lang={book?.language ?? locale}
+                poetry={kind === "poetry"}
               />
             </div>
             {paper && (

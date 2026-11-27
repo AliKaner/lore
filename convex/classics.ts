@@ -1,4 +1,4 @@
-import { internalAction, internalMutation, query } from "./_generated/server";
+import { internalAction, internalMutation, internalQuery, query, type MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { components, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
@@ -14,11 +14,12 @@ import {
   type ChapterDoc,
 } from "./classicsParse";
 
-// Public-domain books from open libraries, chapter by chapter, owned by the
-// account that brings them in (so they can be split or fixed by hand),
-// public, and open for anyone to branch from. Run from the command line:
-//   npx convex run classics:importWikisource '{"owner":"…","pages":["…"],…}'
-//   npx convex run classics:importStandardEbooks '{"owner":"…","repo":"…",…}'
+// Public-domain books from open libraries, chapter by chapter, public, and
+// open for anyone to branch from. Each belongs to an account standing for
+// its author (@sabahattinali, @janeausten…), not to whoever imported it.
+// Run from the command line:
+//   npx convex run classics:importWikisource '{"pages":["…"],…}'
+//   npx convex run classics:importStandardEbooks '{"repo":"…",…}'
 
 const USER_AGENT = "BooktionClassicsImporter/1.0 (public-domain library import)";
 
@@ -31,9 +32,45 @@ const classicValidator = v.object({
   coverCredit: v.optional(v.string()),
 });
 
+// "Sabahattin Ali" → "sabahattinali": a username made of plain letters.
+export function authorHandle(author: string) {
+  const map: Record<string, string> = { ç: "c", ğ: "g", ı: "i", İ: "i", ö: "o", ş: "s", ü: "u", â: "a", î: "i", û: "u" };
+  const plain = author
+    .toLocaleLowerCase("tr-TR")
+    .replace(/[çğıİöşüâîû]/gu, (ch) => map[ch] ?? ch)
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]/gu, "");
+  return plain.slice(0, 30) || "yazar";
+}
+
+// The account that stands for a classic author, made the first time.
+async function authorAccount(ctx: MutationCtx, author: string): Promise<Id<"users">> {
+  const existing = await ctx.db
+    .query("users")
+    .withIndex("by_classic_author", (q) => q.eq("classicAuthor", author))
+    .unique();
+  if (existing) return existing._id;
+  const userId = await ctx.db.insert("users", {
+    xp: 0,
+    level: 1,
+    classicAuthor: author,
+    bio: "Klasik yazar. Eserleri kamu malı: oku, istediğin bölümden kendi dalını yaz.",
+  });
+  const handle = authorHandle(author);
+  for (let n = 0; n < 20; n++) {
+    try {
+      await ctx.runMutation(components.authUsername.public.setUsername, { userId, username: n === 0 ? handle : `${handle}${n + 1}` });
+      break;
+    } catch {
+      // Taken; try the next.
+    }
+  }
+  return userId;
+}
+
 export const createBook = internalMutation({
   args: {
-    ownerId: v.id("users"),
+    ownerId: v.optional(v.id("users")),
     title: v.string(),
     description: v.optional(v.string()),
     kind: writingKindValidator,
@@ -49,7 +86,7 @@ export const createBook = internalMutation({
     return await ctx.db.insert("books", {
       title: args.title,
       description: args.description,
-      ownerId: args.ownerId,
+      ownerId: args.ownerId ?? (await authorAccount(ctx, args.classic.author)),
       kind: args.kind,
       language: args.language,
       classic: args.classic,
@@ -153,7 +190,8 @@ async function addAll(
 // named author, so nothing is credited wrongly.
 export const importWikisource = internalAction({
   args: {
-    owner: v.string(),
+    // Only to put the book in someone's own account instead of the author's.
+    owner: v.optional(v.string()),
     author: v.string(),
     pages: v.array(v.string()),
     title: v.optional(v.string()),
@@ -164,7 +202,7 @@ export const importWikisource = internalAction({
     poetry: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const owner = await ownerId(ctx as never, args.owner);
+    const owner = args.owner ? await ownerId(ctx as never, args.owner) : undefined;
     const parsed: ReturnType<typeof parseWikisource>[] = [];
     // A page that isn't clearly by the author, or has no plain text, is left
     // out (and reported) rather than credited wrongly or shown empty.
@@ -189,7 +227,7 @@ export const importWikisource = internalAction({
         }))
       : parsed.map((p) => ({ title: p.title, doc: toDoc(p.paragraphs) }));
     const bookId = (await ctx.runMutation(internal.classics.createBook, {
-      ownerId: owner,
+      ...(owner ? { ownerId: owner } : {}),
       title: args.title ?? parsed[0].title,
       description: args.description,
       kind: args.kind,
@@ -211,7 +249,8 @@ export const importWikisource = internalAction({
 // per file of its table of contents.
 export const importStandardEbooks = internalAction({
   args: {
-    owner: v.string(),
+    // Only to put the book in someone's own account instead of the author's.
+    owner: v.optional(v.string()),
     repo: v.string(),
     title: v.string(),
     author: v.string(),
@@ -219,7 +258,7 @@ export const importStandardEbooks = internalAction({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const owner = await ownerId(ctx as never, args.owner);
+    const owner = args.owner ? await ownerId(ctx as never, args.owner) : undefined;
     const base = `https://raw.githubusercontent.com/standardebooks/${args.repo}/master/src/epub`;
     const files = standardEbooksChapters(await fetchText(`${base}/toc.xhtml`));
     if (files.length === 0) throw new Error("İçindekiler boş.");
@@ -230,7 +269,7 @@ export const importStandardEbooks = internalAction({
       if (chapter.paragraphs.length > 0) chapters.push({ title: chapter.title, doc: toDoc(chapter.paragraphs) });
     }
     const bookId = (await ctx.runMutation(internal.classics.createBook, {
-      ownerId: owner,
+      ...(owner ? { ownerId: owner } : {}),
       title: args.title,
       description: args.description,
       kind: "book",
@@ -271,6 +310,62 @@ export const attachCover = internalMutation({
     if (book.coverStorageId) await ctx.storage.delete(book.coverStorageId);
     await ctx.db.patch(book._id, { coverStorageId: args.storageId, classic: { ...book.classic, coverCredit: args.credit } });
     return null;
+  },
+});
+
+// Moves a classic from whoever imported it to its author's account, with
+// the chapters that importer held (branches others wrote stay theirs).
+export const moveToAuthor = internalMutation({
+  args: { bookId: v.id("books") },
+  handler: async (ctx, args) => {
+    const book = await ctx.db.get(args.bookId);
+    if (!book?.classic) throw new Error("Bu bir klasik değil.");
+    const author = await authorAccount(ctx, book.classic.author);
+    if (book.ownerId === author) return { moved: 0, done: true };
+    // A few chapters at a time: each one is a whole text to write again.
+    let moved = 0;
+    for await (const chapter of ctx.db.query("chapters").withIndex("by_book", (q) => q.eq("bookId", book._id))) {
+      if (chapter.authorId !== book.ownerId) continue;
+      await ctx.db.patch(chapter._id, { authorId: author });
+      moved += 1;
+      if (moved >= 8) return { moved, done: false };
+    }
+    await ctx.db.patch(book._id, { ownerId: author });
+    return { moved, done: true };
+  },
+});
+
+// Every classic on the shelf to its author's account, slowly enough for
+// the deployment's write limit:
+//   npx convex run classics:moveAllToAuthors
+export const moveAllToAuthors = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    const books = await ctx.runQuery(internal.classics.allClassicIds, {});
+    const out: string[] = [];
+    for (const bookId of books) {
+      let total = 0;
+      for (let round = 0; round < 500; round++) {
+        const { moved, done } = await ctx.runMutation(internal.classics.moveToAuthor, { bookId });
+        total += moved;
+        if (done) break;
+        await pause(1500);
+      }
+      out.push(`${bookId}: ${total}`);
+      await pause(1000);
+    }
+    return out;
+  },
+});
+
+export const allClassicIds = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const books = await ctx.db
+      .query("books")
+      .withIndex("by_classic_author", (q) => q.gt("classic.author", ""))
+      .take(500);
+    return books.map((b) => b._id);
   },
 });
 

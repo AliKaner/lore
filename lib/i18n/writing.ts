@@ -183,4 +183,10 @@ export const WRITING: Record<string, Entry> = {
   "alıntı": "quote",
   "liste": "list",
   "kaydet": "save",
+  "Oku": "Read",
+  "Okurların gördüğü gibi, baştan oku": "Read it from the start, as your readers see it",
+  "Bu bölümü okurların gördüğü gibi aç": "Open this chapter as your readers see it",
+  "Okurların gördüğü yayındaki metni aç. Değişikliklerin bu cihazda bekler.": "Open the published text your readers see. Your changes wait on this device.",
+  "Taslak: bunu yalnızca sen görüyorsun": "Draft: only you can see this",
+  "Yazın gizli: bunu yalnızca sen görüyorsun": "Your writing is private: only you can see this",
 };

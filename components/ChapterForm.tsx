@@ -360,6 +360,22 @@ export default function ChapterForm({
     }
   }
 
+  // Opens the reading page of this chapter. A draft is saved first so the
+  // page shows the latest words; a published text's unpublished edits wait
+  // on this device, as they would anyway.
+  async function openReading() {
+    let chapterId = chapterIdRef.current;
+    if (!chapterId) return;
+    if (dirty && !liveEdit) {
+      try {
+        chapterId = await persist("draft");
+      } catch {
+        return;
+      }
+    }
+    router.push(`/book/${bookId}/chapter/${chapterId}`);
+  }
+
   function restore() {
     if (!restorable) return;
     setTitle(restorable.title);
@@ -499,6 +515,24 @@ export default function ChapterForm({
             </svg>
             <span className="hidden xl:inline">{t("Geçmiş")}</span>
           </button>
+          {savedChapterId && (
+            <button
+              type="button"
+              onClick={() => void openReading()}
+              disabled={submitting !== null}
+              title={
+                liveEdit && dirty
+                  ? t("Okurların gördüğü yayındaki metni aç. Değişikliklerin bu cihazda bekler.")
+                  : t("Bu bölümü okurların gördüğü gibi aç")
+              }
+              className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground disabled:opacity-50"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+                <path d="M10 5.5C8.5 4.3 6.3 3.8 3 4v11c3.3-.2 5.5.3 7 1.5 1.5-1.2 3.7-1.7 7-1.5V4c-3.3-.2-5.5.3-7 1.5zM10 5.5v11" />
+              </svg>
+              <span className="hidden lg:inline">{t("Oku")}</span>
+            </button>
+          )}
           <ThemeButton />
           {isOwner && book && <BookSettingsButton book={book} />}
           {liveEdit && (

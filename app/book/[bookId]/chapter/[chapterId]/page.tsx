@@ -142,6 +142,14 @@ export default function ChapterPage({
           </Link>
         )}
       </div>
+      {isAuthor && (chapter.status === "draft" || book?.visibility === "private") && (
+        <p className="-mt-2 mb-4 inline-flex items-center gap-2 rounded-full bg-caramel-soft px-3 py-1 text-xs text-foreground/80">
+          <span className="h-1.5 w-1.5 rounded-full bg-caramel" aria-hidden="true" />
+          {chapter.status === "draft"
+            ? t("Taslak: bunu yalnızca sen görüyorsun")
+            : t("Yazın gizli: bunu yalnızca sen görüyorsun")}
+        </p>
+      )}
 
       <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
         <div

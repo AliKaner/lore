@@ -40,6 +40,11 @@ function continueHref(book: DeskBook) {
     : `/book/${book._id}/write`;
 }
 
+// The writing as its readers see it, from the first page.
+function readHref(book: DeskBook) {
+  return book.rootChapterId ? `/book/${book._id}/chapter/${book.rootChapterId}` : null;
+}
+
 function stats(book: DeskBook, cfg: KindConfig, { t, num, lower, locale }: I18n) {
   const parts: string[] = [];
   const chapters = book.chapterCount ?? 0;
@@ -63,6 +68,14 @@ function Visibility({ book }: { book: DeskBook }) {
       <span className={`h-1.5 w-1.5 rounded-full ${open ? "bg-sapphire" : "bg-border-hover"}`} />
       {open ? t("Bağlantıyla açık") : t("Gizli")}
     </span>
+  );
+}
+
+function BookIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+      <path d="M10 5.5C8.5 4.3 6.3 3.8 3 4v11c3.3-.2 5.5.3 7 1.5 1.5-1.2 3.7-1.7 7-1.5V4c-3.3-.2-5.5.3-7 1.5zM10 5.5v11" />
+    </svg>
   );
 }
 
@@ -118,15 +131,27 @@ function ContinueCard({ book, now }: { book: DeskBook; now: number }) {
             )}
           </p>
         </div>
-        <Link
-          href={continueHref(book)}
-          className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 self-start rounded-full bg-accent px-7 text-[15px] font-medium text-accent-contrast shadow-[0_12px_28px_-14px_rgba(38,66,139,0.9)] transition-colors hover:bg-accent-hover sm:self-center"
-        >
-          {book.lastChapter ? t("Devam et") : t("Yazmaya başla")}
-          <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
-            →
-          </span>
-        </Link>
+        <div className="flex shrink-0 items-center gap-2 self-start sm:flex-col sm:items-stretch sm:self-center">
+          <Link
+            href={continueHref(book)}
+            className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-accent px-7 text-[15px] font-medium text-accent-contrast shadow-[0_12px_28px_-14px_rgba(38,66,139,0.9)] transition-colors hover:bg-accent-hover"
+          >
+            {book.lastChapter ? t("Devam et") : t("Yazmaya başla")}
+            <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
+              →
+            </span>
+          </Link>
+          {readHref(book) && (
+            <Link
+              href={readHref(book)!}
+              title={t("Okurların gördüğü gibi, baştan oku")}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border px-5 text-sm text-foreground transition-colors hover:border-accent hover:text-accent"
+            >
+              <BookIcon />
+              {t("Oku")}
+            </Link>
+          )}
+        </div>
       </div>
     </section>
   );
@@ -161,6 +186,16 @@ function DeskRow({ book, now }: { book: DeskBook; now: number }) {
           <Visibility book={book} />
         </p>
       </Link>
+      {readHref(book) && (
+        <Link
+          href={readHref(book)!}
+          title={t("Okurların gördüğü gibi, baştan oku")}
+          className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground sm:inline-flex"
+        >
+          <BookIcon />
+          {t("Oku")}
+        </Link>
+      )}
       <Link
         href={continueHref(book)}
         className="hidden shrink-0 rounded-full border border-border px-4 py-1.5 text-sm text-foreground transition-colors hover:border-accent hover:text-accent sm:inline-flex"

@@ -319,6 +319,11 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       `books.wordCount/chapterCount/lastEditedAt` alanlarında, yalnızca sahibin
       kendi bölümleriyle güncellenir (`convex/desk.ts`); eski kayıtlar için
       `npx convex run migrations:backfillDeskStats`
+- [x] **Kendi yazını okumak**: masada "Oku" (yazıyı ilk bölümden, okurun
+      gördüğü gibi açar), yazma ekranının üst çubuğunda "Oku" (bu bölümün okuma
+      sayfası; taslaksa önce kaydeder, yayındaki metnin yayınlanmamış
+      değişiklikleri cihazda bekler). Okuma sayfasında yazara "Taslak" ya da
+      "Yazın gizli: bunu yalnızca sen görüyorsun" etiketi
 - [x] **Okurken sayfa çevirme**: bölüm sonunda "← Önceki" ve ana hattı izleyen
       "Sonraki →" kartları, ← → tuşlarıyla da; ana hattın dışındakiler "Buradan
       ayrılan başka dallar" olarak ayrı

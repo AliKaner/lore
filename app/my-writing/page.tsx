@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import WritingActivity from "@/components/WritingActivity";
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "@/convex/_generated/api";
@@ -279,6 +280,8 @@ export default function MyWritingsPage() {
           </p>
         </>
       )}
+
+      {me && books && books.length > 0 && <WritingActivity />}
 
       {shared && shared.length > 0 && (
         <section className="mt-12">

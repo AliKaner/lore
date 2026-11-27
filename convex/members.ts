@@ -122,3 +122,22 @@ export const myRole = query({
     return row ? ("coauthor" as const) : null;
   },
 });
+
+// Who wrote the chapters of a writing, by user id, for its story map.
+export const chapterAuthors = query({
+  args: { bookId: v.id("books") },
+  handler: async (ctx, args) => {
+    const viewerId = await optionalUserId(ctx);
+    const book = await ctx.db.get(args.bookId);
+    if (!book) return {};
+    if (book.visibility !== "public" && !(await canWriteBook(ctx, book, viewerId))) return {};
+    const chapters = await ctx.db
+      .query("chapters")
+      .withIndex("by_book", (q) => q.eq("bookId", args.bookId))
+      .take(500);
+    const ids = [...new Set(chapters.map((c) => c.authorId))].slice(0, 100);
+    const names: Record<string, string | null> = {};
+    for (const id of ids) names[id] = await usernameOf(ctx, id);
+    return names;
+  },
+});

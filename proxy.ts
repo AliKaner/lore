@@ -9,16 +9,16 @@ const PUBLIC_PAGES = [
   /^\/$/,
   /^\/sign-in$/,
   /^\/discover$/,
-  /^\/classics$/,
+  /^\/books$/,
   /^\/book\/[^/]+$/,
   /^\/book\/[^/]+\/chapter\/[^/]+$/,
   /^\/book\/[^/]+\/world\/[^/]+$/,
 ];
 
 // Files for crawlers and link previews (WhatsApp, X…), static sounds, word
-// lists and spelling dictionaries: never behind sign-in.
+// lists, spelling dictionaries and cover pictures: never behind sign-in.
 const OPEN_FILES =
-  /\/(?:opengraph-image|twitter-image)(?:-[\w-]+)?$|^\/(?:icon\.svg|apple-icon|manifest\.webmanifest|sitemap\.xml|robots\.txt|llms(?:-full)?\.txt)$|^\/(?:sounds|words|dict)\//;
+  /\/(?:opengraph-image|twitter-image)(?:-[\w-]+)?$|^\/(?:icon\.svg|apple-icon|manifest\.webmanifest|sitemap\.xml|robots\.txt|llms(?:-full)?\.txt)$|^\/(?:sounds|words|dict|covers)\//;
 
 export default convexAuthNextjsProxy(async (request, { isAuthenticated }) => {
   const { pathname, searchParams } = request.nextUrl;

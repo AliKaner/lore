@@ -22,7 +22,7 @@ function NavLinks() {
       <Link href="/my-writing">{t("Yazılarım")}</Link>
       <Link href="/new">{t("Yeni yazı")}</Link>
       <Link href="/world">{t("Evren")}</Link>
-      <Link href="/classics">{t("Klasikler")}</Link>
+      <Link href="/books">{t("Kitaplar")}</Link>
       {communityOpen && (
         <>
           <Link href="/discover">{t("Keşfet")}</Link>

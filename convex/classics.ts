@@ -28,6 +28,7 @@ const classicValidator = v.object({
   source: v.string(),
   sourceUrl: v.string(),
   license: v.string(),
+  coverCredit: v.optional(v.string()),
 });
 
 export const createBook = internalMutation({
@@ -245,6 +246,32 @@ export const importStandardEbooks = internalAction({
   },
 });
 
+// A public-domain picture as a classic's cover, with its credit:
+//   npx convex run classics:setCover '{"bookId":"…","imageUrl":"…","credit":"…"}'
+export const setCover = internalAction({
+  args: { bookId: v.id("books"), imageUrl: v.string(), credit: v.string() },
+  handler: async (ctx, args) => {
+    const res = await fetch(args.imageUrl, { headers: { "User-Agent": USER_AGENT } });
+    if (!res.ok) throw new Error(`${res.status} ${args.imageUrl}`);
+    const type = (res.headers.get("content-type") ?? "").split(";")[0];
+    if (!type.startsWith("image/")) throw new Error(`Görsel değil: ${type}`);
+    const storageId = await ctx.storage.store(new Blob([await res.arrayBuffer()], { type }));
+    await ctx.runMutation(internal.classics.attachCover, { bookId: args.bookId, storageId, credit: args.credit });
+    return storageId;
+  },
+});
+
+export const attachCover = internalMutation({
+  args: { bookId: v.id("books"), storageId: v.id("_storage"), credit: v.string() },
+  handler: async (ctx, args) => {
+    const book = await ctx.db.get(args.bookId);
+    if (!book?.classic) throw new Error("Bu bir klasik değil.");
+    if (book.coverStorageId) await ctx.storage.delete(book.coverStorageId);
+    await ctx.db.patch(book._id, { coverStorageId: args.storageId, classic: { ...book.classic, coverCredit: args.credit } });
+    return null;
+  },
+});
+
 // Takes a classic off the shelf (with its chapters and everything on them),
 // to bring it in again: npx convex run classics:removeBook '{"bookId":"…"}'
 export const removeBook = internalMutation({
@@ -277,6 +304,7 @@ export const list = query({
         author: b.classic!.author,
         year: b.classic!.year ?? null,
         rootChapterId: b.rootChapterId!,
+        kind: b.kind ?? "book",
         chapters: b.chapterCount ?? 0,
         words: b.wordCount ?? 0,
       }));

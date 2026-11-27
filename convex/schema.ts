@@ -37,6 +37,8 @@ export default defineSchema({
         source: v.string(),
         sourceUrl: v.string(),
         license: v.string(),
+        // Where the cover picture comes from, when it isn't ours.
+        coverCredit: v.optional(v.string()),
       }),
     ),
     visibility: v.union(v.literal("public"), v.literal("private")),
@@ -83,6 +85,9 @@ export default defineSchema({
     userId: v.id("users"),
     day: v.string(),
     wordsWritten: v.number(),
+    // Words gained by hour of the writer's day (24 slots), for "when do I
+    // write". Unset on days before it was kept.
+    hours: v.optional(v.array(v.number())),
     secondsRead: v.number(),
     lastReadAt: v.optional(v.number()),
   }).index("by_user_and_day", ["userId", "day"]),

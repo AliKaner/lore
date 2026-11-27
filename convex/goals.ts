@@ -54,8 +54,17 @@ async function todayRow(ctx: MutationCtx, userId: Id<"users">, now: number) {
 // lost, when the writer cuts). Counts for whoever wrote the chapter.
 export async function recordWriting(ctx: MutationCtx, authorId: Id<"users">, words: number) {
   if (words === 0) return;
-  const row = await todayRow(ctx, authorId, Date.now());
-  await ctx.db.patch(row._id, { wordsWritten: row.wordsWritten + words });
+  const now = Date.now();
+  const row = await todayRow(ctx, authorId, now);
+  const patch: { wordsWritten: number; hours?: number[] } = { wordsWritten: row.wordsWritten + words };
+  if (words > 0) {
+    const user = await ctx.db.get(authorId);
+    const hour = new Date(now + (user?.tzOffset ?? DEFAULT_OFFSET) * 60_000).getUTCHours();
+    const hours = row.hours?.length === 24 ? [...row.hours] : new Array<number>(24).fill(0);
+    hours[hour] += words;
+    patch.hours = hours;
+  }
+  await ctx.db.patch(row._id, patch);
 }
 
 /* ---------- Reading ---------- */
@@ -124,6 +133,27 @@ export const setTimezone = mutation({
 
 // Today, the last seven days and the streaks. `today` is the client's own
 // calendar day, so the page turns over at the writer's midnight.
+// A year of writing, day by day (for the heatmap), and by hour of day.
+export const activity = query({
+  args: { today: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return null;
+    if (!/^\d{4}-\d{2}-\d{2}$/u.test(args.today)) throw new Error("Geçersiz gün.");
+    const rows = await ctx.db
+      .query("dailyActivity")
+      .withIndex("by_user_and_day", (q) => q.eq("userId", userId).lte("day", args.today))
+      .order("desc")
+      .take(372);
+    const hours = new Array<number>(24).fill(0);
+    for (const row of rows) row.hours?.forEach((n, i) => (hours[i] += Math.max(0, n)));
+    return {
+      days: rows.map((row) => ({ day: row.day, words: Math.max(0, row.wordsWritten), minutes: Math.floor(row.secondsRead / 60) })),
+      hours,
+    };
+  },
+});
+
 export const summary = query({
   args: { today: v.string() },
   handler: async (ctx, args) => {

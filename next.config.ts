@@ -21,6 +21,8 @@ const OLD_PATHS: [string, string][] = [
   ["/hesap", "/account"],
   ["/kesfet", "/discover"],
   ["/kutuphanem", "/library"],
+  ["/classics", "/books"],
+  ["/kitaplar", "/books"],
   ["/moderasyon", "/moderation"],
 ];
 

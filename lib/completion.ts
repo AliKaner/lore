@@ -39,7 +39,7 @@ export function loadWords(lang: Lang): Promise<WordIndex | null> {
     pending = fetch(`/words/${lang}.txt`)
       .then((res) => (res.ok ? res.text() : Promise.reject(new Error(String(res.status)))))
       .then((text) => {
-        const index = buildIndex(text.split("\n").filter(Boolean));
+        const index = buildIndex(text.split(/\r?\n/u).filter(Boolean));
         ready.set(lang, index);
         return index;
       })

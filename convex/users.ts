@@ -7,7 +7,7 @@ import {
 } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { components } from "./_generated/api";
+import { components, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { themeValidator } from "./themes";
 
@@ -30,7 +30,7 @@ export const me = query({
     const userId = await getAuthUserId(ctx);
     if (userId === null) return null;
     const user = await ctx.db.get(userId);
-    if (!user) return null;
+    if (!user || user.deletedAt !== undefined) return null;
     const username: string | null = await ctx.runQuery(
       components.authUsername.public.getUsername,
       { userId },
@@ -43,7 +43,7 @@ export const publicProfile = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
-    if (!user) return null;
+    if (!user || user.deletedAt !== undefined) return null;
     const username: string | null = await ctx.runQuery(
       components.authUsername.public.getUsername,
       { userId: args.userId },
@@ -83,3 +83,48 @@ export async function requireUserId(
   if (userId === null) throw new Error("Giriş yapmalısın.");
   return userId;
 }
+
+// Deletes the signed-in account. The password and the username, typed
+// again, confirm it. Everything the person made goes (their writings,
+// world, comments, likes); a chapter of theirs that someone else continued
+// stays, with no name on it, so the other writer's work isn't cut loose.
+export const deleteAccount = mutation({
+  args: { password: v.string(), username: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const user = await ctx.db.get(userId);
+    if (!user || user.deletedAt !== undefined) throw new Error("Hesap bulunamadı.");
+    const username: string | null = await ctx.runQuery(components.authUsername.public.getUsername, { userId });
+    if (!username || args.username.trim().replace(/^@/, "").toLocaleLowerCase("tr-TR") !== username.toLocaleLowerCase("tr-TR")) {
+      throw new Error("Kullanıcı adın eşleşmiyor.");
+    }
+    // A wrong password is returned, not thrown, so the attempt still counts
+    // against the password component's rate limit.
+    const check = await ctx.runMutation(components.authPassword.public.verifyPassword, { userId, password: args.password });
+    if (!check.success) return { error: "Şifren yanlış." };
+    await eraseAccount(ctx, userId);
+    return { error: null };
+  },
+});
+
+async function eraseAccount(ctx: MutationCtx, userId: Id<"users">) {
+  const user = await ctx.db.get(userId);
+  if (!user) return;
+  for (const id of [user.avatarStorageId, user.wallpaperStorageId]) if (id) await ctx.storage.delete(id);
+  await ctx.db.replace(userId, { xp: 0, level: 1, deletedAt: Date.now() });
+  await ctx.runMutation(components.authUsername.public.deleteUsername, { userId });
+  const sessions = await ctx.runQuery(components.auth.public.listSessions, { userId });
+  if (sessions.length > 0) {
+    await ctx.runMutation(components.auth.public.revokeSessions, { sessionIds: sessions.map((s) => s.sessionId) });
+  }
+  await ctx.scheduler.runAfter(0, internal.cleanup.purgeUser, { userId, chapterCursor: null });
+}
+
+// The same, once the person is known to have asked for it.
+export const erase = internalMutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    await eraseAccount(ctx, args.userId);
+    return null;
+  },
+});

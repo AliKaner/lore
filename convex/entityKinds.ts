@@ -112,6 +112,18 @@ export const ENTITY_KINDS: Record<EntityKind, EntityKindConfig> = {
         ],
       },
       {
+        // Who they love, fight, trust: drawn as the relations web.
+        title: "İlişkileri",
+        fields: [
+          { key: "friends", label: "Arkadaşları", type: "link", kinds: ["character"], multiple: true, reverse: "Arkadaşları" },
+          { key: "loves", label: "Aşık olduğu", type: "link", kinds: ["character"], multiple: true, reverse: "Ona aşık olanlar" },
+          { key: "enemies", label: "Düşmanları", type: "link", kinds: ["character"], multiple: true, reverse: "Düşmanları" },
+          { key: "hates", label: "Nefret ettiği", type: "link", kinds: ["character"], multiple: true, reverse: "Ondan nefret edenler" },
+          { key: "rivals", label: "Rakipleri", type: "link", kinds: ["character"], multiple: true, reverse: "Rakipleri" },
+          { key: "mentors", label: "Akıl hocası", type: "link", kinds: ["character"], multiple: true, reverse: "Öğrencileri" },
+        ],
+      },
+      {
         title: "Bağlılığı",
         fields: [
           { key: "race", label: "Irkı", type: "link", kinds: ["race"], reverse: "Bu ırktan" },

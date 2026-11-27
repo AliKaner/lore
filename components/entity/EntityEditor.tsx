@@ -15,6 +15,7 @@ import {
 import LinkPicker from "@/components/entity/LinkPicker";
 import MentionText from "@/components/entity/MentionText";
 import FamilyTree from "@/components/entity/FamilyTree";
+import RelationsGraph from "@/components/entity/RelationsGraph";
 import EntityEvents from "@/components/entity/EntityEvents";
 import { toDisplay, toStored } from "@/lib/mentions";
 import { EntityChip, KindGlyph, errorText, eyebrow, useImageUpload, type Chip } from "@/components/entity/shared";
@@ -691,6 +692,7 @@ function EditorBody({
           </section>
 
           {entity.kind === "character" && <FamilyTree entityId={entity._id} onOpen={onOpenEntity} />}
+          {entity.kind === "character" && <RelationsGraph entityId={entity._id} onOpen={onOpenEntity} title={t("İlişki ağı")} height={360} />}
 
           {!compact && <EntityEvents entityId={entity._id} />}
 

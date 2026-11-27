@@ -9,6 +9,7 @@ import { parseMentions } from "@/lib/mentions";
 import { EntityChip, KindGlyph, eyebrow, type Chip } from "@/components/entity/shared";
 import FavoriteButton from "@/components/FavoriteButton";
 import FamilyTree from "@/components/entity/FamilyTree";
+import RelationsGraph from "@/components/entity/RelationsGraph";
 import Loading from "@/components/Loading";
 import NotFoundState from "@/components/NotFoundState";
 import { useCommunityOpen } from "@/lib/community";
@@ -214,6 +215,7 @@ export default function EntityView({
           )}
 
           {entity.kind === "character" && <FamilyTree entityId={entity._id} bookId={bookId} />}
+          {entity.kind === "character" && <RelationsGraph entityId={entity._id} bookId={bookId} title={t("İlişki ağı")} height={360} />}
 
           {entity.incoming.length > 0 && (
             <section>

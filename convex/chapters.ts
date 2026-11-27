@@ -8,7 +8,7 @@ import { snapshotBeforeChange, wordsIn } from "./versions";
 import { recordDeskChange } from "./desk";
 import { recordWriting } from "./goals";
 import type { Doc, Id } from "./_generated/dataModel";
-import type { MutationCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 
 type RichNode = { marks?: { type: string }[]; content?: RichNode[] };
 
@@ -350,5 +350,108 @@ export const splitAt = mutation({
       touched: true,
     });
     return tailId;
+  },
+});
+
+const MAX_BRANCH_DELETE = 200;
+
+async function subtree(ctx: MutationCtx | QueryCtx, chapter: Doc<"chapters">) {
+  const out: Doc<"chapters">[] = [];
+  const queue = [chapter];
+  while (queue.length > 0 && out.length <= MAX_BRANCH_DELETE) {
+    const next = queue.shift()!;
+    out.push(next);
+    const children = await ctx.db
+      .query("chapters")
+      .withIndex("by_book_and_parent", (q) => q.eq("bookId", next.bookId).eq("parentChapterId", next._id))
+      .take(MAX_BRANCH_DELETE);
+    queue.push(...children);
+  }
+  return out;
+}
+
+// How many chapters follow this one, for the owner deciding to delete it
+// with everything after it.
+export const continuationCount = query({
+  args: { chapterId: v.id("chapters") },
+  handler: async (ctx, args) => {
+    const userId = await optionalUserId(ctx);
+    const chapter = await ctx.db.get(args.chapterId);
+    if (!chapter || userId === null) return null;
+    const book = await ctx.db.get(chapter.bookId);
+    if (!book || book.ownerId !== userId) return null;
+    return (await subtree(ctx, chapter)).length - 1;
+  },
+});
+
+// The book's owner deletes a chapter and every chapter that continues from
+// it, whoever wrote them.
+export const removeWithContinuations = mutation({
+  args: { chapterId: v.id("chapters") },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const chapter = await ctx.db.get(args.chapterId);
+    if (!chapter) throw new Error("Bölüm bulunamadı.");
+    const book = await ctx.db.get(chapter.bookId);
+    if (!book || book.ownerId !== userId) {
+      throw new Error("Devamıyla birlikte silmeyi yalnızca yazının sahibi yapabilir.");
+    }
+    const all = await subtree(ctx, chapter);
+    if (all.length > MAX_BRANCH_DELETE) {
+      throw new Error("Bu dal bir seferde silinemeyecek kadar büyük; önce uçlarından birkaç bölüm sil.");
+    }
+    for (const doomed of all) {
+      await ctx.db.delete(doomed._id);
+      await recordDeskChange(ctx, doomed.bookId, doomed, {
+        words: -(doomed.words ?? wordsIn(doomed.content)),
+        chapters: -1,
+        touched: false,
+      });
+      await ctx.scheduler.runAfter(0, internal.cleanup.purgeTarget, { targetType: "chapter", targetId: doomed._id });
+    }
+    if (book.rootChapterId === chapter._id) await ctx.db.patch(book._id, { rootChapterId: undefined });
+    if (chapter.isCanonical) {
+      const heir = await ctx.db
+        .query("chapters")
+        .withIndex("by_book_and_parent", (q) => q.eq("bookId", chapter.bookId).eq("parentChapterId", chapter.parentChapterId))
+        .first();
+      if (heir) await ctx.db.patch(heir._id, { isCanonical: true });
+    }
+    return { parentChapterId: chapter.parentChapterId ?? null, deleted: all.length };
+  },
+});
+
+// The writer's unpublished chapters, most recently touched first, for the desk.
+export const myDrafts = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await optionalUserId(ctx);
+    if (userId === null) return [];
+    const mine = await ctx.db
+      .query("chapters")
+      .withIndex("by_author", (q) => q.eq("authorId", userId))
+      .order("desc")
+      .take(300);
+    const drafts = mine
+      .filter((c) => c.status === "draft")
+      .sort((a, b) => (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt))
+      .slice(0, 12);
+    const books = new Map<Id<"books">, Doc<"books"> | null>();
+    const out = [];
+    for (const c of drafts) {
+      if (!books.has(c.bookId)) books.set(c.bookId, await ctx.db.get(c.bookId));
+      const book = books.get(c.bookId);
+      if (!book) continue;
+      out.push({
+        _id: c._id,
+        bookId: c.bookId,
+        title: c.title,
+        words: c.words ?? wordsIn(c.content),
+        updatedAt: c.updatedAt ?? c.createdAt,
+        bookTitle: book.title,
+        bookPrivate: book.visibility === "private",
+      });
+    }
+    return out;
   },
 });

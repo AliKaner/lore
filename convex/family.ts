@@ -133,3 +133,84 @@ export const tree = query({
     return { people: [...people.values()], parentOf, spouses };
   },
 });
+
+// The links that make the relations web: family and the rest.
+const WEB_ROLES = new Set(["father", "mother", "spouse", "friends", "loves", "enemies", "hates", "rivals", "mentors"]);
+
+// Characters and how they relate: around one character (its neighbours and
+// the links among them), or the writer's whole cast. A reader sees it
+// through a writing, with only the people who are part of it.
+export const web = query({
+  args: { entityId: v.optional(v.id("entities")), bookId: v.optional(v.id("books")) },
+  handler: async (ctx, args) => {
+    const viewerId = await optionalUserId(ctx);
+    let creatorId: Id<"users"> | null = null;
+    if (args.entityId) {
+      const root = await ctx.db.get(args.entityId);
+      if (!root || root.kind !== "character") return null;
+      creatorId = root.creatorId;
+    } else {
+      creatorId = viewerId;
+    }
+    if (creatorId === null) return null;
+    const isWriter = creatorId === viewerId;
+    if (!isWriter) {
+      if (args.bookId === undefined) return null;
+      if ((await viewableBook(ctx, args.bookId, viewerId)) === null) return null;
+    }
+    const inBook = new Map<Id<"entities">, boolean>();
+    const visible = async (id: Id<"entities">) => {
+      if (isWriter) return true;
+      if (!inBook.has(id)) {
+        const link = await ctx.db
+          .query("bookEntities")
+          .withIndex("by_book_and_entity", (q) => q.eq("bookId", args.bookId!).eq("entityId", id))
+          .unique();
+        inBook.set(id, link !== null);
+      }
+      return inBook.get(id)!;
+    };
+
+    // Who is in the picture.
+    const people = new Map<Id<"entities">, Doc<"entities">>();
+    const addPerson = async (entity: Doc<"entities"> | null) => {
+      if (!entity || entity.kind !== "character" || entity.creatorId !== creatorId) return false;
+      if (!(await visible(entity._id))) return false;
+      people.set(entity._id, entity);
+      return true;
+    };
+    const outgoing = async (id: Id<"entities">) =>
+      (await ctx.db.query("entityLinks").withIndex("by_from_and_role", (q) => q.eq("fromId", id)).take(200)).filter((l) =>
+        WEB_ROLES.has(l.role),
+      );
+    if (args.entityId) {
+      const root = await ctx.db.get(args.entityId);
+      if (!(await addPerson(root))) return null;
+      for (const link of await outgoing(args.entityId)) await addPerson(await ctx.db.get(link.toId));
+      const incoming = await ctx.db.query("entityLinks").withIndex("by_to", (q) => q.eq("toId", args.entityId!)).take(200);
+      for (const link of incoming) if (WEB_ROLES.has(link.role)) await addPerson(await ctx.db.get(link.fromId));
+    } else {
+      const cast = await ctx.db
+        .query("entities")
+        .withIndex("by_creator_and_kind", (q) => q.eq("creatorId", creatorId!).eq("kind", "character"))
+        .take(300);
+      for (const entity of cast) await addPerson(entity);
+    }
+
+    // Every link among them.
+    const edges: { from: Id<"entities">; to: Id<"entities">; role: string }[] = [];
+    for (const id of people.keys()) {
+      for (const link of await outgoing(id)) {
+        if (people.has(link.toId) && link.toId !== id) edges.push({ from: id, to: link.toId, role: link.role });
+      }
+    }
+    // Only people with at least one link, plus the one asked about.
+    const linked = new Set(edges.flatMap((e) => [e.from, e.to]));
+    const nodes = await Promise.all(
+      [...people.values()]
+        .filter((p) => linked.has(p._id) || p._id === args.entityId)
+        .map(async (p) => ({ _id: p._id, name: p.name, coverUrl: await cover(ctx, p), root: p._id === args.entityId })),
+    );
+    return { nodes, edges };
+  },
+});

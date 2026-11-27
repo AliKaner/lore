@@ -14,6 +14,7 @@ import { useWritingKinds } from "@/lib/localized";
 import { useI18n } from "@/lib/i18n";
 import type { KindConfig } from "@/lib/writingKinds";
 import { GoalsCard } from "@/components/Goals";
+import Drafts from "@/components/Drafts";
 import { timeAgo, useNow } from "@/lib/useNow";
 
 type DeskBook = FunctionReturnType<typeof api.books.myDesk>[number];
@@ -257,6 +258,7 @@ export default function MyWritingsPage() {
             {first && <ContinueCard book={first} now={now} />}
             <GoalsCard stacked />
           </div>
+          <Drafts />
           {rest.length > 0 && (
             <>
               <h2 className="mb-3 mt-12 text-xs font-semibold uppercase tracking-[0.16em] text-muted">

@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Loading from "@/components/Loading";
 import BackupButton from "@/components/BackupButton";
+import DeleteAccount from "@/components/DeleteAccount";
 import { ThemeGrid } from "@/components/ThemePicker";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { authErrorMessage } from "@/lib/authErrors";
@@ -151,6 +152,17 @@ export default function AccountPage() {
           <BackupButton />
         </div>
       </section>
+
+      {/* Leaving */}
+      {me?.username && (
+        <section className="mt-12 border-t border-border pt-10">
+          <h2 className="font-display text-2xl">{t("Hesabı sil")}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-muted">
+            {t("Hesabın ve yazdığın her şey kalıcı olarak silinir.")}
+          </p>
+          <DeleteAccount username={me.username} />
+        </section>
+      )}
     </main>
   );
 }

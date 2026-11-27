@@ -127,6 +127,18 @@ function Universe() {
             </svg>
             {t("Zaman çizelgesi")}
           </Link>
+          <Link
+            href="/world/relations"
+            className="inline-flex h-11 items-center gap-2 rounded-xl border border-border px-4 text-sm transition-colors hover:border-accent hover:text-accent"
+          >
+            <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <circle cx="5" cy="6" r="2" />
+              <circle cx="15" cy="5" r="2" />
+              <circle cx="10" cy="15" r="2" />
+              <path d="M7 6.5l6-1M6 8l3 5.3M14 7l-3 6" />
+            </svg>
+            {t("İlişki ağı")}
+          </Link>
           {!creating && (
             <button type="button" onClick={() => setCreating(true)} className={`${buttonPrimary} h-11 shrink-0 rounded-xl px-5`}>
               {t("+ Yeni ekle")}

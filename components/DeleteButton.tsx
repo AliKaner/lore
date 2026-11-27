@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
@@ -34,11 +34,13 @@ export default function DeleteButton({
   const removeBook = useMutation(api.books.remove);
   const removeChapter = useMutation(api.chapters.remove);
   const removeEntity = useMutation(api.entities.remove);
+  const removeBranch = useMutation(api.chapters.removeWithContinuations);
   const router = useRouter();
   const showToast = useToast();
   const t = useT();
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
+  const following = useQuery(api.chapters.continuationCount, target.kind === "chapter" && asking ? { chapterId: target.id } : "skip");
 
   async function handleDelete() {
     setBusy(true);
@@ -46,7 +48,9 @@ export default function DeleteButton({
       let parentChapterId: Id<"chapters"> | null = null;
       if (target.kind === "book") await removeBook({ bookId: target.id });
       else if (target.kind === "chapter") {
-        ({ parentChapterId } = await removeChapter({ chapterId: target.id }));
+        ({ parentChapterId } = following
+          ? await removeBranch({ chapterId: target.id })
+          : await removeChapter({ chapterId: target.id }));
       } else await removeEntity({ entityId: target.id });
       showToast(t("Silindi."), "success");
       if (onDeleted) onDeleted();
@@ -77,14 +81,19 @@ export default function DeleteButton({
       aria-label={label}
       className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
     >
-      <span className="flex-1 min-w-[12rem]">{t(WARNING[target.kind])} {t("Geri alınamaz.")}</span>
+      <span className="flex-1 min-w-[12rem]">
+        {following
+          ? t("Bu bölüm ve devamındaki {n} bölüm (başkalarının yazdığı dallar dahil) kalıcı olarak silinecek.", { n: following })
+          : t(WARNING[target.kind])}{" "}
+        {t("Geri alınamaz.")}
+      </span>
       <button
         onClick={() => void handleDelete()}
-        disabled={busy}
+        disabled={busy || (target.kind === "chapter" && following === undefined)}
         autoFocus
         className="rounded-sm bg-red-700 px-3 py-1 font-medium text-white hover:bg-red-800 disabled:opacity-50"
       >
-        {busy ? t("Siliniyor…") : t("Evet, sil")}
+        {busy ? t("Siliniyor…") : following ? t("Evet, hepsini sil") : t("Evet, sil")}
       </button>
       <button onClick={() => setAsking(false)} disabled={busy} className="underline">
         {t("Vazgeç")}

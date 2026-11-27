@@ -20,6 +20,7 @@ import CommentSection from "@/components/CommentSection";
 import ReportButton from "@/components/ReportButton";
 import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
+import { PublishDraftButton } from "@/components/Drafts";
 import NotFoundState from "@/components/NotFoundState";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonLink, pillInactive } from "@/lib/ui";
@@ -155,6 +156,13 @@ export default function ChapterPage({
           {chapter.status === "draft"
             ? t("Taslak: bunu yalnızca sen görüyorsun")
             : t("Yazın gizli: bunu yalnızca sen görüyorsun")}
+          {chapter.status === "draft" && (
+            <PublishDraftButton
+              chapterId={chapter._id}
+              bookPrivate={book?.visibility === "private"}
+              className="-my-0.5 -mr-2 ml-1 rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-contrast hover:bg-accent-hover disabled:opacity-50"
+            />
+          )}
         </p>
       )}
 
@@ -337,7 +345,7 @@ export default function ChapterPage({
 
       {communityOpen && <CommentSection targetType="chapter" targetId={chapterId} />}
 
-      {(isAuthor || ownsBook) && children?.length === 0 && (
+      {((isAuthor && children?.length === 0) || ownsBook) && (
         <div className="mt-12 border-t border-border pt-4">
           <DeleteButton
             target={{ kind: "chapter", id: chapterId }}

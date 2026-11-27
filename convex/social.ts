@@ -2,6 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { requireUserId } from "./users";
+import { components } from "./_generated/api";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { canViewChapter, optionalUserId, viewableBook } from "./access";
@@ -118,13 +119,30 @@ export const listComments = query({
     if (!(await canViewTarget(ctx, args.targetType, args.targetId, userId))) {
       return { page: [], isDone: true, continueCursor: "" };
     }
-    return await ctx.db
+    const result = await ctx.db
       .query("comments")
       .withIndex("by_target", (q) =>
         q.eq("targetType", args.targetType).eq("targetId", args.targetId),
       )
       .order("desc")
       .paginate(args.paginationOpts);
+    const ownerId = await targetOwner(ctx, args.targetType, args.targetId);
+    const names = new Map<Id<"users">, string | null>();
+    const page = [];
+    for (const comment of result.page) {
+      if (!names.has(comment.userId)) {
+        names.set(
+          comment.userId,
+          (await ctx.runQuery(components.authUsername.public.getUsername, { userId: comment.userId })) as string | null,
+        );
+      }
+      page.push({
+        ...comment,
+        username: names.get(comment.userId) ?? null,
+        canDelete: viewerCanDelete(comment.userId, ownerId, userId),
+      });
+    }
+    return { ...result, page };
   },
 });
 
@@ -182,6 +200,35 @@ export const recordShare = mutation({
       createdAt: Date.now(),
     });
     await bumpCount(ctx, args.targetType, args.targetId, "shareCount", 1);
+    return null;
+  },
+});
+
+// The writing's owner, for who may remove comments on it.
+async function targetOwner(ctx: QueryCtx, targetType: "book" | "chapter", targetId: string) {
+  if (targetType === "book") {
+    const bookId = ctx.db.normalizeId("books", targetId);
+    return bookId ? ((await ctx.db.get(bookId))?.ownerId ?? null) : null;
+  }
+  const chapterId = ctx.db.normalizeId("chapters", targetId);
+  const chapter = chapterId ? await ctx.db.get(chapterId) : null;
+  return chapter ? ((await ctx.db.get(chapter.bookId))?.ownerId ?? null) : null;
+}
+
+function viewerCanDelete(writerId: Id<"users">, ownerId: Id<"users"> | null, viewerId: Id<"users"> | null) {
+  return viewerId !== null && (writerId === viewerId || ownerId === viewerId);
+}
+
+// A comment's writer, or the owner of the writing it is on, may remove it.
+export const removeComment = mutation({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const comment = await ctx.db.get(args.commentId);
+    if (!comment) return null;
+    const ownerId = await targetOwner(ctx, comment.targetType, comment.targetId);
+    if (!viewerCanDelete(comment.userId, ownerId, userId)) throw new Error("Bu yorumu silemezsin.");
+    await ctx.db.delete(comment._id);
     return null;
   },
 });

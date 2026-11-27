@@ -21,6 +21,9 @@ export default defineSchema({
     // An account that stands for the author of public-domain books (no
     // sign-in): the classics on the shelf belong to it.
     classicAuthor: v.optional(v.string()),
+    // Set when the account was deleted: the row stays, empty, so chapters
+    // others continued from keep an author.
+    deletedAt: v.optional(v.number()),
   }).index("by_classic_author", ["classicAuthor"]),
 
   books: defineTable({
@@ -262,7 +265,9 @@ export default defineSchema({
     targetId: v.string(),
     content: v.string(),
     createdAt: v.number(),
-  }).index("by_target", ["targetType", "targetId"]),
+  })
+    .index("by_target", ["targetType", "targetId"])
+    .index("by_user", ["userId"]),
 
   favorites: defineTable({
     userId: v.id("users"),

@@ -531,6 +531,16 @@ h1, h2, h3 {
   line-height: 1.95;
 }
 
+/* Words just changed by a bulk fix glow, then fade. */
+@keyframes flash-change {
+  0%, 60% { background-color: color-mix(in srgb, #2f8f55 32%, transparent); }
+  100% { background-color: transparent; }
+}
+.writing-surface .flash-change {
+  border-radius: 3px;
+  animation: flash-change 4.5s ease-out forwards;
+}
+
 /* Word completion: the rest of the word, faint, after the caret. */
 .completion-ghost {
   color: var(--muted);

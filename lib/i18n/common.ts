@@ -230,4 +230,8 @@ export const COMMON: Record<string, Entry> = {
   "Lisans": "Licence",
   "Kapak": "Cover",
   "Eserin yazarı": "Author",
+  "Dalları gizle": "Hide branches",
+  "Bütün dalları göster": "Show all branches",
+  "Bu bölümden açılan dalları göster": "Show the branches that leave from this chapter",
+  "1 dal": "1 branch",
 };

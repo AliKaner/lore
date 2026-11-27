@@ -102,3 +102,38 @@ export function completeWord(
   const shouting = typed.length >= 2 && typed === upperIn(lang, typed) && typed !== prefix;
   return shouting ? upperIn(lang, rest) : rest;
 }
+
+// Turkish letters typed without their marks ("gidecegiz" for "gideceğiz").
+const ASCII: Record<string, string> = { ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u", â: "a", î: "i", û: "u" };
+export const asciify = (text: string) => text.replace(/[çğıöşüâîû]/gu, (ch) => ASCII[ch] ?? ch);
+
+export function isSubsequence(short: string, long: string) {
+  let i = 0;
+  for (const ch of long) if (ch === short[i]) i++;
+  return i === short.length;
+}
+
+// Common words a misspelling most likely meant: the same word with its
+// Turkish letters, or the word with a letter or two that were skipped.
+export function nearCommonWords(lang: Lang, word: string, limit = 4): string[] {
+  const set = common.get(lang);
+  if (!set) return [];
+  const w = asciify(lowerIn(lang, word));
+  const exact: string[] = [];
+  const skipped: string[] = [];
+  for (const candidate of set) {
+    const c = asciify(candidate);
+    if (c === w) exact.push(candidate);
+    else if (
+      skipped.length < limit &&
+      c.length > w.length &&
+      c.length - w.length <= 2 &&
+      c.slice(0, 2) === w.slice(0, 2) &&
+      isSubsequence(w, c)
+    ) {
+      skipped.push(candidate);
+    }
+    if (exact.length >= limit) break;
+  }
+  return [...exact, ...skipped].slice(0, limit);
+}

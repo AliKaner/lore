@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useEditorState, type Editor } from "@tiptap/react";
-import { isCommonWord, lowerIn, type Lang } from "@/lib/completion";
+import type { Lang } from "@/lib/completion";
 import { addOwnWord, spellChecker } from "@/lib/spellClient";
+import { rankSuggestions } from "@/lib/spellSuggest";
 import { spellKey } from "@/lib/spellExtension";
 import { useT } from "@/lib/i18n";
 
-const upper = (lang: Lang, text: string) => text.toLocaleUpperCase(lang === "tr" ? "tr-TR" : "en-US");
 
 // Suggestions for a word with a wavy line, opened by clicking it: the
 // likeliest spellings (common words first), "add to my dictionary" and
@@ -25,19 +25,7 @@ export default function SpellMenu({ editor, lang }: { editor: Editor; lang: Lang
       ?.suggest(word)
       .then((raw) => {
         if (!live) return;
-        const capital = word[0] !== lowerIn(lang, word[0]);
-        const seen = new Set<string>();
-        const list = raw
-          .filter((s) => s === lowerIn(lang, s) || s[0] !== lowerIn(lang, s[0]) && s.slice(1) === lowerIn(lang, s.slice(1)))
-          .map((s) => (capital ? upper(lang, s[0]) + s.slice(1) : s))
-          .filter((s) => {
-            const key = lowerIn(lang, s);
-            if (seen.has(key) || key === lowerIn(lang, word)) return false;
-            seen.add(key);
-            return true;
-          })
-          .sort((a, b) => Number(isCommonWord(lang, lowerIn(lang, b))) - Number(isCommonWord(lang, lowerIn(lang, a))))
-          .slice(0, 5);
+        const list = rankSuggestions(lang, word, raw);
         setSuggestions({ word, list });
       });
     const onKey = (event: KeyboardEvent) => event.key === "Escape" && editor.commands.openSpell(null);

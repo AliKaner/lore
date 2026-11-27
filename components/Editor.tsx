@@ -14,6 +14,8 @@ import { loadWords, type Lang } from "@/lib/completion";
 import { SpellCheck } from "@/lib/spellExtension";
 import { PoetryAid } from "@/lib/poetryExtension";
 import SpellMenu from "@/components/SpellMenu";
+import SpellFixAll from "@/components/SpellFixAll";
+import { FlashChanges } from "@/lib/flashExtension";
 import type { WritingModes } from "@/lib/writingModes";
 import { useEffect, useEffectEvent, useImperativeHandle, useRef, type Ref, type RefObject } from "react";
 import type { EditorView } from "@tiptap/pm/view";
@@ -348,6 +350,7 @@ export function ChapterEditor({
       WordCompletion,
       SpellCheck,
       PoetryAid,
+      FlashChanges,
       Focus.configure({ className: "has-focus", mode: "shallowest" }),
       Placeholder.configure({ placeholder }),
     ],
@@ -412,6 +415,7 @@ export function ChapterEditor({
       <EditorContent editor={editor} className={`${writingProse} ${modes?.focus ? "focus-mode" : ""}`} />
       <SelectionMenu ref={menuRef} editor={editor} names={names} onAddName={onAddName} />
       {lang && modes?.spell && <SpellMenu editor={editor} lang={lang} />}
+      {lang && modes?.spell && <SpellFixAll editor={editor} lang={lang} />}
     </>
   );
 }

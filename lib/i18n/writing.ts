@@ -293,4 +293,12 @@ export const WRITING: Record<string, Entry> = {
   "Bu öneriyi kapatamazsın.": "You can't close this suggestion.",
   "Şiir yardımcısı": "Poetry aid",
   "Şiirlerde her dizenin hecesini ve uyağını, kıtanın uyak düzenini gösterir.": "In poems, shows each line's syllables and rhyme, and each stanza's rhyme scheme.",
+  "Yazım hatalarını düzelt": "Fix spelling",
+  "Düzeltilecekler": "Changes to make",
+  "Tek Ctrl+Z ile hepsi geri alınır": "One Ctrl+Z undoes them all",
+  "Uygula ({n})": "Apply ({n})",
+  "{n} kelime düzeltildi": "{n} words fixed",
+  "Geri al": "Undo",
+  "{n} yazım hatası": "{n} spelling mistakes",
+  "Toplu düzelt": "Fix all",
 };

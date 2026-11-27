@@ -2,14 +2,88 @@
 
 import type { TypingSound } from "@/lib/writingModes";
 
-// Typing sounds made on the spot with Web Audio: short bursts of filtered
-// noise for the strike and a falling tone for the body of each key, varied a
-// little every time so it doesn't sound like a loop.
+// Typing sounds from real recordings (see public/sounds/typing/CREDITS.txt).
+// Each sound is one small file holding several takes of every kind of key;
+// a key picks a take at random, never the same twice in a row, and varies
+// pitch and level a little so a run of letters never sounds like a loop.
 
 export type KeyKind = "char" | "space" | "enter" | "backspace";
 
+// [start, length] in milliseconds inside the sound's file.
+type Take = [number, number];
+type Pack = {
+  file: string;
+  takes: Partial<Record<KeyKind | "bell", Take[]>>;
+  // How much the pitch may wander, as a fraction (0.03 = ±3%).
+  pitch: number;
+};
+
+const PACKS: Record<Exclude<TypingSound, "none">, Pack> = {
+  daktilo: {
+    file: "/sounds/typing/typewriter.wav",
+    pitch: 0.04,
+    takes: {
+      char: [[0, 223], [243, 223], [486, 171], [677, 147], [844, 203], [1067, 175], [1262, 179], [1461, 123], [1604, 223], [1847, 119], [1986, 191], [2197, 149], [2366, 102]],
+      space: [[2488, 133], [2641, 103]],
+      enter: [[2764, 119]],
+      backspace: [[2903, 102]],
+      bell: [[3025, 345]],
+    },
+  },
+  mekanik: {
+    file: "/sounds/typing/mechanical-brown.wav",
+    pitch: 0.03,
+    takes: {
+      char: [[0, 211], [231, 191], [442, 200], [662, 192], [874, 193], [1087, 190], [1297, 192], [1509, 203], [1732, 198], [1950, 197], [2167, 187], [2374, 208]],
+      space: [[2602, 216]],
+      enter: [[2838, 194]],
+      backspace: [[3052, 197]],
+    },
+  },
+  tiklama: {
+    file: "/sounds/typing/mechanical-blue.wav",
+    pitch: 0.03,
+    takes: {
+      char: [[0, 177], [197, 180], [397, 172], [589, 221], [830, 163], [1013, 173], [1206, 173], [1399, 205], [1624, 191], [1835, 195], [2050, 205], [2275, 168]],
+      space: [[2463, 243]],
+      enter: [[2726, 201]],
+      backspace: [[2947, 235]],
+    },
+  },
+  yumusak: {
+    file: "/sounds/typing/soft.wav",
+    pitch: 0.03,
+    takes: {
+      char: [[0, 175.6], [195.6, 143], [358.6, 171], [549.6, 143], [712.6, 135], [867.6, 170], [1057.6, 147], [1224.6, 175], [1419.6, 155], [1594.6, 135], [1749.6, 174.7], [1944.2, 145.1]],
+      space: [[2109.3, 175.3], [2304.6, 175]],
+      enter: [[2499.6, 188.1], [2707.7, 173.4]],
+      backspace: [[2901.1, 163], [3084.1, 166.1]],
+    },
+  },
+  kalem: {
+    file: "/sounds/typing/pencil.wav",
+    pitch: 0.06,
+    takes: {
+      char: [[0, 75], [95, 75], [190, 75], [285, 75], [380, 75], [475, 75], [570, 75], [665, 75], [760, 75]],
+      // A pencil makes no sound for a space.
+      enter: [[855, 280]],
+      backspace: [[1155, 160], [1335, 160]],
+    },
+  },
+};
+
+// Levels per sound, so switching doesn't jump in loudness.
+const LEVEL: Record<Exclude<TypingSound, "none">, number> = {
+  daktilo: 0.75,
+  mekanik: 0.8,
+  tiklama: 0.7,
+  yumusak: 0.8,
+  kalem: 0.6,
+};
+
 let context: AudioContext | null = null;
-let noise: AudioBuffer | null = null;
+const buffers = new Map<string, Promise<AudioBuffer | null>>();
+const lastTake = new Map<string, number>();
 
 function audio() {
   if (typeof window === "undefined") return null;
@@ -22,125 +96,67 @@ function audio() {
   return context;
 }
 
-function noiseBuffer(ac: AudioContext) {
-  if (!noise) {
-    noise = ac.createBuffer(1, ac.sampleRate * 0.5, ac.sampleRate);
-    const data = noise.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+function load(ac: AudioContext, file: string) {
+  let pending = buffers.get(file);
+  if (!pending) {
+    pending = fetch(file)
+      .then((res) => (res.ok ? res.arrayBuffer() : Promise.reject(new Error(String(res.status)))))
+      .then((data) => ac.decodeAudioData(data))
+      .catch(() => {
+        buffers.delete(file); // try again next time
+        return null;
+      });
+    buffers.set(file, pending);
   }
-  return noise;
+  return pending;
 }
 
-const vary = (value: number, amount = 0.08) => value * (1 + (Math.random() * 2 - 1) * amount);
+// Fetch a sound ahead of the first key, so the first press isn't silent.
+export function preloadSound(sound: TypingSound) {
+  if (sound === "none") return;
+  const ac = audio();
+  if (ac) void load(ac, PACKS[sound].file);
+}
 
-// A burst of noise through a filter, shaped by a quick attack and decay.
-function burst(
-  ac: AudioContext,
-  out: AudioNode,
-  at: number,
-  { type, freq, q = 1, duration, gain }: { type: BiquadFilterType; freq: number; q?: number; duration: number; gain: number },
-) {
+const vary = (amount: number) => 1 + (Math.random() * 2 - 1) * amount;
+
+function pick(sound: string, kind: string, takes: Take[]) {
+  const id = `${sound}:${kind}`;
+  let index = Math.floor(Math.random() * takes.length);
+  if (takes.length > 1 && index === lastTake.get(id)) index = (index + 1) % takes.length;
+  lastTake.set(id, index);
+  return takes[index];
+}
+
+function play(ac: AudioContext, buffer: AudioBuffer, take: Take, at: number, gain: number, rate: number) {
   const source = ac.createBufferSource();
-  source.buffer = noiseBuffer(ac);
-  const filter = ac.createBiquadFilter();
-  filter.type = type;
-  filter.frequency.value = freq;
-  filter.Q.value = q;
-  const env = ac.createGain();
-  env.gain.setValueAtTime(0.0001, at);
-  env.gain.exponentialRampToValueAtTime(gain, at + 0.002);
-  env.gain.exponentialRampToValueAtTime(0.0001, at + duration);
-  source.connect(filter).connect(env).connect(out);
-  source.start(at, Math.random() * 0.4);
-  source.stop(at + duration + 0.02);
-}
-
-// A short tone that falls in pitch: the wood and metal of the key.
-function thump(
-  ac: AudioContext,
-  out: AudioNode,
-  at: number,
-  { from, to, duration, gain, type = "sine" }: { from: number; to: number; duration: number; gain: number; type?: OscillatorType },
-) {
-  const osc = ac.createOscillator();
-  osc.type = type;
-  osc.frequency.setValueAtTime(from, at);
-  osc.frequency.exponentialRampToValueAtTime(to, at + duration);
-  const env = ac.createGain();
-  env.gain.setValueAtTime(0.0001, at);
-  env.gain.exponentialRampToValueAtTime(gain, at + 0.003);
-  env.gain.exponentialRampToValueAtTime(0.0001, at + duration);
-  osc.connect(env).connect(out);
-  osc.start(at);
-  osc.stop(at + duration + 0.02);
-}
-
-function bell(ac: AudioContext, out: AudioNode, at: number, gain: number) {
-  for (const [freq, level, decay] of [
-    [2093, 1, 1.4],
-    [4186, 0.35, 0.8],
-    [6280, 0.12, 0.5],
-  ] as const) {
-    thump(ac, out, at, { from: freq, to: freq * 0.995, duration: decay, gain: gain * level });
-  }
+  source.buffer = buffer;
+  source.playbackRate.value = rate;
+  const level = ac.createGain();
+  level.gain.value = gain;
+  source.connect(level).connect(ac.destination);
+  source.start(at, take[0] / 1000, take[1] / 1000);
+  source.onended = () => level.disconnect();
 }
 
 export function playKey(sound: TypingSound, key: KeyKind, volume: number) {
   if (sound === "none" || volume <= 0) return;
   const ac = audio();
   if (!ac) return;
-  const out = ac.createGain();
-  out.gain.value = volume;
-  out.connect(ac.destination);
-  const t = ac.currentTime + 0.001;
-  const heavy = key === "space" || key === "enter";
+  const pack = PACKS[sound];
+  const takes = pack.takes[key] ?? (key === "space" ? undefined : pack.takes.char);
+  if (!takes) return;
+  const asked = performance.now();
 
-  switch (sound) {
-    case "daktilo": {
-      burst(ac, out, t, { type: "bandpass", freq: vary(2600, 0.15), q: 1.4, duration: 0.03, gain: 0.9 });
-      thump(ac, out, t, { from: vary(heavy ? 150 : 210), to: 70, duration: heavy ? 0.09 : 0.06, gain: 0.55 });
-      if (key === "enter") {
-        // The carriage running back, then the bell.
-        for (let i = 0; i < 9; i++) {
-          burst(ac, out, t + 0.05 + i * 0.022, { type: "highpass", freq: 3000, duration: 0.012, gain: 0.25 });
-        }
-        bell(ac, out, t + 0.28, 0.22);
-      }
-      break;
-    }
-    case "mekanik": {
-      burst(ac, out, t, { type: "highpass", freq: vary(3800, 0.1), duration: 0.012, gain: 0.7 });
-      thump(ac, out, t + 0.004, {
-        from: vary(heavy ? 180 : 320),
-        to: heavy ? 90 : 150,
-        duration: heavy ? 0.08 : 0.045,
-        gain: heavy ? 0.6 : 0.4,
-        type: "triangle",
-      });
-      burst(ac, out, t + vary(0.07, 0.2), { type: "bandpass", freq: 1800, q: 2, duration: 0.02, gain: 0.18 });
-      break;
-    }
-    case "yumusak": {
-      burst(ac, out, t, { type: "lowpass", freq: vary(1300, 0.15), duration: heavy ? 0.05 : 0.032, gain: 0.35 });
-      thump(ac, out, t, { from: vary(heavy ? 200 : 280), to: 120, duration: 0.035, gain: 0.18 });
-      break;
-    }
-    case "kalem": {
-      if (key === "space") break;
-      const strokes = key === "enter" ? 1 : 1 + Math.floor(Math.random() * 2);
-      for (let i = 0; i < strokes; i++) {
-        burst(ac, out, t + i * vary(0.045, 0.3), {
-          type: "bandpass",
-          freq: vary(4200, 0.25),
-          q: 0.8,
-          duration: vary(key === "enter" ? 0.16 : 0.06, 0.3),
-          gain: vary(0.22, 0.3),
-        });
-      }
-      break;
-    }
-  }
-  window.setTimeout(() => out.disconnect(), 2000);
+  void load(ac, pack.file).then((buffer) => {
+    // A sound that arrives late would only confuse; drop it.
+    if (!buffer || performance.now() - asked > 250) return;
+    const at = ac.currentTime + 0.001;
+    const gain = volume * LEVEL[sound] * vary(0.12);
+    play(ac, buffer, pick(sound, key, takes), at, gain, vary(pack.pitch));
+    const bell = pack.takes.bell;
+    if (key === "enter" && bell) play(ac, buffer, bell[0], at + 0.12, gain * 0.7, 1);
+  });
 }
 
 export function keyKind(event: KeyboardEvent): KeyKind | null {

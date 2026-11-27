@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { playKey } from "@/lib/typingSounds";
+import { playKey, preloadSound } from "@/lib/typingSounds";
 import { SOUNDS, type WritingModes } from "@/lib/writingModes";
 import { useT } from "@/lib/i18n";
 
@@ -78,7 +78,10 @@ export default function WritingModeMenu({
         aria-haspopup="true"
         aria-expanded={open}
         title={t("Yazma modu ve sesler")}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOpen((o) => !o);
+          preloadSound(modes.sound);
+        }}
         className={`relative inline-flex h-9 items-center gap-1.5 rounded-full px-2.5 text-sm transition-colors ${
           open || active ? "bg-accent-soft/70 text-foreground" : "text-muted hover:bg-accent-soft/60 hover:text-foreground"
         }`}
@@ -116,6 +119,8 @@ export default function WritingModeMenu({
                 type="button"
                 role="radio"
                 aria-checked={modes.sound === sound.id}
+                onPointerEnter={() => preloadSound(sound.id)}
+                onFocus={() => preloadSound(sound.id)}
                 onClick={() => {
                   onChange({ sound: sound.id });
                   // A taste of it, so the choice is heard, not guessed.

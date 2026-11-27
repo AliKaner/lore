@@ -306,9 +306,11 @@ export const KINDS_EN: Record<string, Entry> = {
   "Ses yok": "No sound",
   "Tok vuruş, satır sonunda zil": "Solid strike, a bell at the line's end",
   "Mekanik klavye": "Mechanical keyboard",
-  "Net tık, derin boşluk tuşu": "Crisp click, deep space bar",
+  "Tok ve yumuşak, kahverengi switch": "Deep and soft, brown switches",
+  "Tıkırtılı mekanik": "Clicky mechanical",
+  "Net tık, mavi switch": "Crisp click, blue switches",
   "Yumuşak tuş": "Soft keys",
-  "Dizüstü gibi, kısık": "Laptop-like, quiet",
+  "Membran klavye, kısık": "Membrane keyboard, quiet",
   "Kalem": "Pencil",
   "Kâğıtta kurşun kalem hışırtısı": "Pencil scratching on paper",
 };

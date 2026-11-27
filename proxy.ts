@@ -14,9 +14,10 @@ const PUBLIC_PAGES = [
   /^\/book\/[^/]+\/world\/[^/]+$/,
 ];
 
-// Files for crawlers and link previews (WhatsApp, X…): never behind sign-in.
+// Files for crawlers and link previews (WhatsApp, X…) and static sounds:
+// never behind sign-in.
 const OPEN_FILES =
-  /\/(?:opengraph-image|twitter-image)(?:-[\w-]+)?$|^\/(?:icon\.svg|apple-icon|manifest\.webmanifest|sitemap\.xml|robots\.txt|llms(?:-full)?\.txt)$/;
+  /\/(?:opengraph-image|twitter-image)(?:-[\w-]+)?$|^\/(?:icon\.svg|apple-icon|manifest\.webmanifest|sitemap\.xml|robots\.txt|llms(?:-full)?\.txt)$|^\/sounds\//;
 
 export default convexAuthNextjsProxy(async (request, { isAuthenticated }) => {
   const { pathname, searchParams } = request.nextUrl;

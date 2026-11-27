@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 
 // How the writing screen behaves while typing, remembered on this device.
 
-export type TypingSound = "none" | "daktilo" | "mekanik" | "yumusak" | "kalem";
+export type TypingSound = "none" | "daktilo" | "mekanik" | "tiklama" | "yumusak" | "kalem";
 
 export type WritingModes = {
   // The line being written stays at the same height; the text scrolls up.
@@ -18,8 +18,9 @@ export type WritingModes = {
 export const SOUNDS: { id: TypingSound; label: string; hint: string }[] = [
   { id: "none", label: "Sessiz", hint: "Ses yok" },
   { id: "daktilo", label: "Daktilo", hint: "Tok vuruş, satır sonunda zil" },
-  { id: "mekanik", label: "Mekanik klavye", hint: "Net tık, derin boşluk tuşu" },
-  { id: "yumusak", label: "Yumuşak tuş", hint: "Dizüstü gibi, kısık" },
+  { id: "mekanik", label: "Mekanik klavye", hint: "Tok ve yumuşak, kahverengi switch" },
+  { id: "tiklama", label: "Tıkırtılı mekanik", hint: "Net tık, mavi switch" },
+  { id: "yumusak", label: "Yumuşak tuş", hint: "Membran klavye, kısık" },
   { id: "kalem", label: "Kalem", hint: "Kâğıtta kurşun kalem hışırtısı" },
 ];
 

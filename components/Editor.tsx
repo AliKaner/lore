@@ -9,7 +9,7 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Focus, Placeholder } from "@tiptap/extensions";
-import { keyKind, playKey } from "@/lib/typingSounds";
+import { keyKind, playKey, preloadSound } from "@/lib/typingSounds";
 import type { WritingModes } from "@/lib/writingModes";
 import { useEffect, useEffectEvent, useImperativeHandle, useRef, type Ref, type RefObject } from "react";
 import type { EditorView } from "@tiptap/pm/view";
@@ -222,6 +222,7 @@ function useTypewriter(editor: Editor | null, on: boolean) {
 function useTypingSounds(editor: Editor | null, sound: WritingModes["sound"], volume: number) {
   useEffect(() => {
     if (!editor || sound === "none") return;
+    preloadSound(sound);
     const dom = editor.view.dom as HTMLElement;
     const onKey = (event: KeyboardEvent) => {
       if (event.repeat) return;

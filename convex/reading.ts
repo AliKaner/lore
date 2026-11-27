@@ -2,7 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { levelForXp, requireUserId } from "./users";
 import type { Id } from "./_generated/dataModel";
-import { canViewChapter } from "./access";
+import { canViewChapter, optionalUserId } from "./access";
 
 const XP_PER_CHAPTER = 10;
 
@@ -74,5 +74,20 @@ export const myLibrary = query({
     return results
       .filter((r) => r !== null)
       .sort((a, b) => b!.lastReadAt - a!.lastReadAt);
+  },
+});
+
+// Which chapters of a writing the viewer has read, for the contents list
+// and "continue reading".
+export const readInBook = query({
+  args: { bookId: v.id("books") },
+  handler: async (ctx, args) => {
+    const userId = await optionalUserId(ctx);
+    if (userId === null) return [];
+    const rows = await ctx.db
+      .query("chapterReads")
+      .withIndex("by_user_and_book", (q) => q.eq("userId", userId).eq("bookId", args.bookId))
+      .take(1000);
+    return rows.map((row) => ({ chapterId: row.chapterId, at: row.createdAt }));
   },
 });

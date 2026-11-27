@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import BookCover from "@/components/BookCover";
 import Loading from "@/components/Loading";
 import { useI18n } from "@/lib/i18n";
+import { AVERAGE_WPM, FLOW_WPM, readingTime } from "@/lib/readingTime";
 
 type Category = "all" | "classics" | "book" | "story";
 
@@ -100,7 +101,10 @@ export default function BooksPage() {
                 {book.year ? ` · ${book.year}` : ""}
               </p>
               <p className="mt-1 text-xs tabular-nums text-muted">
-                {t("{n} bölüm", { n: num(book.chapters) })} · {t("{n} kelime", { n: num(book.words) })}
+                {t("{n} bölüm", { n: num(book.chapters) })} · {readingTime(book.words, AVERAGE_WPM, t, num)}
+              </p>
+              <p className="text-xs tabular-nums text-muted" title={t("Akış modunda, dakikada {n} kelime", { n: FLOW_WPM })}>
+                {t("Hızlı okumada {time}", { time: readingTime(book.words, FLOW_WPM, t, num) })}
               </p>
             </li>
           ))}

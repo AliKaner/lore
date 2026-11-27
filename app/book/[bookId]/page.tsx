@@ -22,6 +22,7 @@ import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonPrimary } from "@/lib/ui";
 import { useEntityKinds, useKindConfig } from "@/lib/localized";
 import { useI18n } from "@/lib/i18n";
+import { AVERAGE_WPM, FLOW_WPM, readingTime } from "@/lib/readingTime";
 import { useCommunityOpen } from "@/lib/community";
 import { ENTITY_KIND_ORDER } from "@/convex/entityKinds";
 import { KindGlyph } from "@/components/entity/shared";
@@ -44,6 +45,8 @@ export default function BookPage({
   const { t, num } = useI18n();
   const cfg = useKindConfig(book);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const coverUrl = useQuery(api.files.getUrl, book?.coverStorageId ? { storageId: book.coverStorageId } : "skip");
+  const reads = useQuery(api.reading.readInBook, { bookId });
   const entityKinds = useEntityKinds();
 
   if (book === undefined) {
@@ -74,8 +77,27 @@ export default function BookPage({
   const isWriter = role === "owner" || role === "coauthor";
   const words = book.wordCount ?? (chapters ?? []).reduce((sum, c) => sum + (c.words ?? 0), 0);
   const mainLine = (chapters ?? []).filter((c) => c.isCanonical).length;
-  const hours = Math.round(words / 220 / 6) / 10;
-  const readTime = words < 220 * 60 ? t("~{n} dk", { n: Math.max(1, Math.round(words / 220)) }) : t("~{n} saat", { n: num(hours) });
+  // The main line in reading order, and where the reader is on it.
+  type ChapterRow = NonNullable<typeof chapters>[number];
+  const byParent = new Map<string, ChapterRow[]>();
+  for (const c of chapters ?? []) {
+    const key = c.parentChapterId ?? "root";
+    byParent.set(key, [...(byParent.get(key) ?? []), c]);
+  }
+  const line: ChapterRow[] = [];
+  let step: ChapterRow | undefined = (byParent.get("root") ?? []).find((c) => c.isCanonical) ?? byParent.get("root")?.[0];
+  while (step && line.length < 2000) {
+    line.push(step);
+    const kids: ChapterRow[] = byParent.get(step._id) ?? [];
+    step = kids.find((c) => c.isCanonical) ?? kids[0];
+  }
+  const readIds = new Set<string>((reads ?? []).map((r) => r.chapterId));
+  const furthest = line.reduce((at, c, i) => (readIds.has(c._id) ? i : at), -1);
+  const progress = {
+    read: line.filter((c) => readIds.has(c._id)).length,
+    next: furthest >= 0 ? (line[furthest + 1] ?? null) : null,
+  };
+  const hasBranches = (chapters?.length ?? 0) > mainLine;
   const ghost =
     "inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-sm transition-colors hover:border-accent hover:text-accent";
 
@@ -83,10 +105,15 @@ export default function BookPage({
     <main className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
       {/* The book itself: cover, name, who wrote it, how long, read it. */}
       <section className="relative grid gap-8 sm:grid-cols-[13rem_1fr] sm:gap-10">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-16 -top-16 bottom-0 -z-10 bg-[radial-gradient(ellipse_at_15%_0%,var(--caramel-soft),transparent_60%)] opacity-70 blur-2xl"
-        />
+        {/* The cover, blurred, as the light behind the top of the page. */}
+        <div aria-hidden="true" className="pointer-events-none absolute -inset-x-40 -top-10 bottom-0 -z-10 overflow-hidden [mask-image:radial-gradient(ellipse_55%_75%_at_35%_30%,black_35%,transparent_100%)]">
+          {coverUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={coverUrl} alt="" className="h-full w-full scale-125 object-cover opacity-25 blur-3xl saturate-150" />
+          ) : (
+            <div className="h-full w-full bg-[radial-gradient(ellipse_at_15%_0%,var(--caramel-soft),transparent_60%)] opacity-70" />
+          )}
+        </div>
         <BookCover
           storageId={book.coverStorageId}
           title={book.title}
@@ -120,8 +147,8 @@ export default function BookPage({
           <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
             {[
               [t("Bölüm"), num(mainLine)],
-              [t("Kelime"), num(words)],
-              [t("Okuma"), readTime],
+              [t("Okuma"), readingTime(words, AVERAGE_WPM, t, num)],
+              [t("Hızlı okuma"), readingTime(words, FLOW_WPM, t, num)],
               ...(chapters && chapters.length > mainLine ? [[t("Dal"), num(chapters.length - mainLine)]] : []),
             ].map(([label, value]) => (
               <div key={label}>
@@ -132,7 +159,11 @@ export default function BookPage({
           </dl>
 
           <div className="mt-7 flex flex-wrap items-center gap-2">
-            {book.rootChapterId ? (
+            {book.rootChapterId && progress.next ? (
+              <Link href={`/book/${bookId}/chapter/${progress.next._id}`} className={`${buttonPrimary} h-11 rounded-full px-6 text-[15px]`}>
+                {t("Okumaya devam et")} →
+              </Link>
+            ) : book.rootChapterId ? (
               <Link href={`/book/${bookId}/chapter/${book.rootChapterId}`} className={`${buttonPrimary} h-11 rounded-full px-6 text-[15px]`}>
                 {t("Okumaya başla")} →
               </Link>
@@ -150,15 +181,21 @@ export default function BookPage({
             {communityOpen && !isOwner && me && <ReportButton targetType="book" targetId={bookId} />}
           </div>
 
+          {progress.read > 0 && mainLine > 0 && (
+            <div className="mt-5 max-w-sm">
+              <div className="flex justify-between gap-3 text-xs text-muted">
+                <span className="truncate">{progress.next ? t("Sıradaki: {title}", { title: progress.next.title }) : t("Bitirdin")}</span>
+                <span className="shrink-0 tabular-nums">{t("{n}/{m} bölüm", { n: num(progress.read), m: num(mainLine) })}</span>
+              </div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-border">
+                <div className="h-full rounded-full bg-caramel" style={{ width: `${Math.min(100, (progress.read / mainLine) * 100)}%` }} />
+              </div>
+            </div>
+          )}
+
           {book.classic && (
-            <p className="mt-6 max-w-2xl text-xs leading-relaxed text-muted">
-              {t("İstediğin bölümden kendi dalını açıp hikâyeyi devam ettirebilirsin; ana hat özgün metin olarak kalır.")}{" "}
-              {t("Kaynak:")}{" "}
-              <a href={book.classic.sourceUrl} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-accent">
-                {book.classic.source}
-              </a>{" "}
-              · {t(book.classic.license)}
-              {book.classic.coverCredit && <> · {t("Kapak:")} {t(book.classic.coverCredit)}</>}
+            <p className="mt-6 max-w-2xl text-sm text-muted">
+              {t("İstediğin bölümden kendi dalını açıp hikâyeyi devam ettirebilirsin; ana hat özgün metin olarak kalır.")}
             </p>
           )}
         </div>
@@ -201,10 +238,11 @@ export default function BookPage({
       )}
 
       <section className="mt-12">
-        <h2 className="mb-3 font-display text-2xl">{cfg.mapLabel}</h2>
+        <h2 className="mb-3 font-display text-2xl">{hasBranches ? cfg.mapLabel : t("İçindekiler")}</h2>
         {chapters === undefined ? <Loading /> : <ChapterTree
             chapters={chapters}
             bookId={bookId}
+            read={readIds}
             original={book.classic ? { ownerId: book.ownerId, author: book.classic.author } : undefined}
           />}
       </section>
@@ -244,6 +282,40 @@ export default function BookPage({
               </div>
             ))}
           </div>
+        </section>
+      )}
+
+      {book.classic && (
+        <section className="mt-14 border-t border-border pt-8">
+          <h2 className="font-display text-2xl">{t("Künye")}</h2>
+          <dl className="mt-4 grid gap-x-10 gap-y-3 text-sm sm:grid-cols-[9rem_1fr]">
+            <dt className="text-muted">{t("Eserin yazarı")}</dt>
+            <dd>
+              <Link href={`/profile/${book.ownerId}`} className="hover:text-accent">
+                {book.classic.author}
+              </Link>
+            </dd>
+            {book.classic.year && (
+              <>
+                <dt className="text-muted">{t("İlk yayın")}</dt>
+                <dd>{book.classic.year}</dd>
+              </>
+            )}
+            <dt className="text-muted">{t("Metnin kaynağı")}</dt>
+            <dd>
+              <a href={book.classic.sourceUrl} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-accent">
+                {book.classic.source}
+              </a>
+            </dd>
+            <dt className="text-muted">{t("Lisans")}</dt>
+            <dd>{t(book.classic.license)}</dd>
+            {book.classic.coverCredit && (
+              <>
+                <dt className="text-muted">{t("Kapak")}</dt>
+                <dd>{t(book.classic.coverCredit)}</dd>
+              </>
+            )}
+          </dl>
         </section>
       )}
 

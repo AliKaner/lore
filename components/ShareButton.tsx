@@ -36,7 +36,7 @@ export default function ShareButton({
 
   return (
     <button onClick={() => void handleShare()} className={pillInactive}>
-      ↗ {t("Paylaş")} ({shareCount})
+      ↗ {t("Paylaş")}{shareCount > 0 ? ` (${shareCount})` : ""}
     </button>
   );
 }

@@ -68,9 +68,12 @@ export default function ChapterTree({
   chapters,
   bookId,
   original,
+  read,
 }: {
   chapters: Chapter[];
   bookId: Id<"books">;
+  // Chapters the reader has read, ticked off.
+  read?: Set<string>;
   // A classic: chapters its importer holds are credited to the real author.
   original?: { ownerId: Id<"users">; author: string };
 }) {
@@ -86,6 +89,41 @@ export default function ChapterTree({
   const x = (lane: number) => PAD + lane * LANE;
   const y = (row: number) => row * ROW + ROW / 2;
   const branchCount = rows.filter((r) => r.branchStart).length;
+
+  // One straight line and nothing branching off: a contents list reads
+  // better than a graph.
+  if (branchCount === 0) {
+    const list = expanded || rows.length <= 14 ? rows : rows.slice(0, 12);
+    return (
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+        <ol className="grid sm:grid-cols-2">
+          {list.map((r, i) => {
+            const done = read?.has(r.chapter._id);
+            const minutes = Math.max(1, Math.round((r.chapter.words ?? 0) / 220));
+            return (
+              <li key={r.chapter._id} className="border-b border-border/60 sm:odd:border-r">
+                <Link href={`/book/${bookId}/chapter/${r.chapter._id}`} className="group flex items-baseline gap-4 px-5 py-3.5 transition-colors hover:bg-accent-soft/40">
+                  <span className="w-7 shrink-0 text-right font-display text-sm tabular-nums text-muted">{num(i + 1)}</span>
+                  <span className={`min-w-0 flex-1 truncate group-hover:text-accent ${done ? "text-muted" : ""}`}>
+                    {r.chapter.title || t("(başlıksız bölüm)")}
+                  </span>
+                  {r.chapter.status === "draft" && <span className="shrink-0 text-[11px] text-muted">{t("taslak")}</span>}
+                  <span className="shrink-0 text-xs tabular-nums text-muted">
+                    {done ? <span className="text-caramel-strong">✓</span> : t("{n} dk", { n: num(minutes) })}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ol>
+        {list.length < rows.length && (
+          <button type="button" onClick={() => setExpanded(true)} className="block w-full py-3 text-center text-sm text-accent hover:bg-accent-soft/40">
+            {t("{n} bölüm daha · tümünü göster", { n: num(rows.length - list.length) })}
+          </button>
+        )}
+      </div>
+    );
+  }
 
   // Lines: straight down a lane, or a curve out of the parent's lane.
   const paths = shown

@@ -76,6 +76,11 @@ export default function BookPage({
     <main className="mx-auto max-w-3xl px-4 py-10">
       <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-sapphire">
         {cfg.label}
+        {book.classic && (
+          <span className="ml-2 rounded-full bg-caramel-soft px-2 py-0.5 normal-case tracking-normal text-foreground/80">
+            {t("Klasik · Kamu malı")}
+          </span>
+        )}
       </p>
       <div className="flex gap-4 mb-4">
         <BookCover
@@ -97,6 +102,26 @@ export default function BookPage({
           )}
         </div>
       </div>
+
+      {book.classic && (
+        <div className="mb-6 rounded-xl border border-border bg-surface px-4 py-3 text-sm">
+          <p>
+            <span className="text-muted">{t("Yazan:")} </span>
+            <span className="font-medium">{book.classic.author}</span>
+            {book.classic.year && <span className="text-muted"> · {book.classic.year}</span>}
+          </p>
+          <p className="mt-1 text-xs text-muted">
+            {t("Kaynak:")}{" "}
+            <a href={book.classic.sourceUrl} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-accent">
+              {book.classic.source}
+            </a>{" "}
+            · {t(book.classic.license)}
+          </p>
+          <p className="mt-2 text-xs text-muted">
+            {t("İstediğin bölümden kendi dalını açıp hikâyeyi devam ettirebilirsin; ana hat özgün metin olarak kalır.")}
+          </p>
+        </div>
+      )}
 
       {isOwner && (
         <div className="mb-6">

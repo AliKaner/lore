@@ -11,6 +11,7 @@ import {
 } from "react";
 import Link from "next/link";
 import WritingSprint from "@/components/WritingSprint";
+import { errorText } from "@/components/entity/shared";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -197,6 +198,8 @@ export default function ChapterForm({
     existingChapter?._id,
   );
   const [calm, setCalm] = useState(false);
+  const [splitting, setSplitting] = useState(false);
+  const splitChapter = useMutation(api.chapters.splitAt);
   const editorRef = useRef<ChapterEditorHandle>(null);
 
   // While the writer types, the top bar steps back; moving the mouse brings
@@ -377,6 +380,24 @@ export default function ChapterForm({
     router.push(`/book/${bookId}/chapter/${chapterId}`);
   }
 
+  // Everything after the cursor becomes the next chapter.
+  async function splitHere() {
+    const chapterId = chapterIdRef.current;
+    const parts = editorRef.current?.splitAtCursor();
+    if (!chapterId || !parts) return;
+    if (!window.confirm(t("İmlecin olduğu yerden sonrası yeni bir bölüm olur; bu bölümün devamı yeni bölüme bağlanır. Devam edilsin mi?"))) return;
+    setSplitting(true);
+    setError(null);
+    try {
+      const tailId = await splitChapter({ chapterId, head: parts.head, tail: parts.tail, tailTitle: `${title.trim() || fallbackTitle} (2)` });
+      clearBackup(backupKey(bookId, chapterId, parentChapterId));
+      router.push(`/book/${bookId}/chapter/${tailId}/edit`);
+    } catch (err) {
+      setError(t(errorText(err)));
+      setSplitting(false);
+    }
+  }
+
   function restore() {
     if (!restorable) return;
     setTitle(restorable.title);
@@ -533,6 +554,23 @@ export default function ChapterForm({
                 <path d="M10 5.5C8.5 4.3 6.3 3.8 3 4v11c3.3-.2 5.5.3 7 1.5 1.5-1.2 3.7-1.7 7-1.5V4c-3.3-.2-5.5.3-7 1.5zM10 5.5v11" />
               </svg>
               <span className="hidden lg:inline">{t("Oku")}</span>
+            </button>
+          )}
+          {savedChapterId && (
+            <button
+              type="button"
+              onClick={() => void splitHere()}
+              disabled={splitting || submitting !== null}
+              title={t("Bölümü buradan böl")}
+              aria-label={t("Bölümü buradan böl")}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground disabled:opacity-50"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <circle cx="5.5" cy="6" r="2.2" />
+                <circle cx="5.5" cy="14" r="2.2" />
+                <path d="M7.4 7.2 16.5 14M7.4 12.8 16.5 6" />
+              </svg>
+              <span className="hidden 2xl:inline">{splitting ? t("Bölünüyor…") : t("Böl")}</span>
             </button>
           )}
           <ThemeButton />

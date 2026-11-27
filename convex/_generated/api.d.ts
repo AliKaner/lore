@@ -13,6 +13,8 @@ import type * as auth from "../auth.js";
 import type * as boards from "../boards.js";
 import type * as books from "../books.js";
 import type * as chapters from "../chapters.js";
+import type * as classics from "../classics.js";
+import type * as classicsParse from "../classicsParse.js";
 import type * as cleanup from "../cleanup.js";
 import type * as desk from "../desk.js";
 import type * as entities from "../entities.js";
@@ -46,6 +48,8 @@ declare const fullApi: ApiFromModules<{
   boards: typeof boards;
   books: typeof books;
   chapters: typeof chapters;
+  classics: typeof classics;
+  classicsParse: typeof classicsParse;
   cleanup: typeof cleanup;
   desk: typeof desk;
   entities: typeof entities;

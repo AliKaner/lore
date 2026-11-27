@@ -298,3 +298,57 @@ export const markCanonical = mutation({
     return null;
   },
 });
+
+// Cuts a chapter in two where the writer put the cursor: the text before it
+// stays, the rest becomes a new chapter right after it, and whatever came
+// after the old chapter now continues from the new one. For long texts that
+// arrive as one piece (a classic brought in from a library, say).
+export const splitAt = mutation({
+  args: {
+    chapterId: v.id("chapters"),
+    head: v.string(),
+    tail: v.string(),
+    tailTitle: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const chapter = await ctx.db.get(args.chapterId);
+    if (!chapter || chapter.authorId !== userId) throw new Error("Bu bölümü yalnızca yazarı bölebilir.");
+    const headWords = wordsIn(args.head);
+    const tailWords = wordsIn(args.tail);
+    if (headWords === 0 || tailWords === 0) throw new Error("Bölünecek bir yer seç: imleç metnin başında ya da sonunda.");
+
+    await snapshotBeforeChange(ctx, chapter, { content: args.head, status: "published" });
+    const before = chapter.words ?? wordsIn(chapter.content);
+    const now = Date.now();
+    await ctx.db.patch(chapter._id, { content: args.head, words: headWords, updatedAt: now });
+
+    const children = await ctx.db
+      .query("chapters")
+      .withIndex("by_book_and_parent", (q) => q.eq("bookId", chapter.bookId).eq("parentChapterId", chapter._id))
+      .take(200);
+    const tailId = await ctx.db.insert("chapters", {
+      bookId: chapter.bookId,
+      parentChapterId: chapter._id,
+      authorId: userId,
+      title: args.tailTitle.trim() || chapter.title,
+      content: args.tail,
+      order: 0,
+      isCanonical: true,
+      status: chapter.status,
+      words: tailWords,
+      updatedAt: now,
+      likeCount: 0,
+      shareCount: 0,
+      createdAt: now,
+    });
+    for (const child of children) await ctx.db.patch(child._id, { parentChapterId: tailId });
+
+    await recordDeskChange(ctx, chapter.bookId, { _id: tailId, authorId: userId }, {
+      words: headWords + tailWords - before,
+      chapters: 1,
+      touched: true,
+    });
+    return tailId;
+  },
+});

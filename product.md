@@ -395,6 +395,27 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
 - [x] Dallar ve ana hat zaten vardı: herkesin kendi dalı, sahibinin seçtiği
       ana hat ("ana hat yap"), sürüm geçmişi
 
+### Klasikler (kamu malı kitaplar)
+
+- [x] **Klasikler rafı** (`/classics`, herkese açık, üst menüde): telif süresi
+      dolmuş kitaplar bölüm bölüm; dile göre süzme. Kitap sayfasında "Klasik ·
+      Kamu malı", yazar, yıl, kaynak bağlantısı ve lisans; her bölümün altında
+      künye. Topluluk eşiği beklenmeden herkes klasiklerden dal açıp devam
+      yazabilir (ana hat özgün metin). Klasikler 100 yazı eşiğine sayılmaz
+- [x] **Aktarma** (`convex/classics.ts`, `convex/classicsParse.ts`; komut
+      satırından `npx convex run`): `importWikisource` (Vikikaynak; tek sayfa →
+      ~3000 kelimelik bölümler, birden fazla sayfa → her sayfa bir bölüm; her
+      sayfanın yazarı başlıktan doğrulanır, uymayan atlanır ve raporlanır) ve
+      `importStandardEbooks` (GitHub kaynağından içindekilere göre bölümler).
+      Kitaplar onları aktaran hesaba ait (düzeltip bölebilsin diye).
+      Kütüphanelerin hız sınırına uyar: istekler arası bekler, 429'da bekleyip
+      yeniden dener. `removeBook` ile kaldırılıp yeniden aktarılabilir
+- [x] **Bölümü buradan böl** (yazma ekranında makas simgesi, `chapters.splitAt`):
+      imleçten sonrası yeni bölüm olur, eski devamı yeni bölüme bağlanır, önceki
+      hal sürüm geçmişinde kalır
+- Telif notu: Türkiye'de yazarın ölümünden 70 yıl sonra kamu malı. Çeviriler
+  ayrıca korunur; yabancı eserler özgün dilinde ya da serbest çevirilerden
+
 ### Okuma ve dışa aktarma (ek)
 
 - [x] **Sesli okuma** (`components/ReadAloud.tsx`, okuma sayfasında "Sesli

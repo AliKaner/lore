@@ -28,6 +28,17 @@ export default defineSchema({
     kind: v.optional(writingKindValidator),
     // Unset on older writings: the writer's interface language stands in.
     language: v.optional(bookLanguageValidator),
+    // A public-domain work brought in from an open library: who wrote it,
+    // where it came from and under which terms. Anyone may branch from it.
+    classic: v.optional(
+      v.object({
+        author: v.string(),
+        year: v.optional(v.string()),
+        source: v.string(),
+        sourceUrl: v.string(),
+        license: v.string(),
+      }),
+    ),
     visibility: v.union(v.literal("public"), v.literal("private")),
     rootChapterId: v.optional(v.id("chapters")),
     likeCount: v.number(),
@@ -44,7 +55,8 @@ export default defineSchema({
     .index("by_owner_and_edited", ["ownerId", "lastEditedAt"])
     .index("by_visibility", ["visibility"])
     .index("by_visibility_and_kind", ["visibility", "kind"])
-    .index("by_root_chapter", ["rootChapterId"]),
+    .index("by_root_chapter", ["rootChapterId"])
+    .index("by_classic_author", ["classic.author"]),
 
   chapters: defineTable({
     bookId: v.id("books"),

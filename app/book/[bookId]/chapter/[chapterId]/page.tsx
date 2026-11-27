@@ -120,7 +120,7 @@ export default function ChapterPage({
   const cfg = localizedCfg;
   const writeNextLabel = isBookOwner
     ? cfg.continueCta
-    : communityOpen && book?.visibility === "public" && book && isOpenToBranches(book)
+    : (communityOpen || !!book?.classic) && book?.visibility === "public" && book && isOpenToBranches(book)
       ? cfg.branchCta
       : undefined;
 
@@ -251,6 +251,17 @@ export default function ChapterPage({
           <ReportButton targetType="chapter" targetId={chapterId} />
         )}
       </div>
+
+      {book?.classic && (
+        <p className="mt-8 text-xs text-muted">
+          {book.classic.author}
+          {book.classic.year ? `, ${book.classic.year}` : ""} ·{" "}
+          <a href={book.classic.sourceUrl} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-accent">
+            {book.classic.source}
+          </a>{" "}
+          · {t(book.classic.license)}
+        </p>
+      )}
 
       {chapter.status === "published" && <Proposals bookId={bookId} chapterId={chapterId} />}
 

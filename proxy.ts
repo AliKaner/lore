@@ -9,6 +9,7 @@ const PUBLIC_PAGES = [
   /^\/$/,
   /^\/sign-in$/,
   /^\/discover$/,
+  /^\/classics$/,
   /^\/book\/[^/]+$/,
   /^\/book\/[^/]+\/chapter\/[^/]+$/,
   /^\/book\/[^/]+\/world\/[^/]+$/,

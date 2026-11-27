@@ -303,6 +303,8 @@ type AddableKind = EntityKind;
 export type ChapterEditorHandle = {
   focusStart: () => void;
   goTo: (pos: number) => void;
+  // The text before and after the cursor, for splitting a chapter there.
+  splitAtCursor: () => { head: string; tail: string } | null;
 };
 
 export function ChapterEditor({
@@ -381,6 +383,15 @@ export function ChapterEditor({
     focusStart: () => editor?.chain().focus("start").run(),
     goTo: (pos: number) =>
       editor?.chain().focus().setTextSelection(pos).scrollIntoView().run(),
+    splitAtCursor: () => {
+      if (!editor) return null;
+      const { doc, selection } = editor.state;
+      const pos = selection.from;
+      return {
+        head: JSON.stringify(doc.cut(0, pos).toJSON()),
+        tail: JSON.stringify(doc.cut(pos).toJSON()),
+      };
+    },
   }));
 
   if (!editor) {

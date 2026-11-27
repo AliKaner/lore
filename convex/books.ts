@@ -51,10 +51,16 @@ export const COMMUNITY_BOOK_THRESHOLD = 100;
 export const communityStatus = query({
   args: {},
   handler: async (ctx) => {
-    const books = await ctx.db
-      .query("books")
-      .withIndex("by_root_chapter", (q) => q.gt("rootChapterId", undefined))
-      .take(COMMUNITY_BOOK_THRESHOLD);
+    // Classics brought in from open libraries don't count: the threshold is
+    // about people writing here.
+    const books = (
+      await ctx.db
+        .query("books")
+        .withIndex("by_root_chapter", (q) => q.gt("rootChapterId", undefined))
+        .take(COMMUNITY_BOOK_THRESHOLD + 500)
+    )
+      .filter((book) => book.classic === undefined)
+      .slice(0, COMMUNITY_BOOK_THRESHOLD);
     return {
       open: books.length >= COMMUNITY_BOOK_THRESHOLD,
       bookCount: books.length,

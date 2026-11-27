@@ -160,6 +160,8 @@ export const importWikisource = internalAction({
     description: v.optional(v.string()),
     kind: writingKindValidator,
     splitWords: v.optional(v.number()),
+    // A book of poems: line breaks are kept inside each stanza.
+    poetry: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const owner = await ownerId(ctx as never, args.owner);
@@ -170,10 +172,10 @@ export const importWikisource = internalAction({
     for (const [i, page] of args.pages.entries()) {
       if (i > 0) await pause(3000);
       try {
-        const result = parseWikisource(await wikisourceHtml(page), page);
+        const result = parseWikisource(await wikisourceHtml(page), page, args.poetry ?? false);
         if (result.author !== args.author) skipped.push(`${page}: yazarı "${result.author}"`);
         else if (result.paragraphs.length === 0) skipped.push(`${page}: metin bulunamadı`);
-        else parsed.push(result);
+        else parsed.push({ ...result, title: page.includes("/") && (!result.title || page.startsWith(`${result.title}/`)) ? page.slice(page.lastIndexOf("/") + 1) : result.title });
       } catch (error) {
         skipped.push(`${page}: ${String(error)}`);
       }

@@ -4,7 +4,8 @@
 
 type Mark = { type: "italic" };
 type TextNode = { type: "text"; text: string; marks?: Mark[] };
-type Paragraph = { type: "paragraph"; content?: TextNode[] };
+type HardBreak = { type: "hardBreak" };
+type Paragraph = { type: "paragraph"; content?: (TextNode | HardBreak)[] };
 export type ChapterDoc = { type: "doc"; content: Paragraph[] };
 
 const ENTITIES: Record<string, string> = {
@@ -60,7 +61,7 @@ export function inlineRuns(html: string): TextNode[] {
 }
 
 const wordsOf = (p: Paragraph) =>
-  (p.content ?? []).map((r) => r.text).join("").trim().split(/\s+/u).filter(Boolean).length;
+  (p.content ?? []).map((r) => (r.type === "text" ? r.text : " ")).join("").trim().split(/\s+/u).filter(Boolean).length;
 
 export function toDoc(paragraphs: Paragraph[]): ChapterDoc {
   return { type: "doc", content: paragraphs };
@@ -72,10 +73,21 @@ export function docWords(doc: ChapterDoc) {
 
 // The `<p>` paragraphs of an HTML fragment, empty ones dropped. Some
 // sources break paragraphs with `<br>` inside one `<p>`; those become
-// paragraphs of their own.
-export function paragraphsOf(html: string): Paragraph[] {
+// paragraphs of their own. In poetry a `<br>` ends a line, not a stanza.
+export function paragraphsOf(html: string, poetry = false): Paragraph[] {
   const out: Paragraph[] = [];
   for (const match of html.matchAll(/<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/giu)) {
+    if (poetry) {
+      const lines = match[1].split(/<br\s*\/?>/iu).map(inlineRuns).filter((runs) => runs.length > 0);
+      if (lines.length === 0) continue;
+      const content: (TextNode | HardBreak)[] = [];
+      lines.forEach((runs, i) => {
+        if (i > 0) content.push({ type: "hardBreak" });
+        content.push(...runs);
+      });
+      out.push({ type: "paragraph", content });
+      continue;
+    }
     for (const piece of match[1].split(/<br\s*\/?>/iu)) {
       const runs = inlineRuns(piece);
       if (runs.length > 0) out.push({ type: "paragraph", content: runs });
@@ -91,7 +103,7 @@ export type WikiPage = { title: string; author: string | null; year: string | nu
 // The parsed HTML of a Vikikaynak page: the header gives title, author and
 // year; the text is the paragraphs after it (navigation boxes, notes and
 // license footers are left out).
-export function parseWikisource(html: string, fallbackTitle: string): WikiPage {
+export function parseWikisource(html: string, fallbackTitle: string, poetry = false): WikiPage {
   const title = decode(/id="header_title_text">([\s\S]*?)<\/span>/u.exec(html.replace(/&#95;/gu, "_"))?.[1] ?? fallbackTitle)
     .replace(/<[^>]+>/gu, "")
     .trim();
@@ -105,7 +117,7 @@ export function parseWikisource(html: string, fallbackTitle: string): WikiPage {
     .replace(/<sup[\s\S]*?<\/sup>/gu, "")
     .replace(/<ol class="references"[\s\S]*?<\/ol>/gu, "")
     .replace(/<div class="(?:licenseContainer|ws-noexport|noprint)[\s\S]*$/u, "");
-  return { title: title || fallbackTitle, author: author ? decode(author).replace(/[^\p{L}\s.'-]/gu, "").trim() || null : null, year, paragraphs: paragraphsOf(body) };
+  return { title: title || fallbackTitle, author: author ? decode(author).replace(/[^\p{L}\s.'-]/gu, "").trim() || null : null, year, paragraphs: paragraphsOf(body, poetry) };
 }
 
 // A long text with no chapters of its own, cut at paragraph ends into parts

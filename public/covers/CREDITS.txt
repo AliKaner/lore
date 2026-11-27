@@ -13,3 +13,17 @@ pride-and-prejudice.jpg
   Cover art of the Standard Ebooks edition of Pride and Prejudice
   (public-domain painting; Standard Ebooks, CC0).
   https://github.com/standardebooks/jane-austen_pride-and-prejudice
+
+tevfik-fikret.jpg
+  Portrait of Tevfik Fikret (1867–1915).
+  Wikimedia Commons: File:Tevfik Fikret2.jpg (public domain).
+
+omer-seyfettin-2.jpg
+  Portrait of Ömer Seyfettin (1884–1920).
+  Wikimedia Commons: File:Ömer Seyfettin Portresi.jpg (public domain).
+
+Standard Ebooks books (Frankenstein, Dracula, The Great Gatsby, Alice's
+Adventures in Wonderland, The Adventures of Sherlock Holmes, The Picture of
+Dorian Gray, Jane Eyre, Wuthering Heights, Crime and Punishment, The Time
+Machine, Anna Karenina): each edition's own cover painting from its
+repository (images/cover.jpg), public domain; Standard Ebooks, CC0.

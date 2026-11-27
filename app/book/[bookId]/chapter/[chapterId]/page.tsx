@@ -3,6 +3,7 @@
 import { use, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import ReadAloud from "@/components/ReadAloud";
 import Proposals from "@/components/Proposals";
+import MarginCards from "@/components/MarginCards";
 import { useRouter } from "next/navigation";
 import SpeedReader from "@/components/SpeedReader";
 import { useBookNames } from "@/lib/bookNames";
@@ -213,13 +214,14 @@ export default function ChapterPage({
         </span>
       </div>
 
-      <div ref={readerRef} className={book?.kind === "poetry" ? "poem-reading" : undefined}>
+      <div ref={readerRef} className={`relative ${book?.kind === "poetry" ? "poem-reading" : ""}`}>
         <ChapterReader
           key={chapterId}
           content={chapter.content}
           names={showNames ? bookNames : NO_NAMES}
           bionic={bionic}
         />
+        {showNames && <MarginCards container={readerRef} bookId={bookId} />}
       </div>
 
       {flowOpen && (

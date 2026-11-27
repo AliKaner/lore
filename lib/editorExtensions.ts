@@ -66,6 +66,8 @@ export type NameEntry = {
   name: string;
   kind: EntityKind;
   detail?: string;
+  // The entity behind the name, so the reader can show its card.
+  id?: string;
 };
 
 export const readingAidsKey = new PluginKey<DecorationSet>("readingAids");
@@ -147,6 +149,7 @@ function buildDecorations(doc: PMNode, names: NameEntry[], bionic: boolean) {
               Decoration.inline(start + index, start + end, {
                 class: `name-mark name-${markStyleOf(entry.kind)}`,
                 title: entry.detail ? `${entry.name} — ${entry.detail}` : entry.name,
+                ...(entry.id ? { "data-entity-id": entry.id } : {}),
               }),
             );
           }

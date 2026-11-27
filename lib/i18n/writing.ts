@@ -301,4 +301,12 @@ export const WRITING: Record<string, Entry> = {
   "Geri al": "Undo",
   "{n} yazım hatası": "{n} spelling mistakes",
   "Toplu düzelt": "Fix all",
+  "Aç →": "Open →",
+  "Bu yazıya bağlı olay yok.": "No events tied to this writing.",
+  "Panoda kart yok.": "No cards on the board.",
+  "kelime": "words",
+  "Günlük hedef koy →": "Set a daily goal →",
+  "Başlık (ör. 1930’lar Berlin haritası)": "Title (e.g. a map of 1930s Berlin)",
+  "Bugünkü hedef": "Today's goal",
+  "Kaynak bağlantısı": "Research link",
 };

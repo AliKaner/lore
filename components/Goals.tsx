@@ -249,7 +249,7 @@ function GoalHalf({ kind, summary, today }: { kind: Kind; summary: Summary; toda
 }
 
 // The desk's goals card: today's progress, the streak and the last week.
-export function GoalsCard() {
+export function GoalsCard({ stacked = false }: { stacked?: boolean }) {
   const summary = useGoalSummary();
   const now = useNow();
   const t = useT();
@@ -258,7 +258,9 @@ export function GoalsCard() {
   return (
     <section
       aria-label={t("Günlük hedeflerin")}
-      className="mb-8 grid overflow-hidden rounded-2xl border border-border bg-surface sm:grid-cols-2 sm:divide-x sm:divide-border max-sm:divide-y max-sm:divide-border"
+      className={`grid overflow-hidden rounded-2xl border border-border bg-surface ${
+        stacked ? "divide-y divide-border" : "mb-8 sm:grid-cols-2 sm:divide-x sm:divide-border max-sm:divide-y max-sm:divide-border"
+      }`}
     >
       <GoalHalf kind="writing" summary={summary} today={today} />
       <GoalHalf kind="reading" summary={summary} today={today} />

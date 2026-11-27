@@ -79,7 +79,7 @@ export default function SpellFixAll({ editor, lang }: { editor: Editor; lang: La
   if (total === 0 && done === null) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-[55] flex flex-col items-end gap-2">
+    <div className="fixed bottom-5 left-1/2 z-[55] flex -translate-x-1/2 flex-col items-center gap-2">
       {open && (
         <div role="dialog" aria-label={t("Yazım hatalarını düzelt")} className="menu-pop w-[min(24rem,calc(100vw-2.5rem))] overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_60px_-28px_rgba(15,25,57,0.55)]">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">

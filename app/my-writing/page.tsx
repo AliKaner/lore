@@ -162,47 +162,38 @@ function DeskRow({ book, now }: { book: DeskBook; now: number }) {
   const cfg = useCfg()(book);
   const i18n = useI18n();
   const { t, locale } = i18n;
+  const read = readHref(book);
   return (
-    <li className="group flex items-center gap-4 px-4 py-4 transition-colors hover:bg-caramel-soft/30 sm:px-5">
-      <BookCover
-        storageId={book.coverStorageId}
-        title={book.title}
-        placeholder=""
-        className="h-16 w-11 shrink-0 rounded"
-      />
-      <Link href={`/book/${book._id}`} className="min-w-0 flex-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-sapphire">{cfg.label}</p>
-        <p className="truncate font-display text-xl leading-snug text-foreground group-hover:text-accent">
-          {book.title}
-        </p>
-        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
-          <span className="tabular-nums">{stats(book, cfg, i18n)}</span>
-          {book.lastEditedAt && now > 0 && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span>{timeAgo(book.lastEditedAt, now, locale)}</span>
-            </>
-          )}
-          <span aria-hidden="true">·</span>
-          <Visibility book={book} />
-        </p>
-      </Link>
-      {readHref(book) && (
-        <Link
-          href={readHref(book)!}
-          title={t("Okurların gördüğü gibi, baştan oku")}
-          className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-muted transition-colors hover:bg-accent-soft/60 hover:text-foreground sm:inline-flex"
-        >
-          <BookIcon />
-          {t("Oku")}
+    <li className="group">
+      <div className="relative">
+        <Link href={`/book/${book._id}`} className="block">
+          <BookCover
+            storageId={book.coverStorageId}
+            title={book.title}
+            className="aspect-[2/3] w-full rounded-md shadow-[0_18px_36px_-22px_rgba(15,25,57,0.6)] transition-transform duration-300 group-hover:-translate-y-1"
+          />
         </Link>
-      )}
-      <Link
-        href={continueHref(book)}
-        className="hidden shrink-0 rounded-full border border-border px-4 py-1.5 text-sm text-foreground transition-colors hover:border-accent hover:text-accent sm:inline-flex"
-      >
-        {book.lastChapter ? t("Devam et") : t("Başla")}
+        {/* On hover: carry on writing, or read it as readers do. */}
+        <div className="pointer-events-none absolute inset-x-2 bottom-2 flex gap-1.5 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+          <Link href={continueHref(book)} className="flex-1 rounded-full bg-accent py-1.5 text-center text-xs font-medium text-accent-contrast shadow-lg hover:bg-accent-hover">
+            {book.lastChapter ? t("Devam et") : t("Başla")}
+          </Link>
+          {read && (
+            <Link href={read} className="rounded-full bg-surface/95 px-3 py-1.5 text-xs shadow-lg hover:text-accent">
+              {t("Oku")}
+            </Link>
+          )}
+        </div>
+      </div>
+      <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-sapphire">{cfg.label}</p>
+      <Link href={`/book/${book._id}`} className="mt-0.5 line-clamp-2 block font-display text-lg leading-snug hover:text-accent">
+        {book.title}
       </Link>
+      <p className="mt-1 text-xs tabular-nums text-muted">{stats(book, cfg, i18n)}</p>
+      <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
+        {book.lastEditedAt && now > 0 && <span>{timeAgo(book.lastEditedAt, now, locale)}</span>}
+        <Visibility book={book} />
+      </p>
     </li>
   );
 }
@@ -218,7 +209,7 @@ export default function MyWritingsPage() {
   const [first, ...rest] = books ?? [];
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
+    <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sapphire">
@@ -236,8 +227,8 @@ export default function MyWritingsPage() {
         </Link>
       </div>
 
-      {/* On an empty desk the first step is a writing, not a goal. */}
-      {me && books && books.length > 0 && <GoalsCard />}
+      {/* A year of writing first; on an empty desk the first step is a writing. */}
+      {me && books && books.length > 0 && <WritingActivity />}
 
       {me === undefined ? (
         <Loading />
@@ -262,13 +253,16 @@ export default function MyWritingsPage() {
         </EmptyState>
       ) : (
         <>
-          {first && <ContinueCard book={first} now={now} />}
+          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
+            {first && <ContinueCard book={first} now={now} />}
+            <GoalsCard stacked />
+          </div>
           {rest.length > 0 && (
             <>
               <h2 className="mb-3 mt-12 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                 {t("Diğer yazıların")}
               </h2>
-              <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+              <ul className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
                 {rest.map((book) => (
                   <DeskRow key={book._id} book={book} now={now} />
                 ))}
@@ -280,8 +274,6 @@ export default function MyWritingsPage() {
           </p>
         </>
       )}
-
-      {me && books && books.length > 0 && <WritingActivity />}
 
       {shared && shared.length > 0 && (
         <section className="mt-12">

@@ -87,7 +87,18 @@ export const add = mutation({
   args: {
     bookId: v.id("books"),
     side,
-    kind: v.union(v.literal("note"), v.literal("checklist"), v.literal("entity"), v.literal("image")),
+    kind: v.union(
+      v.literal("note"),
+      v.literal("checklist"),
+      v.literal("entity"),
+      v.literal("image"),
+      // Live views: this writing's timeline, its corkboard, today's goal.
+      v.literal("timeline"),
+      v.literal("plan"),
+      v.literal("goal"),
+      // A research link: title and address.
+      v.literal("link"),
+    ),
     entityId: v.optional(v.id("entities")),
     storageId: v.optional(v.id("_storage")),
   },

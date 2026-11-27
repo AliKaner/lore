@@ -134,7 +134,18 @@ export default defineSchema({
     bookId: v.id("books"),
     side: v.union(v.literal("left"), v.literal("right")),
     order: v.number(),
-    kind: v.union(v.literal("note"), v.literal("checklist"), v.literal("entity"), v.literal("image")),
+    kind: v.union(
+      v.literal("note"),
+      v.literal("checklist"),
+      v.literal("entity"),
+      v.literal("image"),
+      // Live views: this writing's timeline, its corkboard, today's goal.
+      v.literal("timeline"),
+      v.literal("plan"),
+      v.literal("goal"),
+      // A research link: title and address.
+      v.literal("link"),
+    ),
     title: v.optional(v.string()),
     text: v.optional(v.string()),
     items: v.optional(v.array(v.object({ text: v.string(), done: v.boolean() }))),

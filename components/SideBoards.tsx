@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { KindGlyph, errorText, useImageUpload } from "@/components/entity/shared";
 import { useToast } from "@/components/Toaster";
+import { GoalCard, LinkCard, PlanCard, TimelineCard } from "@/components/BoardWidgets";
 import { useT } from "@/lib/i18n";
 
 type Card = FunctionReturnType<typeof api.boards.list>[number];
@@ -314,6 +315,20 @@ function AddMenu({ bookId, side }: { bookId: Id<"books">; side: Side }) {
               <button type="button" className={option} onClick={() => setMode("entity")}>
                 <span aria-hidden="true" className="text-xs text-sapphire">✦</span> {t("Evrenden bir kayıt")}
               </button>
+              <div className="my-1 h-px bg-border" />
+              <button type="button" className={option} onClick={() => void run(() => add({ bookId, side, kind: "timeline" }))}>
+                <span aria-hidden="true" className="text-xs text-caramel">⟶</span> {t("Zaman çizelgesi")}
+              </button>
+              <button type="button" className={option} onClick={() => void run(() => add({ bookId, side, kind: "plan" }))}>
+                <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-caramel" /> {t("Mantar pano")}
+              </button>
+              <button type="button" className={option} onClick={() => void run(() => add({ bookId, side, kind: "goal" }))}>
+                <span aria-hidden="true" className="text-xs">◔</span> {t("Bugünkü hedef")}
+              </button>
+              <button type="button" className={option} onClick={() => void run(() => add({ bookId, side, kind: "link" }))}>
+                <span aria-hidden="true" className="text-xs">↗</span> {t("Kaynak bağlantısı")}
+              </button>
+              <div className="my-1 h-px bg-border" />
               <label className={`${option} cursor-pointer`}>
                 <span aria-hidden="true" className="text-xs">▧</span> {t("Görsel")}
                 <input
@@ -401,6 +416,10 @@ function Board({
             {card.kind === "checklist" && <ChecklistCard card={card} />}
             {card.kind === "entity" && <EntityCard card={card} onOpenEntity={onOpenEntity} />}
             {card.kind === "image" && <ImageCard card={card} />}
+            {card.kind === "timeline" && <TimelineCard bookId={bookId} />}
+            {card.kind === "plan" && <PlanCard bookId={bookId} />}
+            {card.kind === "goal" && <GoalCard />}
+            {card.kind === "link" && <LinkCard itemId={card._id} title={card.title ?? ""} url={card.text ?? ""} />}
           </div>
         ))}
         {cards.length === 0 && (

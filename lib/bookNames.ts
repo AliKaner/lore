@@ -14,6 +14,7 @@ export function useBookNames(bookId: Id<"books">): NameEntry[] {
   return useMemo(
     () =>
       (entities ?? []).map((entity) => ({
+        id: entity._id,
         name: entity.name,
         kind: entity.kind,
         detail: entity.summary

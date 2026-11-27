@@ -145,6 +145,13 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       "Halkından", karakterde "Silahları").
 - [x] **Görseller**: birden fazla görsel, sürükle-bırak; ilki kapak,
       "Kapak yap" ile değişir. Alan görselleri (harita, plan) ayrı tutulur.
+- [x] **@ ile anma** (`components/entity/MentionText.tsx`, `lib/mentions.ts`):
+      kişilik, geçmiş gibi uzun alanlarda `@` yazınca imlecin altında
+      evrendeki kayıtlar çıkar (önce karakterler); yoksa "yeni karakter"
+      olarak yerinde oluşturulur. Anılan ad alanın içinde renkli görünür,
+      altında tıklanabilir çip olarak durur. Kimlikle saklanır
+      (`@[id|Ad]`), ad değişince anma da yeni adı gösterir. Okur sayfasında
+      o yazıya dahil kayıtlar link olur, diğerleri düz ad kalır.
 - [x] **Kendi alanların**: her kayda yazarın istediği kadar serbest alan.
 - [x] **Otomatik kayıt**: yazmayı bırakınca kaydedilir, "Kaydedildi" işareti.
 - [x] **Sayfalar**: `/world` (tür sekmeleri, arama, kapaklı kartlar,
@@ -213,10 +220,12 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
 - [x] **Yazma modu** (üst çubukta "Mod"): **Daktilo** — yazılan satır
       ekranda hep aynı yükseklikte kalır, metin yukarı akar; **Odak** —
       üzerinde çalışılan paragraf dışındakiler soluklaşır.
-- [x] **Yazma sesleri**: Sessiz (varsayılan), Daktilo (satır sonunda zil),
-      Mekanik klavye, Yumuşak tuş, Kalem; ses düzeyi ayarlanır. Sesler
-      tarayıcıda üretilir (Web Audio), dosya indirilmez; her vuruş biraz
-      farklı çıkar.
+- [x] **Yazma sesleri**: Sessiz (varsayılan), Daktilo (Enter'da zil),
+      Mekanik klavye (Brown), Tıkırtılı mekanik (Blue), Yumuşak tuş, Kalem;
+      ses düzeyi ayarlanır. Gerçek, açık lisanslı kayıtlar (CC0 ve MIT,
+      `public/sounds/typing/CREDITS.txt`); her ses tek küçük dosya, seçilince
+      yüklenir. Her vuruş rastgele bir kayıttan, perde ve seviye biraz
+      değişerek çalar (`lib/typingSounds.ts`).
 - [x] Akış kontrolünden düzeltmeler: boş masada önce "ilk yazın" kartı
       (hedef kartı yazı olunca çıkar); adsız yazıda çubukta "Ad ver"; kapak
       ve görsel yükleme düğmesi tasarıma uygun; dar ekranda çubuk etiketleri

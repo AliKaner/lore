@@ -10,6 +10,7 @@ export const WORLD: Record<string, Entry> = {
   "Seç ya da oluştur": "Choose or create",
   "Ekle": "Add",
   "“{name}” adında yeni: {kind}": "New {kind} called “{name}”",
+  "Başka bir kaydı anmak için @ yaz": "Type @ to mention another entry",
   "Yazmaya başla…": "Start writing…",
   "Yaşı ya da doğum yılı": "Age or year of birth",
   "Yaş": "Age",

@@ -10,8 +10,11 @@ import {
   type EntityField,
   type EntitySection,
   type ImageField,
+  valueKeysOf,
 } from "@/convex/entityKinds";
 import LinkPicker from "@/components/entity/LinkPicker";
+import MentionText from "@/components/entity/MentionText";
+import { toDisplay, toStored } from "@/lib/mentions";
 import { EntityChip, KindGlyph, errorText, eyebrow, useImageUpload, type Chip } from "@/components/entity/shared";
 import DeleteButton from "@/components/DeleteButton";
 import Loading from "@/components/Loading";
@@ -92,31 +95,6 @@ function Row({ label, children, stacked }: { label: string; children: ReactNode;
       <span className="pt-1.5 text-sm text-muted">{label}</span>
       <div className="min-w-0">{children}</div>
     </div>
-  );
-}
-
-function LongText({
-  value,
-  onChange,
-  placeholder,
-  label,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  label: string;
-}) {
-  const t = useT();
-  return (
-    <textarea
-      value={value}
-      aria-label={label}
-      maxLength={LIMITS.longtext}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder ?? t("Yazmaya başla…")}
-      rows={2}
-      className={`${lineInput} min-h-[3.25rem] resize-none leading-relaxed [field-sizing:content]`}
-    />
   );
 }
 
@@ -404,19 +382,38 @@ function EditorBody({
   const showToast = useToast();
   const { queue, flush, state, error } = useAutosave(entity._id);
 
+  const candidates: Chip[] | undefined = mine?.map((m) => ({ _id: m._id, kind: m.kind, name: m.name }));
+  // Entities made from an "@" menu, until the list above catches up. The ref
+  // serves the save that follows right away; the state, what's drawn.
+  const [created, setCreated] = useState<Chip[]>([]);
+  const createdNow = useRef<Chip[]>([]);
+  const mentionable = [...(candidates ?? []), ...created];
+  const longKeys = new Set(
+    [...valueKeysOf(entity.kind)].filter(([, type]) => type === "longtext").map(([key]) => key),
+  );
+
+  // Long texts are edited with names ("@Aras") and stored with ids.
   const [draft, setDraft] = useState<Draft>(() => ({
     name: entity.name,
     summary: entity.summary ?? "",
-    fields: entity.fields,
+    fields: Object.fromEntries(
+      Object.entries(entity.fields).map(([key, value]) => [
+        key,
+        longKeys.has(key) ? toDisplay(value, candidates ?? []) : value,
+      ]),
+    ),
     custom: entity.custom,
   }));
   const [unfolded, setUnfolded] = useState<Record<string, boolean>>({});
 
-  const candidates: Chip[] | undefined = mine?.map((m) => ({ _id: m._id, kind: m.kind, name: m.name }));
-
   function setField(fields: Record<string, string>) {
     setDraft((d) => ({ ...d, fields: { ...d.fields, ...fields } }));
-    queue({ fields });
+    const known = [...(candidates ?? []), ...createdNow.current];
+    queue({
+      fields: Object.fromEntries(
+        Object.entries(fields).map(([key, value]) => [key, longKeys.has(key) ? toStored(value, known) : value]),
+      ),
+    });
   }
 
   function setCustom(custom: Draft["custom"]) {
@@ -469,11 +466,21 @@ function EditorBody({
       case "longtext":
         return (
           <Row key={field.key} label={field.label} stacked>
-            <LongText
+            <MentionText
               label={field.label}
               value={draft.fields[field.key] ?? ""}
               placeholder={field.placeholder}
               onChange={(value) => setField({ [field.key]: value })}
+              candidates={mentionable}
+              selfId={entity._id}
+              onOpen={onOpenEntity}
+              onCreate={async (name) => {
+                const id = await createEntity({ kind: "character", name, ...(bookId ? { bookId } : {}) });
+                const chip: Chip = { _id: id, kind: "character", name: name.trim().replace(/s+/gu, " ") };
+                createdNow.current = [...createdNow.current, chip];
+                setCreated(createdNow.current);
+                return id;
+              }}
             />
           </Row>
         );
@@ -611,7 +618,8 @@ function EditorBody({
                     isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                   }`}
                 >
-                  <div className="overflow-hidden" inert={!isOpen}>
+                  {/* Clipped only while folded, so menus (@, links) can spill out. */}
+                  <div className={isOpen ? "min-h-0" : "min-h-0 overflow-hidden"} inert={!isOpen}>
                     <div className="pt-1">{section.fields.map(renderField)}</div>
                     {isFamily && familyRows.length > 0 && (
                       <div className="mt-3 rounded-xl bg-accent-soft/40 px-4 py-3">
@@ -769,8 +777,9 @@ export default function EntityEditor({
   onDeleted?: () => void;
 }) {
   const entity = useQuery(api.entities.get, { entityId });
+  const mine = useQuery(api.entities.listMine, {});
   const t = useT();
-  if (entity === undefined) return <Loading />;
+  if (entity === undefined || mine === undefined) return <Loading />;
   if (entity === null || !entity.canEdit) {
     return <NotFoundState title={t("Bu kayıt bulunamadı")} />;
   }

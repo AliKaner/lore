@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import type { EntityField } from "@/convex/entityKinds";
+import { markStyleOf, type EntityField } from "@/convex/entityKinds";
+import { parseMentions } from "@/lib/mentions";
 import { EntityChip, KindGlyph, eyebrow, type Chip } from "@/components/entity/shared";
 import FavoriteButton from "@/components/FavoriteButton";
 import Loading from "@/components/Loading";
@@ -33,6 +34,7 @@ export default function EntityView({
 }) {
   const entity = useQuery(api.entities.get, { entityId, bookId });
   const book = useQuery(api.books.get, { bookId });
+  const named = useQuery(api.entities.listForBook, { bookId });
   const communityOpen = useCommunityOpen();
   const t = useT();
   const kinds = useEntityKinds();
@@ -49,6 +51,28 @@ export default function EntityView({
       ))}
     </div>
   );
+  // "@" mentions link to things of this writing; others read as plain names.
+  const inBook = new Map((named ?? []).map((e) => [e._id as string, e]));
+  const withMentions = (text: string) =>
+    parseMentions(text).map((part, index) => {
+      if (typeof part === "string") return part;
+      const target = inBook.get(part.id);
+      if (!target) return <span key={index}>{part.name}</span>;
+      return (
+        <Link
+          key={index}
+          href={hrefFor(target._id)}
+          title={target.summary ?? undefined}
+          className={`underline decoration-[1.5px] underline-offset-[3px] transition-colors hover:text-accent ${
+            { character: "decoration-caramel", place: "decoration-sapphire decoration-dotted", thing: "decoration-sapphire decoration-dashed" }[
+              markStyleOf(target.kind)
+            ]
+          }`}
+        >
+          {target.name}
+        </Link>
+      );
+    });
   const pictures = entity.images.filter((image) => image.slot === null);
   const [portrait, ...rest] = pictures;
 
@@ -60,7 +84,7 @@ export default function EntityView({
         if (!value) return null;
         return (
           <Row key={field.key} label={field.label}>
-            <span className="whitespace-pre-line">{value}</span>
+            <span className="whitespace-pre-line">{field.type === "longtext" ? withMentions(value) : value}</span>
           </Row>
         );
       }

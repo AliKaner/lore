@@ -169,6 +169,17 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       bağlanabilir. Silince görseller, bağlantılar, favoriler ve yazı
       bağları temizlenir.
 
+- [x] **Zaman çizelgesi** (`/world/timeline`, `convex/events.ts`): olaylar
+      yıl (sayı, eksi olabilir) ve kendi takvimindeki tarih etiketiyle; kimler
+      katıldı (Evren kayıtları), hangi yazı ve bölümde anlatıldığı. Yıla göre
+      dikey çizelge, aynı yıl içinde ↑↓ ile sıra, yazıya göre süzme. Doğum
+      yılı girilen karakterlerin o olaydaki yaşı kendiliğinden yazılır.
+      Karakter sayfasında "Zaman çizelgesinde" listesi. Yalnızca yazarına özel
+- [x] **Soy ağacı** (`convex/family.ts`, `components/entity/FamilyTree.tsx`):
+      karakter sayfasında Babası/Annesi/Eşi bağlantılarından üç kuşak yukarı
+      ve aşağı; eşler yan yana, çocuklar ebeveynlerinin altında, çizgilerle.
+      Okur görünümünde yalnızca o yazıya dahil kişiler
+
 ### Renk temaları
 
 - [x] Dokuz tema: **Booktion** (varsayılan, sistemin açık/koyu ayarına uyar),
@@ -240,9 +251,19 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       çıkarıldı). En az 3 harf yazılınca ve en az 2 harf eklenecekse
       önerir; Türkçe I/ı, İ/i doğru. Hiçbir şey sunucuya gitmez. İlk
       kabul edilene kadar önerinin yanında küçük "Tab" ipucu çıkar
-- [ ] Yazım denetimi (hatalı kelimeye dalgalı çizgi): Hunspell sözlükleri
-      (en_US, tdd-ai/hunspell-tr) Web Worker'da; Türkçe eklemeli olduğu için
-      yanlış alarmı azaltmak gerekiyor — sıradaki adım
+- [x] **Yazım denetimi** (`lib/spellExtension.ts`, `lib/spell.worker.ts`,
+      `components/SpellMenu.tsx`; Mod menüsünde aç/kapa, varsayılan açık,
+      dokunmatikte kapalı): sözlükte olmayan kelimenin altı dalgalı çizilir,
+      tıklayınca öneriler, "Sözlüğüme ekle", "Bu yazıda yoksay". nspell (MIT)
+      Web Worker'da; sözlükler `public/dict` (Türkçe: Harun Reşit Zafer, MIT;
+      İngilizce: SCOWL, MIT/BSD). Yazılan kelime, Evren adları, büyük harfli
+      kısaltmalar ve kelime listesindeki sık kelimeler işaretlenmez (yanlış
+      alarmı azaltır). Tarayıcının kendi denetimi bu sırada kapalı. Türkçe
+      sözlük ~2 MB (sıkıştırılmış), ilk açılışta bir kez iner
+- [x] **Yazma sprinti** (`components/WritingSprint.tsx`, üst çubukta saat
+      simgesi): 10/15/25/45 dk, isteğe bağlı kelime hedefi; çubukta geri sayım
+      ve "+213/500"; bitince kaç kelime yazıldığı, dakika başına kelimede
+      cihazdaki rekor kırıldıysa "Yeni rekor"
 - [x] Akış kontrolünden düzeltmeler: boş masada önce "ilk yazın" kartı
       (hedef kartı yazı olunca çıkar); adsız yazıda çubukta "Ad ver"; kapak
       ve görsel yükleme düğmesi tasarıma uygun; dar ekranda çubuk etiketleri
@@ -350,7 +371,54 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
 - [ ] Bölüm sıralaması: ağaçta sıra yalnızca aynı yerden ayrılan dallar
       arasında anlamlı; şimdilik "ana hat yap" yeterli
 
+### Birlikte yazmak
+
+- [x] **Ortak yazarlar** (`convex/members.ts`, `bookMembers`): yazının sahibi
+      kullanıcı adıyla ekler (en fazla 20). Ortak yazar gizli yazıyı görür,
+      bölüm yazar (ana hattın devamı ya da dal), mantar panoda plan yapar,
+      değişiklik önerir; masasında "Birlikte yazdıkların". Ana hattı seçmek,
+      başkasının bölümünü silmek ve dışa aktarma sahipte kalır. Ortak yazar
+      ayrılabilir; erişim `convex/access.ts` içinde (`isMember`,
+      `canWriteBook`, üye-farkında `viewableBook`)
+- [x] **Değişiklik önerisi (pull request gibi)** (`convex/proposals.ts`,
+      `components/Proposals.tsx`, `/book/…/chapter/…/propose`): ortak yazar
+      yayındaki bir bölümün kendi halini ve bir not gönderir; bölümün yazarı ya
+      da yazının sahibi farkı kelime kelime görür (`lib/diff.ts`, +/− sayısı),
+      "Birleştir" ya da "Kapat". Birleştirmeden önceki metin sürüm geçmişinde
+      kalır; bölüm öneriden sonra değiştiyse uyarır. Yazı sayfasında sahibine
+      "N açık öneri"
+- [x] **Mantar pano** (`/book/…/board`, `convex/planCards.ts`): sahne/bölüm
+      kartları; başlık, kısa özet, renk (iğneyle), durum (Fikir / Yazılıyor /
+      Gözden geçir / Bitti), bağlı bölüm. Sürükle-bırakla sıralanır;
+      "Bölümlerden kart oluştur" ana hattaki bölümlere kart açar. Sahip ve
+      ortak yazarlar birlikte kullanır
+- [x] Dallar ve ana hat zaten vardı: herkesin kendi dalı, sahibinin seçtiği
+      ana hat ("ana hat yap"), sürüm geçmişi
+
+### Okuma ve dışa aktarma (ek)
+
+- [x] **Sesli okuma** (`components/ReadAloud.tsx`, okuma sayfasında "Sesli
+      oku"): tarayıcının sesiyle, yazının dilinde; okunan paragraf işaretlenir,
+      tıklanan paragraftan devam eder; duraklat, önceki/sonraki, hız
+      0.8–1.5×. Uzun cümleler parçalanır (bazı sesler uzun metinde susuyor)
+- [x] **EPUB** (`lib/epub.ts`, "Dışa aktar"da "E-kitap (EPUB)"): EPUB 3 (+
+      EPUB 2 içindekiler), kapak, başlık sayfası (yazar adıyla), bölüm başına
+      dosya; yazar notları girmez. Kindle'a "Send to Kindle" ile
+
 ### Güven
+
+- [ ] **Şifre kurtarma (e-posta)** — hazırlık: Convex Auth'un
+      `email-password` yöntemi (aynı `authPassword` bileşeni) e-posta
+      doğrulama ve 10 dakikalık sıfırlama bağlantısı sağlıyor; e-postayı
+      yalnızca **Resend** ile gönderiyor (`@convex-dev/resend` bileşeni).
+      Kullanıcı adıyla açılmış hesap da Hesap sayfasında e-posta ekleyebilir
+      (`startChangeEmail` oturum + mevcut şifreyle çalışır), sonra "Şifremi
+      unuttum" → `startPasswordRecovery` → `/reset-password` sayfası →
+      `completePasswordRecovery`. Gerekenler: (1) Resend hesabı, (2)
+      booktions.com'u Resend'de doğrulama (DNS kayıtları), (3)
+      `npx convex env set RESEND_API_KEY …` ve `SITE_URL` (dev ve prod),
+      (4) `authEmail` ve `resend` bileşenlerini bağlamak, Hesap ve giriş
+      sayfalarına akışı eklemek
 
 - [x] **Kullanıcı adı + şifre ile giriş** (`convex/auth.ts`,
       @convex-dev/auth `username-password` yöntemi). `/sign-in`'de "Giriş yap" /

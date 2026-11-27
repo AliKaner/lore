@@ -22,6 +22,11 @@ type Sweepable = {
     | "boardItems"
     | "chapters"
     | "chapterVersions"
+    | "eventEntities"
+    | "events"
+    | "planCards"
+    | "bookMembers"
+    | "proposals"
   >;
 };
 
@@ -96,6 +101,25 @@ export const purgeTarget = internalMutation({
           .withIndex("by_chapter_and_time", (q) => q.eq("chapterId", chapterId))
           .take(BATCH);
         more = (await sweep(ctx, versions)) || more;
+        // Timeline events that pointed at it keep everything but the link.
+        const told = await ctx.db
+          .query("events")
+          .withIndex("by_chapter", (q) => q.eq("chapterId", chapterId))
+          .take(BATCH);
+        for (const event of told) await ctx.db.patch(event._id, { chapterId: undefined });
+        more = told.length === BATCH || more;
+        // Corkboard cards keep their text; suggestions go with the chapter.
+        const cards = await ctx.db
+          .query("planCards")
+          .withIndex("by_chapter", (q) => q.eq("chapterId", chapterId))
+          .take(BATCH);
+        for (const card of cards) await ctx.db.patch(card._id, { chapterId: undefined });
+        more = cards.length === BATCH || more;
+        const proposals = await ctx.db
+          .query("proposals")
+          .withIndex("by_chapter_and_status", (q) => q.eq("chapterId", chapterId))
+          .take(BATCH);
+        more = (await sweep(ctx, proposals)) || more;
       }
     }
 
@@ -122,6 +146,11 @@ export const purgeTarget = internalMutation({
         more = (await sweep(ctx, inBooks)) || more;
         more = (await sweep(ctx, outgoing)) || more;
         more = (await sweep(ctx, incoming)) || more;
+        const inEvents = await ctx.db
+          .query("eventEntities")
+          .withIndex("by_entity", (q) => q.eq("entityId", entityId))
+          .take(BATCH);
+        more = (await sweep(ctx, inEvents)) || more;
       }
     }
 
@@ -166,6 +195,36 @@ export const purgeBook = internalMutation({
       if (item.storageId) await ctx.storage.delete(item.storageId);
     }
     more = (await sweep(ctx, boardItems)) || more;
+
+    const cards = await ctx.db
+      .query("planCards")
+      .withIndex("by_book_and_order", (q) => q.eq("bookId", bookId))
+      .take(BATCH);
+    more = (await sweep(ctx, cards)) || more;
+    const members = await ctx.db
+      .query("bookMembers")
+      .withIndex("by_book", (q) => q.eq("bookId", bookId))
+      .take(BATCH);
+    more = (await sweep(ctx, members)) || more;
+    const proposals = await ctx.db
+      .query("proposals")
+      .withIndex("by_book_and_status", (q) => q.eq("bookId", bookId))
+      .take(BATCH);
+    more = (await sweep(ctx, proposals)) || more;
+
+    // The writing's timeline events, with who took part in them.
+    const events = await ctx.db
+      .query("events")
+      .withIndex("by_book", (q) => q.eq("bookId", bookId))
+      .take(50);
+    for (const event of events) {
+      const rows = await ctx.db
+        .query("eventEntities")
+        .withIndex("by_event", (q) => q.eq("eventId", event._id))
+        .take(BATCH);
+      await sweep(ctx, rows);
+    }
+    more = (await sweep(ctx, events)) || events.length === 50 || more;
 
     if (more) {
       await ctx.scheduler.runAfter(0, internal.cleanup.purgeBook, { bookId });

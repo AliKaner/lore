@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { internal } from "./_generated/api";
 import { requireUserId } from "./users";
+import { isMember } from "./access";
 import { bookLanguageValidator, writingKindValidator } from "./writingKinds";
 
 export const create = mutation({
@@ -36,8 +37,8 @@ export const get = query({
     if (!book) return null;
     if (book.visibility === "public") return book;
     const userId = await requireUserId(ctx).catch(() => null);
-    if (userId !== book.ownerId) return null;
-    return book;
+    if (userId === book.ownerId || (await isMember(ctx, book._id, userId))) return book;
+    return null;
   },
 });
 

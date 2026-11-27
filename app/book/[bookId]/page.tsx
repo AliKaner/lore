@@ -17,6 +17,7 @@ import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
 import NotFoundState from "@/components/NotFoundState";
 import ExportMenu from "@/components/ExportMenu";
+import CoAuthors from "@/components/CoAuthors";
 import { toastErrorMessage, useToast } from "@/components/Toaster";
 import { buttonPrimary } from "@/lib/ui";
 import { useEntityKinds, useKindConfig } from "@/lib/localized";
@@ -35,6 +36,8 @@ export default function BookPage({
   const chapters = useQuery(api.chapters.getTree, { bookId });
   const entities = useQuery(api.entities.listForBook, { bookId });
   const me = useQuery(api.users.me);
+  const role = useQuery(api.members.myRole, { bookId });
+  const openProposals = useQuery(api.proposals.openCount, { bookId });
   const setBookCover = useMutation(api.files.setBookCover);
   const showToast = useToast();
   const communityOpen = useCommunityOpen();
@@ -66,6 +69,8 @@ export default function BookPage({
   }
 
   const isOwner = me?._id === book.ownerId;
+  // Owner and co-authors write here and plan on the corkboard.
+  const isWriter = role === "owner" || role === "coauthor";
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
@@ -109,6 +114,28 @@ export default function BookPage({
         )}
         <ShareButton targetType="book" targetId={bookId} shareCount={book.shareCount} />
         {isOwner && <ExportMenu bookId={bookId} />}
+        {isWriter && (
+          <Link
+            href={`/book/${bookId}/board`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-sm transition-colors hover:border-border-hover"
+          >
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-caramel" />
+            {t("Mantar pano")}
+          </Link>
+        )}
+        {isOwner && (
+          <Link
+            href={`/world/timeline?book=${bookId}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-sm transition-colors hover:border-border-hover"
+          >
+            {t("Zaman çizelgesi")}
+          </Link>
+        )}
+        {isOwner && !!openProposals && (
+          <span className="rounded-full bg-caramel-soft px-3 py-1 text-sm">
+            {t("{n} açık öneri", { n: openProposals })}
+          </span>
+        )}
         {communityOpen && <FavoriteButton targetType="book" targetId={bookId} />}
         {communityOpen && !isOwner && me && (
           <ReportButton targetType="book" targetId={bookId} />
@@ -122,7 +149,7 @@ export default function BookPage({
         >
           {t("Okumaya başla")}
         </Link>
-      ) : isOwner ? (
+      ) : isOwner || role === "coauthor" ? (
         <Link href={`/book/${bookId}/write`} className={`${buttonPrimary} mb-6`}>
           {cfg.firstUnitCta}
         </Link>
@@ -174,6 +201,8 @@ export default function BookPage({
           </div>
         </section>
       )}
+
+      {isWriter && <CoAuthors bookId={bookId} />}
 
       {isOwner && (
         <div className="mt-12 border-t border-border pt-4">

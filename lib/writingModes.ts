@@ -15,6 +15,8 @@ export type WritingModes = {
   volume: number;
   // The rest of the word shows faintly; Tab takes it.
   complete: boolean;
+  // Unknown words get a wavy line; a click shows suggestions.
+  spell: boolean;
 };
 
 export const SOUNDS: { id: TypingSound; label: string; hint: string }[] = [
@@ -26,7 +28,7 @@ export const SOUNDS: { id: TypingSound; label: string; hint: string }[] = [
   { id: "kalem", label: "Kalem", hint: "Kâğıtta kurşun kalem hışırtısı" },
 ];
 
-const DEFAULTS: WritingModes = { typewriter: false, focus: false, sound: "none", volume: 0.6, complete: true };
+const DEFAULTS: WritingModes = { typewriter: false, focus: false, sound: "none", volume: 0.6, complete: true, spell: true };
 const KEY = "booktion:yazma-modu";
 const listeners = new Set<() => void>();
 let cached: { raw: string | null; value: WritingModes } | null = null;

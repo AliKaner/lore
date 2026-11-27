@@ -10,9 +10,9 @@ export type ExportChapter = ExportData["chapters"][number];
 export type Scope = "main" | "all";
 
 type Mark = { type: string; attrs?: Record<string, unknown> };
-type Node = { type?: string; text?: string; marks?: Mark[]; attrs?: Record<string, unknown>; content?: Node[] };
+export type Node = { type?: string; text?: string; marks?: Mark[]; attrs?: Record<string, unknown>; content?: Node[] };
 
-function parse(content: string): Node {
+export function parse(content: string): Node {
   try {
     return JSON.parse(content) as Node;
   } catch {
@@ -48,7 +48,7 @@ export function slugify(text: string) {
   return slug || "yazi";
 }
 
-function chapterHeading(chapter: ExportChapter) {
+export function chapterHeading(chapter: ExportChapter) {
   const branch = chapter.onMainLine ? "" : "Dal · ";
   const draft = chapter.status === "draft" ? " (taslak)" : "";
   return `${branch}${chapter.title}${draft}`;

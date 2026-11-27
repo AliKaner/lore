@@ -14,6 +14,8 @@ import {
 } from "@/convex/entityKinds";
 import LinkPicker from "@/components/entity/LinkPicker";
 import MentionText from "@/components/entity/MentionText";
+import FamilyTree from "@/components/entity/FamilyTree";
+import EntityEvents from "@/components/entity/EntityEvents";
 import { toDisplay, toStored } from "@/lib/mentions";
 import { EntityChip, KindGlyph, errorText, eyebrow, useImageUpload, type Chip } from "@/components/entity/shared";
 import DeleteButton from "@/components/DeleteButton";
@@ -687,6 +689,10 @@ function EditorBody({
               )}
             </div>
           </section>
+
+          {entity.kind === "character" && <FamilyTree entityId={entity._id} onOpen={onOpenEntity} />}
+
+          {!compact && <EntityEvents entityId={entity._id} />}
 
           {entity.incoming.length > 0 && (
             <section>

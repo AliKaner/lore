@@ -209,6 +209,7 @@ function DeskRow({ book, now }: { book: DeskBook; now: number }) {
 export default function MyWritingsPage() {
   const me = useQuery(api.users.me);
   const books = useQuery(api.books.myDesk, me ? {} : "skip");
+  const shared = useQuery(api.members.sharedWithMe, me ? {} : "skip");
   const now = useNow();
   const { t, num } = useI18n();
 
@@ -277,6 +278,28 @@ export default function MyWritingsPage() {
             {t("Bir yazıyı okutmak için sayfasındaki “Paylaş” düğmesiyle bağlantısını gönder.")}
           </p>
         </>
+      )}
+
+      {shared && shared.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t("Birlikte yazdıkların")}</h2>
+          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+            {shared.map((book) => (
+              <li key={book._id} className="flex items-center gap-4 px-4 py-3.5 sm:px-5">
+                <Link href={`/book/${book._id}`} className="min-w-0 flex-1">
+                  <p className="truncate font-display text-xl leading-snug hover:text-accent">{book.title}</p>
+                  <p className="text-xs text-muted">{t("@{name} ile birlikte", { name: book.ownerName ?? "—" })}</p>
+                </Link>
+                <Link href={`/book/${book._id}/board`} className="hidden rounded-full px-3 py-1.5 text-sm text-muted hover:bg-accent-soft/60 hover:text-foreground sm:inline-flex">
+                  {t("Mantar pano")}
+                </Link>
+                <Link href={book.rootChapterId ? `/book/${book._id}/chapter/${book.rootChapterId}` : `/book/${book._id}/write`} className="rounded-full border border-border px-4 py-1.5 text-sm hover:border-accent hover:text-accent">
+                  {book.rootChapterId ? t("Oku") : t("Başla")}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </main>
   );

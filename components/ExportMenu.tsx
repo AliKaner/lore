@@ -6,7 +6,7 @@ import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { download, slugify, toDocx, toMarkdown, type Scope } from "@/lib/exportFormats";
-import { useT } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
 
 function Row({
   title,
@@ -48,14 +48,15 @@ function Row({
   );
 }
 
-// "Take it with you": the writing as Word, Markdown or a print-ready PDF.
+// "Take it with you": the writing as Word, an e-book, Markdown or a
+// print-ready PDF.
 export default function ExportMenu({ bookId }: { bookId: Id<"books"> }) {
   const convex = useConvex();
   const [open, setOpen] = useState(false);
   const [scope, setScope] = useState<Scope>("main");
-  const [busy, setBusy] = useState<"docx" | "md" | null>(null);
+  const [busy, setBusy] = useState<"docx" | "md" | "epub" | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const t = useT();
+  const { t, locale } = useI18n();
 
   useEffect(() => {
     if (!open) return;
@@ -64,7 +65,7 @@ export default function ExportMenu({ bookId }: { bookId: Id<"books"> }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  async function run(format: "docx" | "md") {
+  async function run(format: "docx" | "md" | "epub") {
     setBusy(format);
     setError(null);
     try {
@@ -74,6 +75,9 @@ export default function ExportMenu({ bookId }: { bookId: Id<"books"> }) {
       if (format === "md") {
         const text = toMarkdown(data, { scope, includeNotes: false });
         download(new Blob([text], { type: "text/markdown;charset=utf-8" }), `${name}.md`);
+      } else if (format === "epub") {
+        const { toEpub } = await import("@/lib/epub");
+        download(await toEpub(data, scope, locale), `${name}.epub`);
       } else {
         download(await toDocx(data, scope), `${name}.docx`);
       }
@@ -108,6 +112,7 @@ export default function ExportMenu({ bookId }: { bookId: Id<"books"> }) {
               detail={t("Baskıya hazır sayfa; “PDF olarak kaydet”")}
               href={`/book/${bookId}/print${scope === "all" ? "?scope=all" : ""}`}
             />
+            <Row badge="epub" title={t("E-kitap (EPUB)")} detail={t("Kindle, Apple Books, Kobo; kapak ve içindekilerle")} busy={busy === "epub"} onClick={() => void run("epub")} />
             <Row badge="md" title="Markdown" detail={t("Düz metin; her yerde açılır")} busy={busy === "md"} onClick={() => void run("md")} />
             <label className="mt-1 flex cursor-pointer items-center gap-2 border-t border-border px-3 pb-1 pt-3 text-xs text-muted">
               <input

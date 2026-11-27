@@ -24,7 +24,9 @@ export default function NewBranchChapterPage({
   const me = useQuery(api.users.me);
   const book = useQuery(api.books.get, { bookId });
 
-  const isOwner = !!me && !!book && me._id === book.ownerId;
+  const role = useQuery(api.members.myRole, { bookId });
+  // The owner and co-authors continue the writing; others write a branch.
+  const isOwner = role === "owner" || role === "coauthor";
   const t = useT();
   const localized = useKindConfig(book);
   const cfg = book ? localized : null;

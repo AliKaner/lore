@@ -11,6 +11,8 @@ import StarterKit from "@tiptap/starter-kit";
 import { Focus, Placeholder } from "@tiptap/extensions";
 import { keyKind, playKey, preloadSound } from "@/lib/typingSounds";
 import { loadWords, type Lang } from "@/lib/completion";
+import { SpellCheck } from "@/lib/spellExtension";
+import SpellMenu from "@/components/SpellMenu";
 import type { WritingModes } from "@/lib/writingModes";
 import { useEffect, useEffectEvent, useImperativeHandle, useRef, type Ref, type RefObject } from "react";
 import type { EditorView } from "@tiptap/pm/view";
@@ -256,6 +258,17 @@ function useCompletion(editor: Editor | null, lang: Lang | undefined, on: boolea
   }, [editor, lang, on, names]);
 }
 
+// Spell checking in the writing's language, in a worker. The browser's own
+// checker is turned off while ours runs, so words aren't underlined twice.
+function useSpellCheck(editor: Editor | null, lang: Lang | undefined, on: boolean, names: NameEntry[]) {
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) return;
+    const enabled = on && !!lang && !window.matchMedia("(pointer: coarse)").matches;
+    editor.view.dom.setAttribute("spellcheck", enabled ? "false" : "true");
+    editor.commands.setSpellCheck({ enabled, lang: lang ?? null, names: names.map((n) => n.name) });
+  }, [editor, lang, on, names]);
+}
+
 // Keeps name highlighting and bionic reading in step with props.
 function useReadingAids(editor: Editor | null, names: NameEntry[], bionic: boolean) {
   useEffect(() => {
@@ -327,6 +340,7 @@ export function ChapterEditor({
       HeldSelection,
       Pagination,
       WordCompletion,
+      SpellCheck,
       Focus.configure({ className: "has-focus", mode: "shallowest" }),
       Placeholder.configure({ placeholder }),
     ],
@@ -342,6 +356,7 @@ export function ChapterEditor({
   useTypewriter(editor, modes?.typewriter ?? false);
   useTypingSounds(editor, modes?.sound ?? "none", modes?.volume ?? 0);
   useCompletion(editor, lang, modes?.complete ?? false, names);
+  useSpellCheck(editor, lang, modes?.spell ?? false, names);
 
   useEffect(() => {
     return () => editor?.destroy();
@@ -376,6 +391,7 @@ export function ChapterEditor({
     <>
       <EditorContent editor={editor} className={`${writingProse} ${modes?.focus ? "focus-mode" : ""}`} />
       <SelectionMenu ref={menuRef} editor={editor} names={names} onAddName={onAddName} />
+      {lang && modes?.spell && <SpellMenu editor={editor} lang={lang} />}
     </>
   );
 }

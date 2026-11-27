@@ -1,0 +1,14 @@
+Spelling dictionaries (Hunspell format), checked in the browser with nspell
+(MIT, https://github.com/wooorm/nspell).
+
+tr.aff, tr.dic
+  Turkish spellcheck dictionary by Harun Reşit Zafer, MIT License
+  (LICENSE-tr.txt). Source:
+  http://extensions.openoffice.org/en/project/turkish-spellcheck-dictionary
+  Packaged as dictionary-tr 2.0.0 by wooorm/dictionaries.
+
+en.aff, en.dic
+  English (US) dictionary from SCOWL / wordlist.aspell.net,
+  MIT AND BSD licenses (LICENSE-en.txt). Source:
+  http://wordlist.aspell.net/dicts/
+  Packaged as dictionary-en 4.0.0 by wooorm/dictionaries.

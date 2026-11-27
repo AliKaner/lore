@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
+import WritingSprint from "@/components/WritingSprint";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -449,7 +450,7 @@ export default function ChapterForm({
           >
             ←
           </Link>
-          <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
             <p className="hidden min-w-0 truncate text-sm sm:block">
               <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sapphire">
                 {cfg.label}
@@ -468,6 +469,7 @@ export default function ChapterForm({
             </span>
           </div>
           <WritingGoalBadge />
+          <WritingSprint words={words} />
           <PaperPicker paper={paper} pages={pageLayout.pages} onChoose={choosePaper} />
           <WritingModeMenu modes={modes} onChange={changeModes} />
           <span className="hidden text-xs tabular-nums text-muted xl:inline">

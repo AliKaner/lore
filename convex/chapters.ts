@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { requireUserId } from "./users";
 import { isOpenToBranches } from "./writingKinds";
-import { canViewChapter, optionalUserId, viewableBook } from "./access";
+import { canViewChapter, isMember, optionalUserId, viewableBook } from "./access";
 import { snapshotBeforeChange, wordsIn } from "./versions";
 import { recordDeskChange } from "./desk";
 import { recordWriting } from "./goals";
@@ -46,6 +46,8 @@ async function assertCanBranch(
   parentChapterId: Id<"chapters"> | undefined,
 ) {
   if (book.ownerId === userId) return;
+  // Co-authors write in it as its owner does.
+  if (await isMember(ctx, book._id, userId)) return;
   if (!isOpenToBranches(book)) {
     throw new Error("Bu yazıya yalnızca yazarı ekleme yapabilir.");
   }

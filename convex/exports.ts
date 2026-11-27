@@ -2,6 +2,7 @@ import { query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { optionalUserId } from "./access";
+import { components } from "./_generated/api";
 
 type Chapter = Doc<"chapters">;
 
@@ -61,6 +62,10 @@ export const bookForExport = query({
     };
     walk("root", 0, true);
 
+    // For the e-book: who wrote it and its cover.
+    const author: string | null = await ctx.runQuery(components.authUsername.public.getUsername, { userId });
+    const coverUrl = book.coverStorageId ? await ctx.storage.getUrl(book.coverStorageId) : null;
+
     return {
       book: {
         _id: book._id,
@@ -69,6 +74,9 @@ export const bookForExport = query({
         kind: book.kind ?? "book",
         visibility: book.visibility,
         createdAt: book.createdAt,
+        language: book.language ?? null,
+        author,
+        coverUrl,
       },
       chapters: ordered,
     };

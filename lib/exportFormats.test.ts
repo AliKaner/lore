@@ -26,6 +26,9 @@ const data: ExportData = {
     kind: "book",
     visibility: "private",
     createdAt: 0,
+    language: "tr",
+    author: "yazar",
+    coverUrl: null,
   },
   chapters: [
     chapter("Sis", {

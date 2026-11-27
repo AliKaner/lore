@@ -31,6 +31,10 @@ export function buildIndex(words: string[]): WordIndex {
 
 const loads = new Map<Lang, Promise<WordIndex | null>>();
 const ready = new Map<Lang, WordIndex>();
+const common = new Map<Lang, Set<string>>();
+
+// Whether a lowercased word is on the language's list (so spelled right).
+export const isCommonWord = (lang: Lang, lower: string) => common.get(lang)?.has(lower) ?? false;
 
 // The language's list, fetched once; null if it couldn't be loaded.
 export function loadWords(lang: Lang): Promise<WordIndex | null> {
@@ -39,8 +43,10 @@ export function loadWords(lang: Lang): Promise<WordIndex | null> {
     pending = fetch(`/words/${lang}.txt`)
       .then((res) => (res.ok ? res.text() : Promise.reject(new Error(String(res.status)))))
       .then((text) => {
-        const index = buildIndex(text.split(/\r?\n/u).filter(Boolean));
+        const words = text.split(/\r?\n/u).filter(Boolean);
+        const index = buildIndex(words);
         ready.set(lang, index);
+        common.set(lang, new Set(words));
         return index;
       })
       .catch(() => {

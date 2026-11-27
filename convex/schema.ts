@@ -136,6 +136,77 @@ export default defineSchema({
     .index("by_from_and_role", ["fromId", "role"])
     .index("by_to", ["toId"]),
 
+  // The writer's timeline: what happened when, who was there, and which
+  // chapter tells it. Years are numbers (they may be negative or from an
+  // invented calendar); the label says it in the world's own words.
+  events: defineTable({
+    creatorId: v.id("users"),
+    bookId: v.optional(v.id("books")),
+    chapterId: v.optional(v.id("chapters")),
+    title: v.string(),
+    description: v.optional(v.string()),
+    year: v.optional(v.number()),
+    dateLabel: v.optional(v.string()),
+    // Order among events of the same year (or with no year).
+    order: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_creator_and_year", ["creatorId", "year"])
+    .index("by_book", ["bookId"])
+    .index("by_chapter", ["chapterId"]),
+
+  // The writing's corkboard: index cards for scenes and chapters, in the
+  // writer's own order, each with a short synopsis and where it stands.
+  planCards: defineTable({
+    bookId: v.id("books"),
+    title: v.string(),
+    synopsis: v.optional(v.string()),
+    color: v.union(v.literal("plain"), v.literal("caramel"), v.literal("sapphire"), v.literal("rose"), v.literal("sage")),
+    status: v.union(v.literal("idea"), v.literal("writing"), v.literal("revise"), v.literal("done")),
+    order: v.number(),
+    chapterId: v.optional(v.id("chapters")),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_book_and_order", ["bookId", "order"])
+    .index("by_chapter", ["chapterId"]),
+
+  // People who write a writing together with its owner.
+  bookMembers: defineTable({
+    bookId: v.id("books"),
+    userId: v.id("users"),
+    addedAt: v.number(),
+  })
+    .index("by_book", ["bookId"])
+    .index("by_user", ["userId"])
+    .index("by_book_and_user", ["bookId", "userId"]),
+
+  // A suggested change to a chapter, like a pull request: its text, until
+  // the chapter's author or the writing's owner merges or closes it.
+  proposals: defineTable({
+    bookId: v.id("books"),
+    chapterId: v.id("chapters"),
+    proposerId: v.id("users"),
+    note: v.optional(v.string()),
+    title: v.string(),
+    content: v.string(),
+    // The chapter text it was written against, to show what changed.
+    baseContent: v.string(),
+    status: v.union(v.literal("open"), v.literal("merged"), v.literal("closed")),
+    createdAt: v.number(),
+    decidedAt: v.optional(v.number()),
+  })
+    .index("by_chapter_and_status", ["chapterId", "status"])
+    .index("by_book_and_status", ["bookId", "status"]),
+
+  // Who or what took part in an event.
+  eventEntities: defineTable({
+    eventId: v.id("events"),
+    entityId: v.id("entities"),
+  })
+    .index("by_event", ["eventId"])
+    .index("by_entity", ["entityId"]),
+
   // Which writings an entity is part of; its name is highlighted there.
   bookEntities: defineTable({
     bookId: v.id("books"),

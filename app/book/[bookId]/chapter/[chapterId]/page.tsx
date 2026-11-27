@@ -1,6 +1,8 @@
 "use client";
 
-import { use, useEffect, useEffectEvent, useMemo, useState } from "react";
+import { use, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
+import ReadAloud from "@/components/ReadAloud";
+import Proposals from "@/components/Proposals";
 import { useRouter } from "next/navigation";
 import SpeedReader from "@/components/SpeedReader";
 import { useBookNames } from "@/lib/bookNames";
@@ -41,6 +43,7 @@ export default function ChapterPage({
   });
   const me = useQuery(api.users.me);
   const book = useQuery(api.books.get, { bookId });
+  const role = useQuery(api.members.myRole, { bookId });
   const markRead = useMutation(api.reading.markChapterRead);
   const markCanonical = useMutation(api.chapters.markCanonical);
   const showToast = useToast();
@@ -49,7 +52,8 @@ export default function ChapterPage({
   const [bionic, setBionic] = useState(() => readPref("bionic", false));
   const [showNames, setShowNames] = useState(() => readPref("names", true));
   const [flowOpen, setFlowOpen] = useState(false);
-  const { t, num } = useI18n();
+  const { t, num, locale } = useI18n();
+  const readerRef = useRef<HTMLDivElement>(null);
   const localizedCfg = useKindConfig(book);
   const content = chapter?.content ?? "";
   const words = useMemo(() => flowWords(content), [content]);
@@ -110,7 +114,9 @@ export default function ChapterPage({
 
   const canBranch = me !== null && me !== undefined;
   const isAuthor = me?._id === chapter.authorId;
-  const isBookOwner = me?._id === book?.ownerId;
+  // The owner decides the main line; co-authors write on as the owner does.
+  const ownsBook = me?._id === book?.ownerId;
+  const isBookOwner = ownsBook || role === "coauthor";
   const cfg = localizedCfg;
   const writeNextLabel = isBookOwner
     ? cfg.continueCta
@@ -188,6 +194,7 @@ export default function ChapterPage({
         >
           ▶ {t("Akış ile oku")}
         </button>
+        {words.length > 0 && <ReadAloud container={readerRef} lang={book?.language ?? locale} />}
         {bookNames.length > 0 && (
           <label className="inline-flex cursor-pointer items-center gap-1.5 text-muted">
             <input
@@ -206,12 +213,14 @@ export default function ChapterPage({
         </span>
       </div>
 
-      <ChapterReader
-        key={chapterId}
-        content={chapter.content}
-        names={showNames ? bookNames : NO_NAMES}
-        bionic={bionic}
-      />
+      <div ref={readerRef}>
+        <ChapterReader
+          key={chapterId}
+          content={chapter.content}
+          names={showNames ? bookNames : NO_NAMES}
+          bionic={bionic}
+        />
+      </div>
 
       {flowOpen && (
         <SpeedReader words={words} title={chapter.title} onClose={() => setFlowOpen(false)} />
@@ -242,6 +251,8 @@ export default function ChapterPage({
           <ReportButton targetType="chapter" targetId={chapterId} />
         )}
       </div>
+
+      {chapter.status === "published" && <Proposals bookId={bookId} chapterId={chapterId} />}
 
       {/* Turning the page */}
       <nav aria-label="Bölümler arasında" className="mt-12 grid gap-3 sm:grid-cols-2">
@@ -297,7 +308,7 @@ export default function ChapterPage({
                 >
                   {child.title}
                 </Link>
-                {isBookOwner && (
+                {ownsBook && (
                   <button
                     onClick={() => void handleMarkCanonical(child._id)}
                     className={buttonLink}
@@ -313,7 +324,7 @@ export default function ChapterPage({
 
       {communityOpen && <CommentSection targetType="chapter" targetId={chapterId} />}
 
-      {(isAuthor || isBookOwner) && children?.length === 0 && (
+      {(isAuthor || ownsBook) && children?.length === 0 && (
         <div className="mt-12 border-t border-border pt-4">
           <DeleteButton
             target={{ kind: "chapter", id: chapterId }}

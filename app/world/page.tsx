@@ -117,11 +117,22 @@ function Universe() {
             {t("Hikâyelerindeki her adın kendi sayfası: kim kimin çocuğu, hangi krallığa bağlı, haritası, silahı. Bir kere oluştur, istediğin yazıda kullan.")}
           </p>
         </div>
-        {!creating && (
-          <button type="button" onClick={() => setCreating(true)} className={`${buttonPrimary} h-11 shrink-0 rounded-xl px-5`}>
-            {t("+ Yeni ekle")}
-          </button>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/world/timeline"
+            className="inline-flex h-11 items-center gap-2 rounded-xl border border-border px-4 text-sm transition-colors hover:border-accent hover:text-accent"
+          >
+            <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M3 10h14M6 7v6M10 5v10M14 8v4" />
+            </svg>
+            {t("Zaman çizelgesi")}
+          </Link>
+          {!creating && (
+            <button type="button" onClick={() => setCreating(true)} className={`${buttonPrimary} h-11 shrink-0 rounded-xl px-5`}>
+              {t("+ Yeni ekle")}
+            </button>
+          )}
+        </div>
       </div>
 
       {creating && <NewEntity initialKind={kind ?? "character"} onClose={() => setCreating(false)} />}

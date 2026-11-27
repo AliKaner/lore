@@ -1,0 +1,14 @@
+Word lists for completion (tr.txt, en.txt)
+
+Derived from FrequencyWords by Hermit Dave
+https://github.com/hermitdave/FrequencyWords
+(content/2018/tr/tr_50k.txt and content/2018/en/en_50k.txt,
+built from OpenSubtitles 2018, http://www.opensubtitles.org)
+
+Changes: kept words of four or more letters, in order of frequency, at
+most 40,000 per language; dropped entries with digits or punctuation,
+foreign letters, slurs and vulgarities; lowercased; frequencies removed.
+
+The original lists and these derived lists are licensed under the
+Creative Commons Attribution-ShareAlike 4.0 International License
+(CC BY-SA 4.0): https://creativecommons.org/licenses/by-sa/4.0/

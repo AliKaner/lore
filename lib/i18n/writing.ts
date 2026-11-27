@@ -189,4 +189,8 @@ export const WRITING: Record<string, Entry> = {
   "Okurların gördüğü yayındaki metni aç. Değişikliklerin bu cihazda bekler.": "Open the published text your readers see. Your changes wait on this device.",
   "Taslak: bunu yalnızca sen görüyorsun": "Draft: only you can see this",
   "Yazın gizli: bunu yalnızca sen görüyorsun": "Your writing is private: only you can see this",
+  "Kelime tamamlama": "Word completion",
+  "Yazdığın kelimenin devamı soluk görünür, Tab ile alırsın. Önce kendi kelimelerin ve karakterlerin gelir.": "The rest of the word shows faintly; press Tab to take it. Your own words and characters come first.",
+  "Yazının dili": "Language of the writing",
+  "Kelime tamamlama bu dilin sözlüğünü kullanır.": "Word completion uses this language’s word list.",
 };

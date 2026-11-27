@@ -10,6 +10,7 @@ import {
 import StarterKit from "@tiptap/starter-kit";
 import { Focus, Placeholder } from "@tiptap/extensions";
 import { keyKind, playKey, preloadSound } from "@/lib/typingSounds";
+import { loadWords, type Lang } from "@/lib/completion";
 import type { WritingModes } from "@/lib/writingModes";
 import { useEffect, useEffectEvent, useImperativeHandle, useRef, type Ref, type RefObject } from "react";
 import type { EditorView } from "@tiptap/pm/view";
@@ -23,6 +24,7 @@ import {
   HeldSelection,
   Pagination,
   ReadingAids,
+  WordCompletion,
   type NameEntry,
   type NoteEntry,
   type PageBreak,
@@ -234,6 +236,26 @@ function useTypingSounds(editor: Editor | null, sound: WritingModes["sound"], vo
   }, [editor, sound, volume]);
 }
 
+// Word completion in the writing's language. Off on touch screens, where
+// the phone's keyboard already suggests words.
+function useCompletion(editor: Editor | null, lang: Lang | undefined, on: boolean, names: NameEntry[]) {
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) return;
+    if (lang) editor.view.dom.setAttribute("lang", lang);
+    const enabled = on && !!lang && !window.matchMedia("(pointer: coarse)").matches;
+    const apply = () => {
+      if (editor.isDestroyed) return;
+      editor.commands.setCompletion({ enabled, lang: lang ?? null, names: names.map((n) => n.name) });
+    };
+    apply();
+    let live = true;
+    if (enabled && lang) void loadWords(lang).then(() => live && apply());
+    return () => {
+      live = false;
+    };
+  }, [editor, lang, on, names]);
+}
+
 // Keeps name highlighting and bionic reading in step with props.
 function useReadingAids(editor: Editor | null, names: NameEntry[], bionic: boolean) {
   useEffect(() => {
@@ -280,6 +302,7 @@ export function ChapterEditor({
   placeholder = "Yazmaya başla…",
   pageView,
   modes,
+  lang,
   ref,
 }: {
   content: string;
@@ -291,6 +314,7 @@ export function ChapterEditor({
   placeholder?: string;
   pageView?: PageView;
   modes?: WritingModes;
+  lang?: Lang;
   ref?: Ref<ChapterEditorHandle>;
 }) {
   const menuRef = useRef<SelectionMenuHandle>(null);
@@ -302,6 +326,7 @@ export function ChapterEditor({
       ReadingAids,
       HeldSelection,
       Pagination,
+      WordCompletion,
       Focus.configure({ className: "has-focus", mode: "shallowest" }),
       Placeholder.configure({ placeholder }),
     ],
@@ -316,6 +341,7 @@ export function ChapterEditor({
   usePagination(editor, pageView);
   useTypewriter(editor, modes?.typewriter ?? false);
   useTypingSounds(editor, modes?.sound ?? "none", modes?.volume ?? 0);
+  useCompletion(editor, lang, modes?.complete ?? false, names);
 
   useEffect(() => {
     return () => editor?.destroy();

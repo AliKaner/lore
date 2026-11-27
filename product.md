@@ -226,6 +226,23 @@ aynı tanımla doğrular. Yeni bir tür ya da alan eklemek = o dosyaya bir satı
       `public/sounds/typing/CREDITS.txt`); her ses tek küçük dosya, seçilince
       yüklenir. Her vuruş rastgele bir kayıttan, perde ve seviye biraz
       değişerek çalar (`lib/typingSounds.ts`).
+- [x] **Yazının dili** (`books.language`, yazı ayarlarında Türkçe | English):
+      yeni yazıda arayüz dili; eski yazılarda boşsa arayüz dili geçer.
+      Editöre `lang` olarak da verilir.
+- [x] **Kelime tamamlama** (`lib/completion.ts`, `WordCompletion` eklentisi;
+      Mod menüsünde aç/kapa, varsayılan açık, dokunmatik ekranda kapalı):
+      yazılan kelimenin devamı imlecin önünde soluk görünür, Tab (satır
+      sonunda → da) ile alınır, Esc ile kapanır. Önce yazarın kendi
+      kelimeleri: Evren'deki adlar, sonra metinde en az iki kez geçen
+      5+ harfli kelimeler; sonra yazının dilinin listesi
+      (`public/words/tr.txt`, `en.txt`: FrequencyWords/OpenSubtitles,
+      CC BY-SA 4.0, 4+ harfli ilk 40 bin kelime, küfür ve hakaretler
+      çıkarıldı). En az 3 harf yazılınca ve en az 2 harf eklenecekse
+      önerir; Türkçe I/ı, İ/i doğru. Hiçbir şey sunucuya gitmez. İlk
+      kabul edilene kadar önerinin yanında küçük "Tab" ipucu çıkar
+- [ ] Yazım denetimi (hatalı kelimeye dalgalı çizgi): Hunspell sözlükleri
+      (en_US, tdd-ai/hunspell-tr) Web Worker'da; Türkçe eklemeli olduğu için
+      yanlış alarmı azaltmak gerekiyor — sıradaki adım
 - [x] Akış kontrolünden düzeltmeler: boş masada önce "ilk yazın" kartı
       (hedef kartı yazı olunca çıkar); adsız yazıda çubukta "Ad ver"; kapak
       ve görsel yükleme düğmesi tasarıma uygun; dar ekranda çubuk etiketleri

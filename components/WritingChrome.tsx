@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import BookTitleEditor from "@/components/BookTitleEditor";
@@ -18,6 +18,40 @@ function GearIcon() {
       <circle cx="10" cy="10" r="2.6" />
       <path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4" strokeLinecap="round" />
     </svg>
+  );
+}
+
+// The writing's language: word completion uses its word list.
+function LanguagePicker({ book }: { book: Doc<"books"> }) {
+  const update = useMutation(api.books.update);
+  const { t, locale } = useI18n();
+  const current = book.language ?? locale;
+  return (
+    <div className="mt-4">
+      <p className="mb-1.5 text-sm text-muted">{t("Yazının dili")}</p>
+      <div role="radiogroup" aria-label={t("Yazının dili")} className="inline-flex rounded-full bg-accent-soft/60 p-0.5 text-sm">
+        {(
+          [
+            ["tr", "Türkçe"],
+            ["en", "English"],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            role="radio"
+            aria-checked={current === value}
+            onClick={() => void update({ bookId: book._id, language: value })}
+            className={`rounded-full px-3.5 py-1 transition-colors ${
+              current === value ? "bg-surface font-medium text-foreground shadow-sm" : "text-muted hover:text-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1.5 text-xs leading-relaxed text-muted">{t("Kelime tamamlama bu dilin sözlüğünü kullanır.")}</p>
+    </div>
   );
 }
 
@@ -65,6 +99,7 @@ export function BookSettingsButton({ book }: { book: Doc<"books"> }) {
             <p className="-mt-3 text-xs leading-relaxed text-muted">
               {t("Gizli bir yazıyı yalnızca sen görürsün. Herkese açınca, bağlantısını gönderdiğin kişi okuyabilir.")}
             </p>
+            <LanguagePicker book={book} />
           </div>
         </>
       )}

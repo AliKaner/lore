@@ -3,13 +3,14 @@ import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { internal } from "./_generated/api";
 import { requireUserId } from "./users";
-import { writingKindValidator } from "./writingKinds";
+import { bookLanguageValidator, writingKindValidator } from "./writingKinds";
 
 export const create = mutation({
   args: {
     title: v.string(),
     description: v.optional(v.string()),
     kind: v.optional(writingKindValidator),
+    language: v.optional(bookLanguageValidator),
     visibility: v.union(v.literal("public"), v.literal("private")),
   },
   handler: async (ctx, args) => {
@@ -19,6 +20,7 @@ export const create = mutation({
       description: args.description,
       ownerId: userId,
       kind: args.kind ?? "book",
+      language: args.language,
       visibility: args.visibility,
       likeCount: 0,
       shareCount: 0,
@@ -127,6 +129,7 @@ export const update = mutation({
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     visibility: v.optional(v.union(v.literal("public"), v.literal("private"))),
+    language: v.optional(bookLanguageValidator),
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);

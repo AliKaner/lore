@@ -652,6 +652,7 @@ export default function ChapterForm({
                 placeholder={t("Yazmaya başla…")}
                 pageView={pageView}
                 modes={modes}
+                lang={book?.language ?? locale}
               />
             </div>
             {paper && (

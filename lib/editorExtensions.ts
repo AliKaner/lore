@@ -2,7 +2,9 @@ import { Extension, Mark, mergeAttributes } from "@tiptap/react";
 import type { Node as PMNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { markStyleOf, type EntityKind } from "@/convex/entityKinds";
-import { Decoration, DecorationSet } from "@tiptap/pm/view";
+import { Decoration, DecorationSet, type EditorView } from "@tiptap/pm/view";
+import type { EditorState } from "@tiptap/pm/state";
+import { completeWord, loadedWords, personalWords, type Lang } from "@/lib/completion";
 
 /* ---------- Author notes ---------- */
 
@@ -443,6 +445,153 @@ export const Pagination = Extension.create({
         },
         props: {
           decorations: (state) => paginationKey.getState(state),
+        },
+      }),
+    ];
+  },
+});
+
+/* ---------- Word completion ---------- */
+
+// While typing, the rest of the word shows faintly after the caret; Tab (or
+// → at the end of a line) takes it, Esc or any other key lets it go.
+export type CompletionSettings = { enabled: boolean; lang: Lang | null; names: string[] };
+type CompletionStorage = CompletionSettings & { personal: string[]; personalAt: number };
+type Suggestion = { pos: number; text: string } | null;
+
+export const completionKey = new PluginKey<Suggestion>("wordCompletion");
+
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    wordCompletion: {
+      setCompletion: (settings: CompletionSettings) => ReturnType;
+    };
+  }
+  interface Storage {
+    wordCompletion: CompletionStorage;
+  }
+}
+
+const LEARNED_KEY = "booktion:tamamlama-ogrendi";
+function learned() {
+  try {
+    return window.localStorage.getItem(LEARNED_KEY) === "1";
+  } catch {
+    return true;
+  }
+}
+
+export const WordCompletion = Extension.create({
+  name: "wordCompletion",
+  addStorage(): CompletionStorage {
+    return { enabled: false, lang: null, names: [], personal: [], personalAt: 0 };
+  },
+  addCommands() {
+    return {
+      setCompletion:
+        (settings) =>
+        ({ tr, dispatch }) => {
+          Object.assign(this.storage, settings, { personalAt: 0 });
+          if (dispatch) tr.setMeta(completionKey, "reset");
+          return true;
+        },
+    };
+  },
+  addProseMirrorPlugins() {
+    const store = () => this.storage as CompletionStorage;
+
+    const suggest = (state: EditorState): Suggestion => {
+      const settings = store();
+      if (!settings.enabled || !settings.lang) return null;
+      const { selection } = state;
+      if (!selection.empty) return null;
+      const $head = selection.$head;
+      const block = $head.parent;
+      if (!block.isTextblock || block.type.spec.code) return null;
+      const offset = $head.parentOffset;
+      // Only at the end of a word, not inside one.
+      const next = block.textBetween(offset, Math.min(block.content.size, offset + 1), "\0", "\0");
+      if (/\p{L}/u.test(next)) return null;
+      const before = block.textBetween(Math.max(0, offset - 48), offset, "\0", "\0");
+      // The writer's own words, refreshed every few seconds at most.
+      const now = Date.now();
+      if (now - settings.personalAt > 4000) {
+        const text = state.doc.textBetween(0, state.doc.content.size, " ", " ");
+        settings.personal = personalWords(settings.lang, text, settings.names);
+        settings.personalAt = now;
+      }
+      const text = completeWord(settings.lang, before, loadedWords(settings.lang), settings.personal);
+      return text ? { pos: selection.head, text } : null;
+    };
+
+    const accept = (view: EditorView, suggestion: NonNullable<Suggestion>) => {
+      view.dispatch(view.state.tr.insertText(suggestion.text, suggestion.pos).setMeta(completionKey, "accepted"));
+      try {
+        window.localStorage.setItem(LEARNED_KEY, "1");
+      } catch {}
+      return true;
+    };
+
+    return [
+      new Plugin<Suggestion>({
+        key: completionKey,
+        state: {
+          init: () => null,
+          apply: (tr, previous, oldState, newState) => {
+            if (tr.getMeta(completionKey)) return null;
+            if (tr.docChanged) {
+              // Only as the writer types forward, not when pasting or deleting.
+              const typed =
+                newState.doc.content.size > oldState.doc.content.size &&
+                newState.doc.content.size - oldState.doc.content.size <= 2 &&
+                !tr.getMeta("paste") &&
+                tr.getMeta("uiEvent") !== "paste";
+              return typed ? suggest(newState) : null;
+            }
+            return tr.selectionSet ? null : previous;
+          },
+        },
+        props: {
+          decorations: (state) => {
+            const suggestion = completionKey.getState(state);
+            if (!suggestion) return null;
+            const hint = !learned();
+            return DecorationSet.create(state.doc, [
+              Decoration.widget(
+                suggestion.pos,
+                () => {
+                  const span = document.createElement("span");
+                  span.className = "completion-ghost";
+                  span.setAttribute("aria-hidden", "true");
+                  span.textContent = suggestion.text;
+                  if (hint) {
+                    const kbd = document.createElement("kbd");
+                    kbd.textContent = "Tab";
+                    span.appendChild(kbd);
+                  }
+                  return span;
+                },
+                { side: 1, key: `ghost:${suggestion.pos}:${suggestion.text}:${hint}`, ignoreSelection: true },
+              ),
+            ]);
+          },
+          handleKeyDown: (view, event) => {
+            const suggestion = completionKey.getState(view.state);
+            if (!suggestion || view.composing) return false;
+            if (event.ctrlKey || event.metaKey || event.altKey) return false;
+            if (event.key === "Tab" && !event.shiftKey) {
+              event.preventDefault();
+              return accept(view, suggestion);
+            }
+            if (event.key === "ArrowRight" && view.state.selection.$head.parentOffset === view.state.selection.$head.parent.content.size) {
+              return accept(view, suggestion);
+            }
+            if (event.key === "Escape") {
+              view.dispatch(view.state.tr.setMeta(completionKey, "dismiss"));
+              return true;
+            }
+            return false;
+          },
         },
       }),
     ];

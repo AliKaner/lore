@@ -1,5 +1,9 @@
 import { v, type Infer } from "convex/values";
 
+// The language a writing is written in: picks the word list for completion.
+export const bookLanguageValidator = v.union(v.literal("tr"), v.literal("en"));
+export type BookLanguage = Infer<typeof bookLanguageValidator>;
+
 export const writingKindValidator = v.union(
   v.literal("book"),
   v.literal("story"),

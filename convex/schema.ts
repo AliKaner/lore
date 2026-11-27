@@ -1,6 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { writingKindValidator } from "./writingKinds";
+import { bookLanguageValidator, writingKindValidator } from "./writingKinds";
 import { entityKindValidator } from "./entityKinds";
 import { themeValidator } from "./themes";
 
@@ -26,6 +26,8 @@ export default defineSchema({
     coverStorageId: v.optional(v.id("_storage")),
     ownerId: v.id("users"),
     kind: v.optional(writingKindValidator),
+    // Unset on older writings: the writer's interface language stands in.
+    language: v.optional(bookLanguageValidator),
     visibility: v.union(v.literal("public"), v.literal("private")),
     rootChapterId: v.optional(v.id("chapters")),
     likeCount: v.number(),

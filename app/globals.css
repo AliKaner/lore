@@ -464,6 +464,27 @@ h1, h2, h3 {
   cursor: help;
 }
 
+/* Word completion: the rest of the word, faint, after the caret. */
+.completion-ghost {
+  color: var(--muted);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+}
+.completion-ghost kbd {
+  margin-left: 0.4em;
+  padding: 0 0.4em;
+  border: 1px solid var(--border-hover);
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: 0.6em;
+  vertical-align: 0.2em;
+  letter-spacing: 0.04em;
+}
+.pagination-measuring .completion-ghost {
+  display: none;
+}
+
 /* The floating selection toolbar: it rises out of the text, its buttons
    follow one by one, and each step (note, name, done) slides in. */
 @keyframes menu-pop {

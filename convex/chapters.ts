@@ -442,16 +442,60 @@ export const myDrafts = query({
       if (!books.has(c.bookId)) books.set(c.bookId, await ctx.db.get(c.bookId));
       const book = books.get(c.bookId);
       if (!book) continue;
+      const next = await ctx.db
+        .query("chapters")
+        .withIndex("by_book_and_parent", (q) => q.eq("bookId", c.bookId).eq("parentChapterId", c._id))
+        .first();
       out.push({
         _id: c._id,
         bookId: c.bookId,
         title: c.title,
+        excerpt: firstWords(c.content),
         words: c.words ?? wordsIn(c.content),
         updatedAt: c.updatedAt ?? c.createdAt,
         bookTitle: book.title,
+        bookKind: book.kind ?? null,
         bookPrivate: book.visibility === "private",
+        ownsBook: book.ownerId === userId,
+        hasContinuations: next !== null,
       });
     }
     return out;
+  },
+});
+
+// The opening of a chapter as plain text, for lists.
+function firstWords(content: string, max = 140) {
+  let text = "";
+  try {
+    const walk = (node: { text?: string; content?: unknown[] }): string =>
+      (node.text ?? "") + (node.content ?? []).map((child) => walk(child as typeof node)).join(" ");
+    text = walk(JSON.parse(content) as { text?: string; content?: unknown[] });
+  } catch {
+    text = content.replace(/<[^>]+>/gu, " ");
+  }
+  const flat = text.replace(/\s+/gu, " ").trim();
+  return flat.length > max ? `${flat.slice(0, max - 1).trimEnd()}…` : flat;
+}
+
+// Publishes a draft; for a private writing's owner, optionally opens the
+// writing too, so the chapter is really seen.
+export const publishDraft = mutation({
+  args: { chapterId: v.id("chapters"), openBook: v.boolean() },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const chapter = await ctx.db.get(args.chapterId);
+    if (!chapter || chapter.authorId !== userId) throw new Error("Bu bölümü düzenleyemezsin.");
+    const book = await ctx.db.get(chapter.bookId);
+    if (!book) throw new Error("Kitap bulunamadı.");
+    if (args.openBook) {
+      if (book.ownerId !== userId) throw new Error("Yazıyı yalnızca sahibi herkese açabilir.");
+      if (book.visibility !== "public") await ctx.db.patch(book._id, { visibility: "public" });
+    }
+    if (chapter.status === "published") return null;
+    await snapshotBeforeChange(ctx, chapter, { status: "published" });
+    await ctx.db.patch(chapter._id, { status: "published" });
+    await recordDeskChange(ctx, chapter.bookId, chapter, { words: 0, chapters: 0, touched: true });
+    return null;
   },
 });

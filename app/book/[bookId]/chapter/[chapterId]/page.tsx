@@ -160,6 +160,7 @@ export default function ChapterPage({
             <PublishDraftButton
               chapterId={chapter._id}
               bookPrivate={book?.visibility === "private"}
+              ownsBook={ownsBook}
               className="-my-0.5 -mr-2 ml-1 rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-contrast hover:bg-accent-hover disabled:opacity-50"
             />
           )}

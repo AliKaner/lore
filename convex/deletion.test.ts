@@ -135,3 +135,22 @@ describe("relations web", () => {
     expect((await writer.t.query(api.family.web, {}))?.edges).toHaveLength(4);
   });
 });
+
+describe("publishing a draft", () => {
+  test("in a private writing the owner can open the writing too; a co-writer cannot", async () => {
+    const { t, authApi } = setupTest(modules);
+    const owner = await signInAsNewUser(t, authApi);
+    const bookId = await owner.t.mutation(api.books.create, { title: "Gizli", visibility: "private" });
+    const chapterId = await owner.t.mutation(api.chapters.create, { bookId, title: "Bir", content: "{}", status: "draft" });
+    const drafts = await owner.t.query(api.chapters.myDrafts, {});
+    expect(drafts[0]).toMatchObject({ bookPrivate: true, ownsBook: true, hasContinuations: false });
+
+    const other = await signInAsNewUser(t, authApi);
+    await expect(other.t.mutation(api.chapters.publishDraft, { chapterId, openBook: true })).rejects.toThrow();
+
+    await owner.t.mutation(api.chapters.publishDraft, { chapterId, openBook: true });
+    const state = await t.run(async (ctx) => ({ book: await ctx.db.get(bookId), chapter: await ctx.db.get(chapterId) }));
+    expect(state.book?.visibility).toBe("public");
+    expect(state.chapter?.status).toBe("published");
+  });
+});

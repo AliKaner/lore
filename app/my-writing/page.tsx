@@ -258,7 +258,7 @@ export default function MyWritingsPage() {
             {first && <ContinueCard book={first} now={now} />}
             <GoalsCard stacked />
           </div>
-          <Drafts />
+          <Drafts skip={first?.lastChapter?._id} />
           {rest.length > 0 && (
             <>
               <h2 className="mb-3 mt-12 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
